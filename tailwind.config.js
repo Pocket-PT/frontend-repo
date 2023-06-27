@@ -6,6 +6,10 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    fill: (theme) => ({
+      hover: theme('colors.gray.300'),
+      focus: theme('colors.gray.800'),
+    }),
     extend: {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -14,5 +18,6 @@ module.exports = {
       },
     },
   },
+  variants: { fill: ['hover', 'focus'] },
   plugins: [],
-}
+};
