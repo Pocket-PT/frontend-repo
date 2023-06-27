@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client';
 
 import Footer from '@/components/Footer';
@@ -6,10 +7,13 @@ import Profile from '@/components/Profile';
 import Link from 'next/link';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 
+=======
+>>>>>>> e93b175 (install)
 export default function Home() {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
 
   return (
+<<<<<<< HEAD
     <div className="mt-4">
       <MyProfile />
       <div className="w-full h-[1px] mt-4 mb-4 bg-lightGray"></div>
@@ -27,6 +31,10 @@ export default function Home() {
         ))}
       </Scrollbars>
       <Footer />
+=======
+    <div>
+      <h1>Home</h1>
+>>>>>>> e93b175 (install)
     </div>
   );
 }
