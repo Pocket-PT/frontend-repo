@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> da0bf08 (style: 채팅방 CSS 수정)
 import Footer from '@/components/Footer';
 import './globals.css';
 import { Inter } from 'next/font/google';
@@ -23,8 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+<<<<<<< HEAD
         <div className="w-full h-screen max-w-xl mx-auto overflow-hidden bg-white">
           <Header />
+=======
+        <div className="w-full h-screen max-w-xl mx-auto bg-white">
+>>>>>>> da0bf08 (style: 채팅방 CSS 수정)
           {children}
         </div>
       </body>

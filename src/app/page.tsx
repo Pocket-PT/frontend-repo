@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 'use client';
 
 import Footer from '@/components/Footer';
@@ -9,6 +10,10 @@ import { Scrollbars } from 'react-custom-scrollbars-2';
 
 =======
 >>>>>>> e93b175 (install)
+=======
+import Footer from '@/components/Footer';
+
+>>>>>>> da0bf08 (style: 채팅방 CSS 수정)
 export default function Home() {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
 
@@ -34,7 +39,11 @@ export default function Home() {
 =======
     <div>
       <h1>Home</h1>
+<<<<<<< HEAD
 >>>>>>> e93b175 (install)
+=======
+      <Footer />
+>>>>>>> da0bf08 (style: 채팅방 CSS 수정)
     </div>
   );
 }
