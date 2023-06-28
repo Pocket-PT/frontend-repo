@@ -14,7 +14,7 @@ const Message = ({ message }: { message: string }) => {
           'w-auto text-sm h-auto text-dark px-3 py-1 fill-lightGray border border-gray rounded-lg',
         )}
       >
-        <p className="break-words whitespace-normal">{message}</p>
+        <p className="break-words whitespace-normal ">{message}</p>
       </div>
     </div>
   );
