@@ -8,7 +8,7 @@ const Footer = () => {
   const pathname = usePathname();
   console.log(pathname);
   return (
-    <nav className="box-border fixed bottom-0 flex items-center justify-between w-full max-w-xl p-6 text-gray-800 border-t max-h-4 bg-w hite border-gray">
+    <nav className="box-border fixed bottom-0 flex items-center justify-between w-full max-w-xl p-6 text-gray-800 bg-white border-t max-h-4 bg-w hite border-gray">
       <Link href="/">
         <div className="flex flex-col items-center space-y-2 hover:text-dark group">
           <svg
@@ -65,7 +65,7 @@ const Footer = () => {
           </span> */}
         </div>
       </Link>
-      <Link href="/profile" passHref>
+      <Link href="/myprofile" passHref>
         <div className="flex flex-col items-center space-y-2 text-orange-500 group">
           <svg
             className={
