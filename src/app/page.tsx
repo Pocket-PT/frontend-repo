@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import MyProfile from '@/components/MyProfile';
 import Profile from '@/components/Profile';
 import Link from 'next/link';
+<<<<<<< HEAD
 import { Scrollbars } from 'react-custom-scrollbars-2';
 
 =======
@@ -21,11 +22,14 @@ import MyProfile from '@/components/MyProfile';
 import Profile from '@/components/Profile';
 import Link from 'next/link';
 import { useRef } from 'react';
+=======
+>>>>>>> 741c6ef (feat: 트레이너 프로필 조회 컴포넌트 생성)
 import { Scrollbars } from 'react-custom-scrollbars-2';
 
 >>>>>>> da0bf08 (style: 채팅방 CSS 수정)
 export default function Home() {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   return (
@@ -34,6 +38,9 @@ export default function Home() {
   const scrollbarRef = useRef(null);
   const onScroll = () => {};
   console.log(window.innerHeight, window.outerHeight);
+=======
+
+>>>>>>> 741c6ef (feat: 트레이너 프로필 조회 컴포넌트 생성)
   return (
 >>>>>>> c3944ec (feat: Header, Profile 컴포넌트 생성)
     <div className="mt-4">
