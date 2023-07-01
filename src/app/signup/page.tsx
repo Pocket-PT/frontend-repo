@@ -1,18 +1,16 @@
 'use client';
 
 import useInput from '@/hooks/useInput';
-import { cls } from '@/utils/cls';
-import { use, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 
 const SignUpPage = () => {
-  const { register, handleSubmit, reset } = useForm();
+  const { handleSubmit } = useForm();
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
   const nickname = 'test';
 
-  const onValid = (e) => {
+  const onValid = () => {
     console.log(email, password);
     axios
       .post('http://localhost:3095/api/users', {

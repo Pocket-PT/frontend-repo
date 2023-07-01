@@ -1,19 +1,17 @@
 'use client';
 
 import useInput from '@/hooks/useInput';
-import { cls } from '@/utils/cls';
-import { use, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 const SignUpPage = () => {
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset } = useForm<FieldValues>();
   const [email, onChangeEmail, setEmail] = useInput('');
   const [password, onChangePassword, setPassword] = useInput('');
   const router = useRouter();
 
-  const onValid = (e) => {
+  const onValid: SubmitHandler<FieldValues> = () => {
     axios
       .post(
         'http://localhost:3095/api/users/login',

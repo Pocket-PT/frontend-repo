@@ -4,14 +4,11 @@ import Footer from '@/components/Footer';
 import MyProfile from '@/components/MyProfile';
 import Profile from '@/components/Profile';
 import Link from 'next/link';
-import { useRef } from 'react';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 
 export default function Home() {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
-  const scrollbarRef = useRef(null);
-  const onScroll = () => {};
-  console.log(window.innerHeight, window.outerHeight);
+
   return (
     <div className="mt-4">
       <MyProfile />
