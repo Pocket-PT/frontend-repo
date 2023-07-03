@@ -6,10 +6,5 @@
   html {
     scroll-behavior: smooth;
     background: #f1f4f9;
-    font-family: 'Notosans KR', sans-serif;
-  }
-  @font-face {
-    font-family: 'Notosans KR';
-    src: url('/fonts/NotoSansKR-Regular.otf');
   }
 }
