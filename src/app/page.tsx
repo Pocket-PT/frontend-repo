@@ -14,7 +14,7 @@ export default function Home() {
       <MyProfile />
       <div className="w-full h-[1px] mt-4 mb-4 bg-lightGray"></div>
       <div className="ml-4 text-[12px] text-darkGray mb-4">
-        회원수 : {customerList.length}명
+        회원목록 수 : {customerList.length}명
       </div>
       <Scrollbars autoHeight autoHeightMin="73vh" autoHide>
         {customerList.map((customer) => (
