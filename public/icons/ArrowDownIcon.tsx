@@ -1,4 +1,4 @@
-const ArrowDownIcon = ({ fill = '#C6C6C6' }: { fill: string }) => {
+const ArrowDownIcon = () => {
   return (
     <svg
       width="24"
