@@ -19,7 +19,10 @@ export default function Home() {
       <Scrollbars autoHeight autoHeightMin="73vh" autoHide>
         {customerList.map((customer) => (
           <Link key={customer} href={`/${customer}`}>
-            <div key={customer} className="flex flex-row mb-2">
+            <div
+              key={customer}
+              className="flex flex-row h-12 py-4 mb-3 hover:bg-hoverGray hover:cursor-pointer"
+            >
               <Profile />
               {/* {customer} */}
             </div>
