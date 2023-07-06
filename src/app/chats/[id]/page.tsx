@@ -60,7 +60,11 @@ const ChatDetailPage = () => {
     setModalOpen(false);
   }, []);
 
-  const [canvasData, setCanvasData] = useState({});
+  const [canvasData, setCanvasData] = useState<{
+    canvasURL: string;
+    canvasWidth: number;
+    canvasHeight: number;
+  }>({});
 
   const handleCapture = useCallback((ref: RefObject<HTMLVideoElement>) => {
     const playerElement = ref.current;
