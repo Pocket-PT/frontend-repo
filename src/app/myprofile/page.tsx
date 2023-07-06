@@ -21,7 +21,7 @@ const MyProfileCard = () => {
       <div className="mb-8 text-lg">
         <div>
           <div className="w-full h-[1px] bg-lightGray rounded-full" />
-          <div className="relative flex items-center h-16 gap-8">
+          <div className="relative flex items-center h-16">
             <div className="absolute text-sm font-light top-2 left-4 self-baseline text-darkGray">
               개인정보
             </div>
@@ -63,8 +63,11 @@ const MyProfilePage = () => {
   return (
     <div className="px-6 pb-8">
       <MyProfileCard />
-      <div className="mt-8 mb-1 text-lg font-bold">내 정보관리</div>
-      <div className="space-y-2 ">
+      <div className="flex items-center justify-center w-full h-8 pt-1 -mt-4 border rounded-full border-gray text-gray hover:border-dark hover:text-dark active:border-mainPurple active:text-mainPurple">
+        편집하기
+      </div>
+      <div className="mt-12 mb-1 text-lg font-bold">내 정보관리</div>
+      <div className="space-y-2">
         <Link href="/myprofile/portfolio">
           <InfoCard title="이력관리" />
         </Link>

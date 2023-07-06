@@ -116,13 +116,13 @@ const PortfolioPage = () => {
             rank="몇급? 있음쓰고 없음말고"
           />
           <div className="mt-8 mb-1 text-lg font-bold">
-            학력?자격증이랑 같이해도 학력 쓰기싫은사람도있을듯
+            아니면 담백하게 약력소개
           </div>
-          <Card title="학위명" date="취득날짜" />
-          <Card title="학위명" date="취득날짜" />
-          <Card title="학위명" date="취득날짜" />
-          <Card title="학위명" date="취득날짜" />
-          <Card title="학위명" date="취득날짜" />
+          <div className="pl-2 space-y-1">
+            <div>IFBB PRO</div>
+            <div>생활체육지도사 2급</div>
+            <div>기타 개쩌는 대회 우승</div>
+          </div>
         </div>
       </Scrollbars>
     </div>
