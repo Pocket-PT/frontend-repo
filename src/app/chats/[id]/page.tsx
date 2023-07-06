@@ -64,7 +64,11 @@ const ChatDetailPage = () => {
     canvasURL: string;
     canvasWidth: number;
     canvasHeight: number;
-  }>({});
+  }>({
+    canvasURL: '',
+    canvasWidth: 0,
+    canvasHeight: 0,
+  });
 
   const handleCapture = useCallback((ref: RefObject<HTMLVideoElement>) => {
     const playerElement = ref.current;
