@@ -1,6 +1,20 @@
 import { cls } from '@/utils/cls';
+import { type } from 'os';
+import VideoMessage from './VideoMessage';
 
-const Message = ({ message }: { message: string }) => {
+type MessageProps = {
+  message: string;
+  videoSrc?: string;
+  videoRef?: React.RefObject<HTMLVideoElement>;
+  handleCapture?: () => void;
+};
+
+const Message = ({
+  message,
+  videoSrc,
+  videoRef,
+  handleCapture,
+}: MessageProps) => {
   const isMyMessage = true;
   return (
     <div
@@ -14,6 +28,9 @@ const Message = ({ message }: { message: string }) => {
           'w-auto text-sm h-auto text-dark px-3 py-1 fill-lightGray border border-gray rounded-lg',
         )}
       >
+        {videoSrc && (
+          <VideoMessage handleCapture={handleCapture} ref={videoRef} />
+        )}
         <p className="break-words whitespace-normal">{message}</p>
       </div>
     </div>

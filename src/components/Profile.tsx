@@ -7,7 +7,7 @@ const Profile = () => {
           <div className="">김일곤</div>
           <div className="text-sm text-gray">test@naver.com</div>
         </div>
-        <div className="absolute transform -translate-y-1/2 top-1/2 right-4 text-darkGray">
+        <div className="absolute text-sm transform -translate-y-1/2 top-1/2 right-4 text-darkGray">
           2023-05-17 ~ 2023-08-17
         </div>
       </div>

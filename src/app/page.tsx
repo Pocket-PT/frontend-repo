@@ -4,7 +4,9 @@ import Footer from '@/components/Footer';
 import MyProfile from '@/components/MyProfile';
 import Profile from '@/components/Profile';
 import Link from 'next/link';
+import { useRef } from 'react';
 import { Scrollbars } from 'react-custom-scrollbars-2';
+import html2canvas from 'html2canvas';
 
 export default function Home() {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
@@ -16,6 +18,7 @@ export default function Home() {
       <div className="ml-4 text-[12px] text-darkGray mb-4">
         회원목록 수 : {customerList.length}명
       </div>
+
       <Scrollbars autoHeight autoHeightMin="73vh" autoHide>
         {customerList.map((customer) => (
           <Link key={customer} href={`/${customer}`}>

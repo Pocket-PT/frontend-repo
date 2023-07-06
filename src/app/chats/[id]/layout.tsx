@@ -1,6 +1,6 @@
 'use client';
 
-import { MouseEventHandler, PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 
 const ChatRoomLayout = ({ children }: PropsWithChildren) => {
   return <div>{children}</div>;
