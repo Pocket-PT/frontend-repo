@@ -12,6 +12,12 @@ import Scrollbars from 'react-custom-scrollbars-2';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from '@/constants/global';
 import EditModal from '@/components/EditModal';
 
+interface CanvasData {
+  canvasURL: string;
+  canvasWidth: number;
+  canvasHeight: number;
+}
+
 const ChatDetailPage = () => {
   const [message, onChangeMessage, setMessage] = useInput('');
   const { register, handleSubmit, reset } = useForm();
@@ -60,11 +66,7 @@ const ChatDetailPage = () => {
     setModalOpen(false);
   }, []);
 
-  const [canvasData, setCanvasData] = useState<{
-    canvasURL: string;
-    canvasWidth: number;
-    canvasHeight: number;
-  }>({
+  const [canvasData, setCanvasData] = useState<CanvasData>({
     canvasURL: '',
     canvasWidth: 0,
     canvasHeight: 0,
@@ -73,7 +75,6 @@ const ChatDetailPage = () => {
   const handleCapture = useCallback((ref: RefObject<HTMLVideoElement>) => {
     const playerElement = ref.current;
     const scale = 0.5;
-    console.log(playerElement);
     if (playerElement) {
       const canvas = document.createElement('canvas');
       const canvas2d = canvas.getContext('2d');

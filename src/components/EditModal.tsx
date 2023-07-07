@@ -1,5 +1,7 @@
-import Image from 'next/image';
+import { COLOR_PLATE } from '@/constants/global';
 import { useEffect, useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import { saveAsImage } from '@/utils/saveImage';
 
 type EditModalProps = {
   onCloseModal: () => void;
@@ -12,19 +14,131 @@ type EditModalProps = {
 
 const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
+  const [lineWidth, setLineWidth] = useState(5);
+  const [canvasSize, setCanvasSize] = useState({
+    width: canvasData.canvasWidth,
+    height: canvasData.canvasHeight,
+  });
+  const [color, setColor] = useState('#000000');
+  const img = document.createElement('img');
 
   useEffect(() => {
+    img.src = canvasData.canvasURL;
+  }, [canvasData.canvasURL, img]);
+
+  const onLineWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value);
+    setLineWidth(Number(e.target.value));
+  };
+
+  const onColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e);
+    setColor(e.target.value);
+  };
+
+  const onColorPlateClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    console.log(e);
+    setColor(e.currentTarget.style.backgroundColor);
+  };
+
+  const onDeleteAll = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
-    const img = document.createElement('img');
-    img.src = canvasData.canvasURL;
 
     if (canvas && ctx) {
       canvas.width = canvasData.canvasWidth;
       canvas.height = canvasData.canvasHeight;
-      ctx.drawImage(img, 0, 0, canvasData.canvasWidth, canvasData.canvasHeight);
+      ctx.lineWidth = lineWidth;
     }
-  }, []);
+  };
+
+  const onSubmit = () => {
+    const divElement = divRef.current;
+    if (divElement) {
+      html2canvas(divElement).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        console.log(imgData);
+        //saveAsImage(imgData, 'test.png');
+      });
+    }
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+
+    if (canvas && ctx) {
+      canvas.width = canvasData.canvasWidth;
+      canvas.height = canvasData.canvasHeight;
+      //ctx.drawImage(img, 0, 0, canvasData.canvasWidth, canvasData.canvasHeight);
+    }
+
+    let isPainting = false;
+    const onMove = (e: MouseEvent) => {
+      if (isPainting) {
+        ctx?.lineTo(e.offsetX, e.offsetY);
+        ctx?.stroke();
+        return;
+      }
+      ctx?.moveTo(e.offsetX, e.offsetY);
+    };
+    const onMoveDown = () => {
+      isPainting = true;
+    };
+    const cancelPainting = () => {
+      isPainting = false;
+      ctx?.beginPath();
+    };
+
+    // 컴포넌트 마운트 시에 이벤트 리스너 등록
+    canvas?.addEventListener('mousemove', onMove);
+    canvas?.addEventListener('mousedown', onMoveDown);
+    canvas?.addEventListener('mouseup', cancelPainting);
+    canvas?.addEventListener('mouseleave', cancelPainting);
+    // 컴포넌트 언마운트 시에 이벤트 리스너 제거
+    return () => {
+      canvas?.removeEventListener('mousemove', onMove);
+      canvas?.removeEventListener('mousedown', onMoveDown);
+      canvas?.removeEventListener('mouseup', cancelPainting);
+      canvas?.removeEventListener('mouseleave', cancelPainting);
+    };
+  }, [canvasData.canvasWidth, canvasData.canvasHeight]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (ctx) {
+      ctx.lineWidth = lineWidth;
+    }
+  }, [lineWidth]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (ctx) {
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+    }
+  }, [color]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // 리사이즈 이벤트 발생 시 실행되는 로직을 작성합니다.
+      setCanvasSize({
+        width: divRef.current?.clientWidth || 0,
+        height: divRef.current?.clientHeight || 0,
+      });
+    };
+
+    // 컴포넌트가 마운트될 때 이벤트 리스너를 추가합니다.
+    window.addEventListener('resize', handleResize);
+
+    // 컴포넌트가 언마운트될 때 이벤트 리스너를 제거합니다.
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [canvasSize.width, canvasSize.height]);
 
   return (
     <>
@@ -39,32 +153,63 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
             >
               X
             </button>
-            <div className="relative flex justify-center">
+            <div
+              ref={divRef}
+              style={{
+                backgroundImage: `url(${canvasData.canvasURL})`,
+                width: canvasData.canvasWidth,
+                height: canvasData.canvasHeight,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                objectFit: 'contain',
+                maxWidth: 'auto',
+                maxHeight: '70vh',
+                border: '1px solid blue',
+              }}
+              className="relative flex flex-col justify-center w-full h-full"
+            >
               <canvas
                 ref={canvasRef}
                 style={{
+                  marginTop: '98px',
+                  width: `${canvasSize.width}px`,
+                  height: `${canvasSize.height}px`,
+                  border: '1px solid black',
                   objectFit: 'contain',
                   maxWidth: 'auto',
                   maxHeight: '70vh',
                 }}
               ></canvas>
-              {/* <Image
-                style={{
-                  objectFit: 'contain',
-                  maxWidth: 'auto',
-                  maxHeight: '70vh',
-                }}
-                width={canvasData.canvasWidth}
-                height={canvasData.canvasHeight}
-                src={canvasData.canvasURL}
-                alt="image"
-              /> */}
-              {/* </canvas> */}
+              <input
+                type="range"
+                min={1}
+                max={10}
+                value={lineWidth}
+                onChange={onLineWidthChange}
+                step={0.1}
+              ></input>
+              <input onChange={onColorChange} type="color" />
+              <div className="flex flex-row">
+                {COLOR_PLATE.map((color) => {
+                  return (
+                    <div
+                      role="presentation"
+                      onKeyDown={(e) => onColorPlateClick(e)}
+                      onClick={(e) => onColorPlateClick(e)}
+                      key={color}
+                      style={{ backgroundColor: color }}
+                      className={`w-6 h-6 border border-dark cursor-pointer`}
+                    ></div>
+                  );
+                })}
+              </div>
+              <button onClick={onDeleteAll}>초기화</button>
+              <button onClick={onSubmit}>전송하기</button>
             </div>
           </div>
         </div>
       </div>
-
       <div className="fixed inset-0 z-40 opacity-50 bg-dark"></div>
     </>
   );
