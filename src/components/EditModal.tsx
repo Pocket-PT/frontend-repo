@@ -28,17 +28,14 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
   }, [canvasData.canvasURL, img]);
 
   const onLineWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
     setLineWidth(Number(e.target.value));
   };
 
   const onColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e);
     setColor(e.target.value);
   };
 
   const onColorPlateClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    console.log(e);
     setColor(e.currentTarget.style.backgroundColor);
   };
 
@@ -195,7 +192,6 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
                   return (
                     <div
                       role="presentation"
-                      onKeyDown={(e) => onColorPlateClick(e)}
                       onClick={(e) => onColorPlateClick(e)}
                       key={color}
                       style={{ backgroundColor: color }}
