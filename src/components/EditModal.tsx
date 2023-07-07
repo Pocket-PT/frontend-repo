@@ -80,6 +80,14 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
       }
       ctx?.moveTo(e.offsetX, e.offsetY);
     };
+    const onTouchMove = (e: TouchEvent) => {
+      if (isPainting) {
+        ctx?.lineTo(e.touches[0].clientX, e.touches[0].clientY);
+        ctx?.stroke();
+        return;
+      }
+      ctx?.moveTo(e.touches[0].clientX, e.touches[0].clientY);
+    };
     const onMoveDown = () => {
       isPainting = true;
     };
@@ -93,12 +101,18 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     canvas?.addEventListener('mousedown', onMoveDown);
     canvas?.addEventListener('mouseup', cancelPainting);
     canvas?.addEventListener('mouseleave', cancelPainting);
+    canvas?.addEventListener('touchmove', onTouchMove);
+    canvas?.addEventListener('touchstart', onMoveDown);
+    canvas?.addEventListener('touchend', cancelPainting);
     // 컴포넌트 언마운트 시에 이벤트 리스너 제거
     return () => {
       canvas?.removeEventListener('mousemove', onMove);
       canvas?.removeEventListener('mousedown', onMoveDown);
       canvas?.removeEventListener('mouseup', cancelPainting);
       canvas?.removeEventListener('mouseleave', cancelPainting);
+      canvas?.removeEventListener('touchmove', onTouchMove);
+      canvas?.removeEventListener('touchstart', onMoveDown);
+      canvas?.removeEventListener('touchend', cancelPainting);
     };
   }, [canvasData.canvasWidth, canvasData.canvasHeight]);
 
