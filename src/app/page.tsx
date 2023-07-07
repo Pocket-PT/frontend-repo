@@ -13,7 +13,9 @@ export default function Home() {
 
   return (
     <div className="mt-4">
-      <MyProfile />
+      <Link href={'/myprofile'}>
+        <MyProfile />
+      </Link>
       <div className="w-full h-[1px] mt-4 mb-4 bg-lightGray"></div>
       <div className="ml-4 text-[12px] text-darkGray mb-4">
         회원목록 수 : {customerList.length}명
