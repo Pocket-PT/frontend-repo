@@ -66,6 +66,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     const ctx = canvas?.getContext('2d');
 
     if (canvas && ctx) {
+      console.log('hi');
       canvas.width = canvasData.canvasWidth;
       canvas.height = canvasData.canvasHeight;
       //ctx.drawImage(img, 0, 0, canvasData.canvasWidth, canvasData.canvasHeight);
@@ -115,18 +116,18 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     canvas?.addEventListener('mousedown', onMoveDown);
     canvas?.addEventListener('mouseup', cancelPainting);
     canvas?.addEventListener('mouseleave', cancelPainting);
-    canvas?.addEventListener('pointermove', onMove);
-    canvas?.addEventListener('pointerstart', onMoveDown);
-    canvas?.addEventListener('pointerend', cancelPainting);
+    canvas?.addEventListener('touchmove', onTouchMove);
+    canvas?.addEventListener('touchstart', onMoveDown);
+    canvas?.addEventListener('touchend', cancelPainting);
     // 컴포넌트 언마운트 시에 이벤트 리스너 제거
     return () => {
       canvas?.removeEventListener('mousemove', onMove);
       canvas?.removeEventListener('mousedown', onMoveDown);
       canvas?.removeEventListener('mouseup', cancelPainting);
       canvas?.removeEventListener('mouseleave', cancelPainting);
-      canvas?.removeEventListener('pointermove', onMove);
-      canvas?.removeEventListener('pointerstart', onMoveDown);
-      canvas?.removeEventListener('pointerend', cancelPainting);
+      canvas?.removeEventListener('touchmove', onTouchMove);
+      canvas?.removeEventListener('touchstart', onMoveDown);
+      canvas?.removeEventListener('touchend', cancelPainting);
     };
   }, [canvasData.canvasWidth, canvasData.canvasHeight]);
 
