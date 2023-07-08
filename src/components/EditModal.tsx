@@ -202,7 +202,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
                   width: `${canvasSize.width}px`,
                   height: `${canvasSize.height}px`,
                   border: '3px solid black',
-                  objectFit: 'contain',
+                  // objectFit: 'contain',
                   maxWidth: 'auto',
                   maxHeight: '70vh',
                 }}
