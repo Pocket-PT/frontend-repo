@@ -5,7 +5,7 @@ import VideoMessage from './VideoMessage';
 type MessageProps = {
   message: string;
   videoSrc?: string;
-  videoRef?: React.RefObject<HTMLVideoElement>;
+  videoRef?: React.RefObject<HTMLVideoElement> | null;
   handleCapture?: () => void;
 };
 

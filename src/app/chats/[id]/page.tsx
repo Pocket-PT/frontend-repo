@@ -72,30 +72,38 @@ const ChatDetailPage = () => {
     canvasHeight: 0,
   });
 
-  const handleCapture = useCallback((ref: RefObject<HTMLVideoElement>) => {
-    const playerElement = ref.current;
-    const scale = 0.5;
-    if (playerElement) {
-      const canvas = document.createElement('canvas');
-      const canvas2d = canvas.getContext('2d');
-      canvas.width = playerElement.videoWidth * scale;
-      canvas.height = playerElement.videoHeight * scale;
-      canvas2d?.drawImage(playerElement, 0, 0, canvas.width, canvas.height);
+  const handleCapture = useCallback(
+    (ref: RefObject<HTMLVideoElement> | null) => {
+      const playerElement = ref?.current;
+      const scale = 0.5;
+      if (playerElement) {
+        const canvas = document.createElement('canvas');
+        const canvas2d = canvas.getContext('2d');
+        canvas.width = playerElement.videoWidth * scale;
+        canvas.height = playerElement.videoHeight * scale;
+        canvas2d?.drawImage(playerElement, 0, 0, canvas.width, canvas.height);
 
-      const img = document.createElement('img');
-      img.src = canvas.toDataURL();
-      console.log(canvas.toDataURL());
-      setCanvasData({
-        canvasURL: canvas.toDataURL(),
-        canvasWidth: canvas.width,
-        canvasHeight: canvas.height,
-      });
-    }
-    setModalOpen(true);
-  }, []);
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL();
+        console.log(canvas.toDataURL());
+        setCanvasData({
+          canvasURL: canvas.toDataURL(),
+          canvasWidth: canvas.width,
+          canvasHeight: canvas.height,
+        });
+      }
+      setModalOpen(true);
+    },
+    [],
+  );
 
-  const videoTest = [1, 2, 3].map((v) => {
-    return { number: v, ref: useRef<HTMLVideoElement>(null) };
+  const videoTest = [1, 2, 3].map((v, i) => {
+    return {
+      number: v,
+      //ref callback으로 수정해야함
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      ref: useRef<HTMLVideoElement>(null),
+    };
   });
 
   return (

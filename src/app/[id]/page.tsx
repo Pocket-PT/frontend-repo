@@ -56,7 +56,7 @@ const ProfilePage = () => {
       </div>
       <div className="mt-8 mb-1 ml-6 text-lg font-bold">목표</div>
       {[1, 2, 3].map((v) => {
-        return <GoalCard index={v} />;
+        return <GoalCard key={v} index={v} />;
       })}
     </div>
   );

@@ -1,11 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {
-  ForwardRefRenderFunction,
-  ForwardedRef,
-  MutableRefObject,
-  forwardRef,
-  useRef,
-} from 'react';
+import React, { ForwardedRef, forwardRef } from 'react';
 
 const VideoMessage = forwardRef(
   (

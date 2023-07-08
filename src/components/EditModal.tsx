@@ -56,7 +56,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
       html2canvas(divElement).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         console.log(imgData);
-        //saveAsImage(imgData, 'test.png');
+        saveAsImage(imgData, 'test.png');
       });
     }
   };
@@ -74,19 +74,33 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     let isPainting = false;
     const onMove = (e: MouseEvent) => {
       if (isPainting) {
-        ctx?.lineTo(e.offsetX, e.offsetY);
-        ctx?.stroke();
-        return;
+        const rect = canvas?.getBoundingClientRect();
+        if (rect && canvas) {
+          let x = e.clientX - rect.left;
+          let y = e.clientY - rect.top;
+          x = x * (canvas.width / rect.width);
+          y = y * (canvas.height / rect.height);
+          ctx?.lineTo(x, y);
+          ctx?.stroke();
+          return;
+        }
       }
-      ctx?.moveTo(e.offsetX, e.offsetY);
+      //ctx?.moveTo(e.offsetX, e.offsetY);
     };
     const onTouchMove = (e: TouchEvent) => {
       if (isPainting) {
-        ctx?.lineTo(e.touches[0].clientX, e.touches[0].clientY);
-        ctx?.stroke();
-        return;
+        const rect = canvas?.getBoundingClientRect();
+        if (rect && canvas) {
+          let x = e.touches[0].clientX - rect.left;
+          let y = e.touches[0].clientY - rect.top;
+          x = x * (canvas.width / rect.width);
+          y = y * (canvas.height / rect.height);
+          ctx?.lineTo(x, y);
+          ctx?.stroke();
+          return;
+        }
       }
-      ctx?.moveTo(e.touches[0].clientX, e.touches[0].clientY);
+      //ctx?.moveTo(e.touches[0].clientX, e.touches[0].clientY);
     };
     const onMoveDown = () => {
       isPainting = true;
@@ -140,6 +154,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
         width: divRef.current?.clientWidth || 0,
         height: divRef.current?.clientHeight || 0,
       });
+      console.log(canvasSize.width, canvasSize.height);
     };
 
     // 컴포넌트가 마운트될 때 이벤트 리스너를 추가합니다.
@@ -173,7 +188,6 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
-                objectFit: 'contain',
                 maxWidth: 'auto',
                 maxHeight: '70vh',
                 border: '1px solid blue',
@@ -186,7 +200,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
                   marginTop: '98px',
                   width: `${canvasSize.width}px`,
                   height: `${canvasSize.height}px`,
-                  border: '1px solid black',
+                  border: '3px solid black',
                   objectFit: 'contain',
                   maxWidth: 'auto',
                   maxHeight: '70vh',
@@ -220,7 +234,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
           </div>
         </div>
       </div>
-      <div className="fixed inset-0 z-40 opacity-50 bg-dark"></div>
+      <div className="fixed inset-0 z-40 opacity-70 bg-dark"></div>
     </>
   );
 };
