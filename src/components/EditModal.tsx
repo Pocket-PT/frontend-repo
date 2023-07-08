@@ -72,7 +72,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     }
 
     let isPainting = false;
-    const onMove = (e: MouseEvent) => {
+    const onMove = (e: MouseEvent | PointerEvent) => {
       if (isPainting) {
         const rect = canvas?.getBoundingClientRect();
         if (rect && canvas) {
@@ -115,18 +115,18 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     canvas?.addEventListener('mousedown', onMoveDown);
     canvas?.addEventListener('mouseup', cancelPainting);
     canvas?.addEventListener('mouseleave', cancelPainting);
-    canvas?.addEventListener('touchmove', onTouchMove);
-    canvas?.addEventListener('touchstart', onMoveDown);
-    canvas?.addEventListener('touchend', cancelPainting);
+    canvas?.addEventListener('pointermove', onMove);
+    canvas?.addEventListener('pointerstart', onMoveDown);
+    canvas?.addEventListener('pointerend', cancelPainting);
     // 컴포넌트 언마운트 시에 이벤트 리스너 제거
     return () => {
       canvas?.removeEventListener('mousemove', onMove);
       canvas?.removeEventListener('mousedown', onMoveDown);
       canvas?.removeEventListener('mouseup', cancelPainting);
       canvas?.removeEventListener('mouseleave', cancelPainting);
-      canvas?.removeEventListener('touchmove', onTouchMove);
-      canvas?.removeEventListener('touchstart', onMoveDown);
-      canvas?.removeEventListener('touchend', cancelPainting);
+      canvas?.removeEventListener('pointermove', onMove);
+      canvas?.removeEventListener('pointerstart', onMoveDown);
+      canvas?.removeEventListener('pointerend', cancelPainting);
     };
   }, [canvasData.canvasWidth, canvasData.canvasHeight]);
 
