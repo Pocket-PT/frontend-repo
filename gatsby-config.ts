@@ -28,11 +28,11 @@ const config: GatsbyConfig = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `jgjgill-blog`,
-        short_name: `jgjgill-blog`,
+        name: `pocket-pt`,
+        short_name: `pocket-pt`,
         start_url: `/`,
-        background_color: `#f0abfc`,
-        theme_color: `#c471f5`,
+        background_color: `#F1F4F9`,
+        theme_color: `#8075F8`,
         display: `standalone`,
         icon: 'src/images/icon.png',
         cache_busting_mode: 'none',
