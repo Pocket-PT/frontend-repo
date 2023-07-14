@@ -1,4 +1,4 @@
-import type { GatsbyConfig } from "gatsby";
+import type { GatsbyConfig } from 'gatsby';
 
 const config: GatsbyConfig = {
   siteMetadata: {
@@ -9,8 +9,12 @@ const config: GatsbyConfig = {
   // If you use VSCode you can also use the GraphQL plugin
   // Learn more at: https://gatsby.dev/graphql-typegen
   graphqlTypegen: true,
+  flags: {
+    PARTIAL_HYDRATION: true,
+  },
   plugins: [
-    "gatsby-plugin-postcss",
+    'gatsby-plugin-postcss',
+    'gatsby-plugin-provide-react',
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
@@ -20,8 +24,8 @@ const config: GatsbyConfig = {
         background_color: `#f0abfc`,
         theme_color: `#c471f5`,
         display: `standalone`,
-        icon: "src/images/icon.png",
-        cache_busting_mode: "none",
+        icon: 'src/images/icon.png',
+        cache_busting_mode: 'none',
         icon_options: {
           // For all the options available,
           // please see the section "Additional Resources" below.
