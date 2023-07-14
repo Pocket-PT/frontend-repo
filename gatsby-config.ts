@@ -59,6 +59,9 @@ const config: GatsbyConfig = {
         // ...
       },
     },
+    {
+      resolve: 'gatsby-plugin-netlify',
+    },
   ],
 };
 
