@@ -22,13 +22,9 @@ const config: GatsbyConfig = {
   // If you use VSCode you can also use the GraphQL plugin
   // Learn more at: https://gatsby.dev/graphql-typegen
   graphqlTypegen: true,
-  flags: {
-    PARTIAL_HYDRATION: true,
-  },
   plugins: [
     'gatsby-plugin-postcss',
     'gatsby-plugin-provide-react',
-    'gatsby-plugin-typescript',
     {
       resolve: `gatsby-plugin-manifest`,
       options: {

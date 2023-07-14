@@ -1,3 +1,5 @@
+'use client';
+
 import { Scrollbars } from 'react-custom-scrollbars-2';
 import MyProfile from 'components/MyProfile';
 import { Link } from 'gatsby';
