@@ -1,11 +1,5 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier"],
-  "parserOptions": {
-    "project": "./tsconfig.json",
-    "createDefaultProgram": true
-  },
   "env": {
     // 전역객체를 eslint가 인식하는 구간
     "browser": true, // document나 window 인식되게 함
@@ -14,7 +8,6 @@
   },
   "ignorePatterns": ["node_modules/"], // eslint 미적용될 폴더나 파일 명시
   "extends": [
-    "next/core-web-vitals",
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:jsx-a11y/recommended",
@@ -22,11 +15,24 @@
     "plugin:prettier/recommended", // eslint의 포매팅을 prettier로 사용.
     "prettier"
   ],
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "plugins": ["@typescript-eslint", "prettier"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json",
+        "createDefaultProgram": true
+      }
+    },
+    {
+      "files": ["**/*.js", "**/*.jsx"]
+    }
+  ],
   "rules": {
     "react/react-in-jsx-scope": "off", // react 17부턴 import 안해도돼서 기능 끔
     // 경고표시, 파일 확장자를 .ts나 .tsx 모두 허용함
     "react/jsx-filename-extension": ["warn", { "extensions": [".ts", ".tsx"] }],
-    "no-useless-catch": "off", // 불필요한 catch 못쓰게 하는 기능 끔
-    "no-undef": "off" // 정의되지 않은 변수 사용 못하게 하는 기능 끔
+    "no-useless-catch": "off" // 불필요한 catch 못쓰게 하는 기능 끔
   }
 }
