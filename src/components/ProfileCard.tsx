@@ -1,4 +1,4 @@
-const Profile = () => {
+const ProfileCard = () => {
   return (
     <div className="relative flex items-center w-full h-auto px-4">
       <div className="flex items-center justify-between w-10 h-10 rounded-xl bg-mainPurple" />
@@ -15,4 +15,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfileCard;

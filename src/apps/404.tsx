@@ -1,4 +1,4 @@
-import { Link, HeadFC, PageProps } from 'gatsby';
+import { Link, HeadFC } from 'gatsby';
 
 const pageStyles = {
   color: '#232129',
@@ -22,7 +22,11 @@ const codeStyles = {
   borderRadius: 4,
 };
 
-const NotFoundPage: React.FC<PageProps> = () => {
+type NotFoundPageProps = {
+  default: boolean;
+};
+
+const NotFoundPage: React.FC<NotFoundPageProps> = () => {
   return (
     <main style={pageStyles}>
       <h1 style={headingStyles}>Page not found</h1>

@@ -13,6 +13,7 @@ const Header = () => {
     pathname === '/chats' ||
     pathname === 'profile'
   );
+  console.log(canGoBack);
 
   const onClick = () => {
     navigate(-1);

@@ -1,4 +1,4 @@
-const MyProfile = () => {
+const MyProfileCard = () => {
   return (
     <div className="relative flex items-center w-full h-auto px-4 hover:bg-hoverGray hover:cursor-pointer">
       <div className="flex items-center justify-between w-14 h-14 rounded-xl bg-mainPurple" />
@@ -14,4 +14,4 @@ const MyProfile = () => {
   );
 };
 
-export default MyProfile;
+export default MyProfileCard;

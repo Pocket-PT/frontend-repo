@@ -23,7 +23,13 @@
       "components/*": ["./src/components/*"],
       "pages/*": ["./src/pages/*"],
       "styles/*": ["./src/styles/*"],
-      "utils/*": ["./src/utils/*"]
+      "utils/*": ["./src/utils/*"],
+      "public/*": ["./public/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "types/*": ["./src/types/*"],
+      "images/*": ["./src/images/*"],
+      "apps/*": ["./src/apps/*"],
+      "icons/*": ["./src/icons/*"]
     }
   },
   "include": [
