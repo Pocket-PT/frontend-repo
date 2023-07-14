@@ -1,42 +1,40 @@
 import { Scrollbars } from 'react-custom-scrollbars-2';
 import MyProfileCard from 'components/MyProfileCard';
-import { Link } from 'gatsby';
+import { Link } from 'utils/link';
 import ProfileCard from 'components/ProfileCard';
 import Layout from 'components/Layout';
-import { useFlow } from 'utils/stackflow';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
+import { useActivityPreloadRef } from '@stackflow/plugin-preload';
+import { ActivityComponentType } from '@stackflow/react';
 
-const Main = () => {
+const Main: ActivityComponentType = () => {
+  const preloadRef = useActivityPreloadRef();
+  console.log(preloadRef);
+
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
-  const { push } = useFlow();
 
-  const onClick = () => {
-    push('OtherProfile', { path: '1' });
-  };
   return (
     <AppScreen appBar={{ title: 'Main' }}>
       <Layout>
         <div className="mt-4">
-          <Link to={'/myprofile'}>
-            <MyProfileCard />
-          </Link>
+          <MyProfileCard />
           <div className="w-full h-[1px] mt-4 mb-4 bg-lightGray"></div>
           <div className="ml-4 text-[12px] text-darkGray mb-4">
-            회원목록 수 : {customerList.length}명ß
+            회원목록 수 : {customerList.length}명
           </div>
 
           <Scrollbars autoHeight autoHeightMin="73vh" autoHide>
             {customerList.map((customer) => (
-              <div
-                className="flex flex-row h-12 py-4 mb-3 hover:bg-hoverGray hover:cursor-pointer"
+              <Link
                 key={customer}
-                onClick={onClick}
-                onKeyDown={onClick}
-                role="presentation"
+                activityName="OtherProfile"
+                activityParams={{ id: String(customer) }}
               >
-                <ProfileCard />
-                {/* {customer} */}
-              </div>
+                <div className="flex flex-row h-12 py-4 mb-3 hover:bg-hoverGray hover:cursor-pointer">
+                  <ProfileCard />
+                  {/* {customer} */}
+                </div>
+              </Link>
             ))}
           </Scrollbars>
         </div>

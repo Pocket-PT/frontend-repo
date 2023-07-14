@@ -40,7 +40,7 @@ const GoalCard = ({ index }: { index: number }) => {
 };
 
 type OtherProfileProps = {
-  path: string;
+  id: string;
 };
 
 const OhterProfile: ActivityComponentType<OtherProfileProps> = () => {
