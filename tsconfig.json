@@ -29,7 +29,9 @@
       "types/*": ["./src/types/*"],
       "images/*": ["./src/images/*"],
       "apps/*": ["./src/apps/*"],
-      "icons/*": ["./src/icons/*"]
+      "icons/*": ["./src/icons/*"],
+      "constants/*": ["./src/constants/*"],
+      "videos/*": ["./src/videos/*"]
     }
   },
   "include": [

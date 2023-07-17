@@ -1,11 +1,12 @@
 import { cls } from 'utils/cls';
 import ChatIcon from 'icons/ChatIcon';
-import { Link } from 'gatsby';
 import TelIcon from 'icons/TelIcon';
 import SmsIcon from 'icons/SmsIcon';
 import Layout from 'components/Layout';
-import { ActivityComponentType } from '@stackflow/react';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
+import { Link } from 'utils/link';
+import { useEffect } from 'react';
+import { useStack } from '@stackflow/react';
 
 const Icon = ({ icon }: { icon: JSX.Element }) => {
   return (
@@ -39,11 +40,12 @@ const GoalCard = ({ index }: { index: number }) => {
   );
 };
 
-type OtherProfileProps = {
-  id: string;
-};
+const OhterProfile: React.FC = () => {
+  const stack = useStack();
+  useEffect(() => {
+    console.log('OtherProfilePage', stack);
+  }, [stack]);
 
-const OhterProfile: ActivityComponentType<OtherProfileProps> = () => {
   return (
     <AppScreen appBar={{ title: 'OtherProfile' }}>
       <Layout>
@@ -58,7 +60,7 @@ const OhterProfile: ActivityComponentType<OtherProfileProps> = () => {
               </div>
             </div>
             <div className="flex flex-row justify-center w-full gap-6 pb-6">
-              <Link to={'/chats/1'}>
+              <Link activityName="ChatRoomPage" activityParams={{ id: '1' }}>
                 <Icon icon={<ChatIcon />} />
               </Link>
               <Icon icon={<TelIcon />} />

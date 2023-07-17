@@ -1,8 +1,6 @@
-'use client';
-
 import { Stack } from 'utils/stackflow';
 
-const Home = () => {
+const Home: React.FC = () => {
   return (
     <div>
       <Stack />
