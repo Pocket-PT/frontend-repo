@@ -1,22 +1,11 @@
-import { useLocation, useParams } from '@reach/router';
+import { useLocation } from '@reach/router';
 import { Link } from 'utils/link';
-import { createBrowserHistory } from 'history';
-
-const history = createBrowserHistory();
 
 const Footer = () => {
   const location = useLocation();
-  const params = useParams();
   const { pathname } = location;
-  console.log(
-    pathname,
-    params,
-    window.location.pathname,
-    window.history?.state?.usr?.activity?.params,
-    history.location.pathname,
-    history.location.state,
-    window.history.length,
-  );
+
+  console.log(pathname);
 
   return (
     <nav className="box-border fixed bottom-0 z-50 flex items-center justify-between w-full max-w-xl p-6 text-gray-800 bg-white border-t max-h-4 bg-w hite border-gray">
