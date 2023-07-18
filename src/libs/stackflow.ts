@@ -3,11 +3,11 @@ import ChatListPage from 'apps/Chat';
 import MyProfilePage from 'apps/MyProfilePage';
 import { basicUIPlugin } from '@stackflow/plugin-basic-ui';
 import { historySyncPlugin } from '@stackflow/plugin-history-sync';
-import { basicRendererPlugin } from '@stackflow/plugin-renderer-basic';
 import { stackflow } from '@stackflow/react';
 import Main from 'apps/Home/Main';
 import OtherProfile from 'apps/Home/OtherProfile';
 import SignInPage from 'apps/login';
+import { basicRendererPlugin } from '@stackflow/plugin-renderer-basic';
 
 const activities = {
   Main,
@@ -17,8 +17,6 @@ const activities = {
   ChatRoomPage,
   SignInPage,
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 export const { Stack } = stackflow({
   transitionDuration: 350,
@@ -31,13 +29,14 @@ export const { Stack } = stackflow({
     historySyncPlugin({
       routes: {
         Main: '/',
-        OtherProfile: '/:id',
+        OtherProfile: '/other-profile',
         MyProfilePage: '/mypage',
         ChatListPage: '/chats',
-        ChatRoomPage: '/chats/:id',
+        ChatRoomPage: '/chats-rooms',
         SignInPage: '/login',
       },
       fallbackActivity: () => 'Main',
+      useHash: true,
     }),
   ],
 });

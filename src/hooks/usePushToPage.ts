@@ -1,5 +1,5 @@
-import { TypeActivityKeys } from '../utils/stackflow';
-import { useFlow } from '../utils/useFlow';
+import { useFlow } from 'libs/useFlow';
+import { TypeActivityKeys } from '../libs/stackflow';
 
 const usePushToPage = () => {
   const { push } = useFlow();

@@ -1975,6 +1975,11 @@
     history "^5.3.0"
     url-pattern "^1.0.3"
 
+"@stackflow/plugin-map-initial-activity@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@stackflow/plugin-map-initial-activity/-/plugin-map-initial-activity-1.0.1.tgz"
+  integrity sha512-QSPSUl8sX5BTd3Wxdmg1oxTBUqg5a+Es4e5hHQ6zjdEvjaTwJbGp/gOfw6drt0km0pFKNLJlLp2B6e1TBLTvpg==
+
 "@stackflow/plugin-preload@^1.0.0", "@stackflow/plugin-preload@^1.2.8":
   version "1.2.8"
   resolved "https://registry.npmjs.org/@stackflow/plugin-preload/-/plugin-preload-1.2.8.tgz"
@@ -1986,6 +1991,11 @@
   version "1.1.3"
   resolved "https://registry.npmjs.org/@stackflow/plugin-renderer-basic/-/plugin-renderer-basic-1.1.3.tgz"
   integrity sha512-ylpuOyTMNdV1N/ocpyiy3b8+TV0XyAQHnS9Ksod0Gz16kWzviFexbjh66q1j78yb59tFfzq8rAjZ1x35TXcPFw==
+
+"@stackflow/plugin-renderer-web@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.npmjs.org/@stackflow/plugin-renderer-web/-/plugin-renderer-web-1.1.3.tgz"
+  integrity sha512-Xoda2F8H3pXVxpyISubG+sqQSUh1AwmgKKsgy1RgzV6aqPRPpheFhdvATlciqjgDR3TxhBGRmwqXPjEUkaIi3Q==
 
 "@stackflow/react@^1.0.0", "@stackflow/react@^1.1.3":
   version "1.1.3"
@@ -7692,6 +7702,11 @@ lru-queue@^0.1.0:
   integrity sha512-BpdYkt9EvGl8OfWHDQPISVpcl5xZthb+XPsbELj5AQXxIC8IriDZIQYjBJPEm5rS420sjZ0TLEzRcq5KdBhYrQ==
   dependencies:
     es5-ext "~0.10.2"
+
+lz-string@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/lz-string/-/lz-string-1.5.0.tgz"
+  integrity sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==
 
 make-dir@^3.0.0, make-dir@^3.0.2, make-dir@^3.1.0:
   version "3.1.0"

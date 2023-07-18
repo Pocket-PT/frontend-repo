@@ -1,11 +1,9 @@
-import { useLocation } from '@reach/router';
-import { Link } from 'utils/link';
+import useHashLocation from 'hooks/useHashLocation';
+import { Link } from 'libs/link';
 
 const Footer = () => {
-  const location = useLocation();
-  const { pathname } = location;
-
-  console.log(pathname);
+  const { name, params } = useHashLocation();
+  console.log(name, params);
 
   return (
     <nav className="box-border fixed bottom-0 z-50 flex items-center justify-between w-full max-w-xl p-6 text-gray-800 bg-white border-t max-h-4 bg-w hite border-gray">
@@ -13,7 +11,7 @@ const Footer = () => {
         <div className="flex flex-col items-center space-y-2 hover:text-dark group">
           <svg
             className={
-              pathname === '/'
+              name === 'Main'
                 ? 'w-6 h-6 stroke-mainPurple'
                 : 'w-6 h-6 stroke-gray group-hover:stroke-dark'
             }
@@ -38,7 +36,7 @@ const Footer = () => {
         <div className="flex flex-col items-center space-y-2 text-orange-500 group">
           <svg
             className={
-              pathname === '/chats'
+              name === 'ChatListPage'
                 ? 'w-6 h-6 stroke-mainPurple'
                 : 'w-6 h-6 stroke-gray group-hover:stroke-dark'
             }
@@ -69,7 +67,7 @@ const Footer = () => {
         <div className="flex flex-col items-center space-y-2 text-orange-500 group">
           <svg
             className={
-              pathname === '/profile'
+              name === 'MyProfilePage'
                 ? 'w-6 h-6 stroke-mainPurple'
                 : 'w-6 h-6 stroke-gray group-hover:stroke-dark'
             }

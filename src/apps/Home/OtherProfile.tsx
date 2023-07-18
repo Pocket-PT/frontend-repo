@@ -4,7 +4,7 @@ import TelIcon from 'icons/TelIcon';
 import SmsIcon from 'icons/SmsIcon';
 import Layout from 'components/Layout';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
-import { Link } from 'utils/link';
+import { Link } from 'libs/link';
 import { useEffect } from 'react';
 import { useStack } from '@stackflow/react';
 
