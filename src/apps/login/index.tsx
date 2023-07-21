@@ -1,57 +1,53 @@
-import useInput from 'hooks/useInput';
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import axios from 'axios';
-import usePushToPage from 'hooks/usePushToPage';
+import KaKaoLogin from 'components/KaKaoLogin';
+import Layout from 'components/Layout';
+import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
 import { Link } from 'gatsby-link';
+import { useEffect, useState } from 'react';
 
 const SignInPage = () => {
-  const { handleSubmit } = useForm<FieldValues>();
-  const [email, onChangeEmail] = useInput('');
-  const [password, onChangePassword] = useInput('');
-  const { moveTo } = usePushToPage();
-  const onValid: SubmitHandler<FieldValues> = () => {
-    axios
-      .post(
-        'http://localhost:3095/api/users/login',
-        { email, password },
-        {
-          withCredentials: true,
-        },
-      )
-      .then((response) => {
-        console.log('success', response);
-        moveTo('Main', false);
-      })
-      .catch((error) => {
-        console.log('error', error.response);
-        if (
-          error.response.data === '로그인하지 않은 사용자만 접근 가능합니다.'
-        ) {
-          moveTo('Main', false);
-        }
-      });
+  //`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`
+  const [testData, setTestData] = useState<string>('');
+
+  useEffect(() => {
+    axios({
+      method: 'GET',
+      url: `http://3.34.49.69`,
+    }).then((res) => setTestData(res.data));
+  }, []);
+  console.log(testData);
+
+  const HtmlComponent = ({ htmlString }: { htmlString: string }) => {
+    return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
   };
+
+  if (!testData) return <div>로딩중</div>;
+
   return (
-    <div className="w-2/3 mx-auto mt-16">
-      <form onSubmit={handleSubmit(onValid)}>
-        <input
-          className="w-full mb-4 bg-lightGray"
-          type="email"
-          value={email}
-          onChange={onChangeEmail}
-        />
-        <input
-          className="w-full bg-lightGray"
-          type="password"
-          value={password}
-          onChange={onChangePassword}
-        />
-        <button type="submit">로그인</button>
-      </form>
-      <Link to="/chats">
-        <div>TEST</div>
-      </Link>
-    </div>
+    <Layout title="로그인" hasFooter={false}>
+      <HtmlComponent
+        htmlString={testData.replace(
+          '/oauth2/authorization/kakao',
+          'http://3.34.49.69/oauth2/authorization/kakao',
+        )}
+      />
+      <div
+        className={`w-full flex items-center flex-col px-6 space-y-8`}
+        style={{
+          height: `calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`,
+        }}
+      >
+        <div className="flex items-center justify-center w-32 h-32 mt-32 text-white rounded-full shadow bg-mainPurple">
+          LOGO
+        </div>
+        <div>
+          <Link to="http://3.34.49.69/oauth2/authorization/kakao">
+            <KaKaoLogin />
+          </Link>
+          <div className="mt-1 text-center">회원가입</div>
+        </div>
+      </div>
+    </Layout>
   );
 };
 

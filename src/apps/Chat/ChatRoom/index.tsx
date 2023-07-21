@@ -1,7 +1,8 @@
-import { AppScreen } from '@stackflow/plugin-basic-ui';
-import { useStack } from '@stackflow/react';
+/* eslint-disable react/prop-types */
+import { ActivityComponentType, useStack } from '@stackflow/react';
 import axios from 'axios';
 import EditModal from 'components/EditModal';
+import Layout from 'components/Layout';
 import Message from 'components/Message';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
 import useInput from 'hooks/useInput';
@@ -18,7 +19,12 @@ interface CanvasData {
   canvasHeight: number;
 }
 
-const ChatRoomPage = () => {
+type ChatRoomPageProps = {
+  id: string;
+};
+
+const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
+  console.log(params);
   const [message, onChangeMessage, setMessage] = useInput('');
   const { handleSubmit } = useForm();
   const [socket] = useSocket('sleact');
@@ -117,12 +123,12 @@ const ChatRoomPage = () => {
   });
 
   return (
-    <AppScreen appBar={{ title: 'ChatRoom' }}>
-      <div className="w-full h-screen max-w-xl mx-auto overflow-hidden bg-white">
+    <Layout title={`회원넘버 : ${params.id}`} hasFooter={false}>
+      <div className="box-border w-full mx-auto mt-2 overflow-hidden bg-white">
         <Scrollbars
           autoHide
           autoHeight
-          autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px)`}
+          autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`}
         >
           {chatData &&
             [...chatData].reverse()?.map((item) => (
@@ -144,7 +150,7 @@ const ChatRoomPage = () => {
           <EditModal canvasData={canvasData} onCloseModal={onCloseModal} />
         ) : null}
         <form
-          className="fixed inset-x-0 bottom-0 h-10 max-w-xl mx-auto"
+          className="fixed inset-x-0 bottom-0 h-10 mx-auto"
           onSubmit={handleSubmit(onValid)}
           name="message"
         >
@@ -170,7 +176,7 @@ const ChatRoomPage = () => {
           </div>
         </form>
       </div>
-    </AppScreen>
+    </Layout>
   );
 };
 

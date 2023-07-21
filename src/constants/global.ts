@@ -1,4 +1,4 @@
-export const HEADER_HEIGHT = 45;
+export const HEADER_HEIGHT = 48;
 export const FOOTER_HEIGHT = 40;
 export const COLOR_PLATE = [
   '#1abc9c',

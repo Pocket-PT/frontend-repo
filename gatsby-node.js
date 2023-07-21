@@ -20,6 +20,7 @@ exports.onCreateWebpackConfig = ({ actions }) => {
         hooks: path.resolve(__dirname, 'src/hooks'),
         videos: path.resolve(__dirname, 'src/videos'),
         libs: path.resolve(__dirname, 'src/libs'),
+        stores: path.resolve(__dirname, 'src/stores'),
       },
     },
   });

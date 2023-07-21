@@ -226,7 +226,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-white rounded max-w-[540px] max-h-screen w-[90%] h-[90%] m-auto shadow">
+      <div className="fixed inset-0 z-50 bg-white rounded max-w-[540px] max-h-screen w-[90%] h-[90%] m-auto shadow overflow-hidden">
         <div className="w-full h-full">
           <div
             className={`box-border flex flex-row relative justify-center pt-11 max-h-screen mx-auto`}

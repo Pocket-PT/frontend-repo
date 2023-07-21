@@ -1,6 +1,8 @@
 import type { GatsbyConfig } from 'gatsby';
 
 import path from 'path';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const lessToJson = require('less-to-json');
 // Get paths of Gatsby's required rules, which as of writing is located at:
 // https://github.com/gatsbyjs/gatsby/tree/fbfe3f63dec23d279a27b54b4057dd611dce74bb/packages/
 // gatsby/src/utils/eslint-rules
@@ -28,6 +30,21 @@ const config: GatsbyConfig = {
   plugins: [
     'gatsby-plugin-postcss',
     'gatsby-plugin-provide-react',
+    {
+      resolve: 'gatsby-plugin-antd',
+      options: {
+        style: true,
+      },
+    },
+    {
+      resolve: 'gatsby-plugin-less',
+      options: {
+        lessOptions: {
+          javascriptEnabled: true,
+          modifyVars: lessToJson('src/theme/vars.less'),
+        },
+      },
+    },
     {
       resolve: `gatsby-plugin-manifest`,
       options: {

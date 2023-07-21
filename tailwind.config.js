@@ -28,6 +28,7 @@ export const theme = {
     gray: '#C6C6C6',
     darkGray: '#797979',
     dark: '#333333',
+    red: '#DA291C',
   },
 };
 export const variants = { fill: ['hover', 'focus'] };

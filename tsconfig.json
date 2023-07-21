@@ -32,7 +32,8 @@
       "icons/*": ["./src/icons/*"],
       "constants/*": ["./src/constants/*"],
       "videos/*": ["./src/videos/*"],
-      "libs/*": ["./src/libs/*"]
+      "libs/*": ["./src/libs/*"],
+      "stores/*": ["./src/stores/*"]
     }
   },
   "include": [

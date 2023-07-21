@@ -6,7 +6,7 @@ const Footer = () => {
   console.log(name, params);
 
   return (
-    <nav className="box-border fixed bottom-0 z-50 flex items-center justify-between w-full max-w-xl p-6 text-gray-800 bg-white border-t max-h-4 bg-w hite border-gray">
+    <nav className="box-border fixed bottom-0 z-50 flex items-center justify-between w-full p-6 text-gray-800 bg-white border-t max-h-4 bg-w hite border-gray">
       <Link activityName="Main" animate={false}>
         <div className="flex flex-col items-center space-y-2 hover:text-dark group">
           <svg

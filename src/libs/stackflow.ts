@@ -8,6 +8,9 @@ import Main from 'apps/Home/Main';
 import OtherProfile from 'apps/Home/OtherProfile';
 import SignInPage from 'apps/login';
 import { basicRendererPlugin } from '@stackflow/plugin-renderer-basic';
+import PortfolioPage from 'apps/MyProfilePage/Portfolio';
+import MyProfileEditPage from 'apps/MyProfilePage/Edit';
+import PricePage from 'apps/MyProfilePage/Price';
 
 const activities = {
   Main,
@@ -16,6 +19,9 @@ const activities = {
   ChatListPage,
   ChatRoomPage,
   SignInPage,
+  PortfolioPage,
+  MyProfileEditPage,
+  PricePage,
 };
 
 export const { Stack } = stackflow({
@@ -34,6 +40,9 @@ export const { Stack } = stackflow({
         ChatListPage: '/chats',
         ChatRoomPage: '/chats-rooms',
         SignInPage: '/login',
+        PortfolioPage: '/mypage/portfolio',
+        MyProfileEditPage: '/mypage/edit',
+        PricePage: '/mypage/price',
       },
       fallbackActivity: () => 'Main',
       useHash: true,
