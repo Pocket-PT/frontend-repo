@@ -8,7 +8,7 @@ import { Link } from 'libs/link';
 
 const appendRight = () => {
   const { name } = useHashLocation();
-  console.log(name);
+  console.log('Layout: ', name);
   const items: MenuProps['items'] = [
     {
       label: '마이페이지',

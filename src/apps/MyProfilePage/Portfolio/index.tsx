@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
 import useMyProfileStore from 'stores/myProfile';
 import { cls } from 'utils/cls';
+import truncateString from 'utils/truncateString';
 
 type CardProps = {
   uniqueKey: number;
@@ -39,6 +40,8 @@ const Card = ({
   const ref = useRef<HTMLDivElement>(null);
   const checkRef = useRef<HTMLDivElement>(null);
 
+  console.log('isEdit: ', isEdit);
+  console.log('isActive: ', isActive);
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isEdit) return;
@@ -76,11 +79,28 @@ const Card = ({
   const handleCheck = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEditPrizeTable(uniqueKey, editTitle, editDate, editRank);
+    if (!earlyReturnTest()) return;
+    console.log('test');
     setEditTitle(editTitle);
     setEditDate(editDate);
     setEditRank(editRank);
     setIsEdit(false);
     setIsActive(false);
+    onValidDation();
+  };
+
+  const onValidDation = () => {
+    if (editTitle.trim() === '') {
+      return setEditTitle('대회명을 입력해주세요');
+    } else if (editDate && editDate.trim() === '') {
+      return setEditDate('취득날짜를 입력해주세요');
+    } else if (editRank && editRank.trim() === '') {
+      return setEditRank('랭킹을 입력해주세요');
+    }
+  };
+
+  const earlyReturnTest = () => {
+    return false;
   };
 
   return (
@@ -119,10 +139,14 @@ const Card = ({
         ) : (
           <>
             <div className="flex flex-col pl-6">
-              <div className="text-lg font-bold text-mainPurple">{title}</div>
-              <div className="text-sm text-gray">{date}</div>
+              <div className="text-lg font-bold text-mainPurple">
+                {truncateString(title, 20)}
+              </div>
+              <div className="text-sm text-gray">
+                {truncateString(date, 20)}
+              </div>
             </div>
-            <div className="absolute right-6">{rank}</div>
+            <div className="absolute right-6">{truncateString(rank, 5)}</div>
           </>
         )}
       </div>
