@@ -8,11 +8,17 @@ import { useEffect, useState } from 'react';
 const SignInPage = () => {
   const [testData, setTestData] = useState<string>('');
 
+  const host =
+    window.location.hostname === 'localhost'
+      ? 'http://{your server URL}'
+      : 'api';
+
+  const apiClient = axios.create({
+    baseURL: host,
+  });
+
   useEffect(() => {
-    axios({
-      method: 'GET',
-      url: `http://3.38.250.97:8080/api/v1/main`,
-    }).then((res) => setTestData(res.data));
+    apiClient.get('/api/v1/main').then((res) => setTestData(res.data));
   }, []);
   console.log(testData);
 
