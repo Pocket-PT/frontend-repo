@@ -9,9 +9,7 @@ const SignInPage = () => {
   const [testData, setTestData] = useState<string>('');
 
   const host =
-    window.location.hostname === 'localhost'
-      ? 'http://{your server URL}'
-      : 'api';
+    window.location.hostname === 'localhost' ? 'http://3.38.250.97' : 'api';
 
   const apiClient = axios.create({
     baseURL: host,
