@@ -1,8 +1,8 @@
-import axios from 'axios';
 import KaKaoLogin from 'components/KaKaoLogin';
 import Layout from 'components/Layout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
 import { Link } from 'gatsby-link';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 const SignInPage = () => {
@@ -10,7 +10,7 @@ const SignInPage = () => {
 
   useEffect(() => {
     axios
-      .get('http://3.38.250.97/api/v1/main')
+      .get('http://3.38.250.97:8080/api/v1/main')
       .then((res) => setTestData(res.data));
   }, []);
   console.log(testData);
