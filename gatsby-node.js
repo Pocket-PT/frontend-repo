@@ -3,6 +3,8 @@
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { createRedirect } = require('gatsby-plugin-netlify');
 
 // Required for Paths to work with Gatsby.
 exports.onCreateWebpackConfig = ({ actions }) => {
@@ -23,5 +25,11 @@ exports.onCreateWebpackConfig = ({ actions }) => {
         stores: path.resolve(__dirname, 'src/stores'),
       },
     },
+  });
+  createRedirect({
+    fromPath: window.location.hostname, // 이 경로로의 요청을
+    toPath: 'http://3.38.250.97/', // 이 경로로 리다이렉트합니다.
+    isPermanent: true, // 영구 리다이렉트 설정 (기본값은 false)
+    redirectInBrowser: true, // 브라우저에서 리다이렉트를 처리하도록 설정 (기본값은 false)
   });
 };
