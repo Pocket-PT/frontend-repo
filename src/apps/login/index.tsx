@@ -1,17 +1,15 @@
 import KaKaoLogin from 'components/KaKaoLogin';
 import Layout from 'components/Layout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
-import { Link } from 'gatsby-link';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { Link } from 'gatsby';
 
 const SignInPage = () => {
   const [testData, setTestData] = useState<string>('');
 
   useEffect(() => {
-    axios
-      .get('http://3.38.250.97:8080/api/v1/main')
-      .then((res) => setTestData(res.data));
+    axios.get('http://3.38.250.97:8080').then((res) => setTestData(res.data));
   }, []);
   console.log(testData);
 
@@ -27,7 +25,7 @@ const SignInPage = () => {
           LOGO
         </div>
         <div>
-          <Link to="http://3.38.250.97/oauth2/authorization/kakao">
+          <Link to="https://back.pocketpt.shop/oauth2/authorization/kakao">
             <KaKaoLogin />
           </Link>
           <div className="mt-1 text-center">회원가입</div>
