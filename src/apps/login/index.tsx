@@ -1,18 +1,9 @@
 import KaKaoLogin from 'components/KaKaoLogin';
 import Layout from 'components/Layout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 import { Link } from 'gatsby';
 
 const SignInPage = () => {
-  const [testData, setTestData] = useState<string>('');
-
-  useEffect(() => {
-    axios.get('http://3.38.250.97:8080').then((res) => setTestData(res.data));
-  }, []);
-  console.log(testData);
-
   return (
     <Layout title="로그인" hasFooter={false}>
       <div

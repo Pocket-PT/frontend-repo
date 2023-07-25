@@ -5,10 +5,10 @@ const ProfileCard = () => {
       <div className="flex flex-row">
         <div className="flex flex-col ml-3">
           <div className="">김일곤</div>
-          <div className="text-sm text-gray">test@naver.com</div>
+          {<div className="text-sm text-gray"></div>}
         </div>
         <div className="absolute text-sm transform -translate-y-1/2 top-1/2 right-4 text-darkGray">
-          2023-05-17 ~ 2023-08-17
+          test@naver.com
         </div>
       </div>
     </div>
