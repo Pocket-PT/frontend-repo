@@ -16,7 +16,11 @@ const SignInPage = () => {
           LOGO
         </div>
         <div>
-          <Link to="https://back.pocketpt.shop/oauth2/authorization/kakao">
+          <Link
+            to={`https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
+              'http://localhost:8000/#/before-login',
+            )}`}
+          >
             <KaKaoLogin />
           </Link>
           <div className="mt-1 text-center">회원가입</div>

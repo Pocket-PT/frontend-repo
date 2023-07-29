@@ -11,6 +11,7 @@ import { basicRendererPlugin } from '@stackflow/plugin-renderer-basic';
 import PortfolioPage from 'apps/MyProfilePage/Portfolio';
 import MyProfileEditPage from 'apps/MyProfilePage/Edit';
 import PricePage from 'apps/MyProfilePage/Price';
+import BeforeLogin from 'apps/login/BeforeLogin';
 
 const activities = {
   Main,
@@ -22,9 +23,10 @@ const activities = {
   PortfolioPage,
   MyProfileEditPage,
   PricePage,
+  BeforeLogin,
 };
 
-export const { Stack } = stackflow({
+export const { Stack, useStepFlow } = stackflow({
   transitionDuration: 350,
   activities,
   plugins: [
@@ -43,6 +45,7 @@ export const { Stack } = stackflow({
         PortfolioPage: '/mypage/portfolio',
         MyProfileEditPage: '/mypage/edit',
         PricePage: '/mypage/price',
+        BeforeLogin: '/before-login',
       },
       fallbackActivity: () => 'Main',
       useHash: true,

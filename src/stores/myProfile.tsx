@@ -59,8 +59,22 @@ const useMyProfileStore = create(
         { key: 1, price: '30000', month: '3개월 당' },
       ],
       prizeTable: [
-        { key: 0, name: 'IFBB PRO', date: '2023.05.17', rank: '1등' },
-        { key: 1, name: '대회', date: '2023.05.17', rank: '입상' },
+        {
+          key: 0,
+          name: 'IFBB PRO',
+          date: '2023.05.17',
+          rank: '1등',
+          isEdit: false,
+          isActive: false,
+        },
+        {
+          key: 1,
+          name: '대회',
+          date: '2023.05.17',
+          rank: '입상',
+          isEdit: false,
+          isActive: false,
+        },
       ],
       licenseTable: [
         { key: 0, name: '생활체육지도사', date: '2023.05.17', rank: '2급' },
@@ -103,7 +117,12 @@ const useMyProfileStore = create(
         set((state) => ({
           prizeTable: [
             ...state.prizeTable,
-            { key: state.prizeTable.length, name, date, rank },
+            {
+              key: state.prizeTable.length,
+              name,
+              date,
+              rank,
+            },
           ],
         }));
       },
