@@ -19,7 +19,8 @@ const useSocket = (
     return [undefined, disconnect];
   }
   if (!sockets[workspace]) {
-    sockets[workspace] = io.connect(`wss://back.pocketpt.shop/ws-stomp`, {
+    sockets[workspace] = io.connect(`wss://back.pocketpt.shop`, {
+      path: '/ws-stomp',
       transports: ['websocket'],
     });
   }
