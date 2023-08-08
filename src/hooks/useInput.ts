@@ -11,7 +11,7 @@ const useInput = <T = any>(initialData: T): ReturnTypes<T> => {
     (e: any) => {
       setValue(e.target.value);
     },
-    [value],
+    [],
   );
 
   return [value, handler, setValue];

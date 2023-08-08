@@ -1,50 +1,35 @@
-import { headerTitle } from 'utils/headerTitle';
-import SearchIcon from '../icons/SearchIcon';
-import { useLocation } from '@reach/router';
-import { navigate } from 'gatsby-link';
-
 const Header = () => {
-  const location = useLocation();
-  const { pathname } = location;
-  console.log(pathname);
-
-  const canGoBack = !(
-    pathname === '/' ||
-    pathname === '/chats' ||
-    pathname === 'profile'
-  );
-  console.log(canGoBack);
-
-  const onClick = () => {
-    navigate(-1);
-  };
   return (
-    <div className="w-full h-[45px] flex flex-row items-center">
-      <div className="fixed top-0 flex items-center justify-center w-full h-12 max-w-xl">
-        {canGoBack ? (
-          <button onClick={onClick} className="absolute left-4">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 19l-7-7 7-7"
-              ></path>
-            </svg>
-          </button>
-        ) : null}
-      </div>
-      <div className="text-black text-[16px] w-full font-bold flex flex-row px-12">
-        {headerTitle(pathname)}
-      </div>
-      <div className="pr-10 text-darkGray">
-        <SearchIcon />
+    <div className="w-full h-[47px] relative">
+      <div className="w-full h-[47px] left-0 top-0 absolute">
+        <div className="right-[26.7px] top-[19px] absolute justify-start items-center gap-[7px] inline-flex">
+          <div className="relative w-5 h-3">
+            <img
+              className="absolute top-0 left-0 w-5 h-3"
+              src="https://via.placeholder.com/20x12"
+              alt="#"
+            />
+          </div>
+          <div className="w-[17px] h-[12.50px] relative">
+            <img
+              className="w-[17px] h-[12.50px] left-0 top-0 absolute"
+              src="https://via.placeholder.com/17x12"
+              alt="#"
+            />
+          </div>
+          <div className="w-[27.33px] h-[13px] relative">
+            <div className="w-[25px] h-[13px] left-0 top-0 absolute opacity-40 rounded border border-black" />
+            <div className="w-[17px] h-[9px] left-[2px] top-[2px] absolute bg-black rounded-sm" />
+          </div>
+        </div>
+        <div className="w-1.5 h-1.5 left-[282px] top-[6px] absolute">
+          <div className="w-1.5 h-1.5 left-0 top-0 absolute rounded-full" />
+        </div>
+        <div className="left-[46.50px] top-[17px] absolute justify-center items-center gap-0.5 inline-flex">
+          <div className="text-center text-black text-[17px] font-semibold leading-[17px]">
+            9:41
+          </div>
+        </div>
       </div>
     </div>
   );

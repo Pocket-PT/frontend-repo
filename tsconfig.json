@@ -33,7 +33,8 @@
       "constants/*": ["./src/constants/*"],
       "videos/*": ["./src/videos/*"],
       "libs/*": ["./src/libs/*"],
-      "stores/*": ["./src/stores/*"]
+      "stores/*": ["./src/stores/*"],
+      "apis/*": ["./src/apis/*"]
     }
   },
   "include": [

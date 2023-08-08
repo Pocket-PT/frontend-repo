@@ -1,5 +1,4 @@
 import Layout from 'components/Layout';
-import useSocket from 'hooks/useSocket';
 import ArrowRightIcon from 'icons/ArrowRightIcon';
 import GraphIcon from 'icons/GraphIcon';
 import PrizeIcon from 'icons/PrizeIcon';
@@ -89,11 +88,6 @@ const InfoCard = ({ title }: { title: string }) => {
 const MyProfilePage = () => {
   const { name, nickname, description, birthDate, email } = useMyProfileStore();
   console.log('MyProfilePage', name, nickname, description, birthDate, email);
-  const [socket] = useSocket();
-  const onTestClick = () => {
-    console.log('socket:', socket);
-    socket?.emit('login', { id: 1, channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] });
-  };
 
   return (
     <Layout title="MyProfile">
@@ -110,14 +104,6 @@ const MyProfilePage = () => {
             편집하기
           </div>
         </Link>
-        <div
-          onClick={onTestClick}
-          onKeyDown={onTestClick}
-          role="presentation"
-          className="flex items-center justify-center w-full h-8 pt-1 border rounded-full border-gray text-gray hover:border-dark hover:text-dark active:border-mainPurple active:text-mainPurple"
-        >
-          Socket Test
-        </div>
         <div className="mt-12 mb-1 text-lg font-bold">내 정보관리</div>
         <div className="space-y-2">
           <div>

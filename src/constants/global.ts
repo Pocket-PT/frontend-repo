@@ -14,3 +14,9 @@ export const COLOR_PLATE = [
   '#2ecc71',
   '#e67e22',
 ];
+
+export const koreanPhoneNumberRegex = /^01(?:0|1|[6-9])(?:\d{3}|\d{4})\d{4}$/;
+export const koreanOrEnglishRegex = /^[가-힣A-Za-z]+$/;
+
+export const PUB_URL = '/pub/chatting/rooms';
+export const SUB_URL = '/sub/channel';

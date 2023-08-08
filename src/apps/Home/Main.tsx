@@ -2,42 +2,90 @@ import { Scrollbars } from 'react-custom-scrollbars-2';
 import MyProfileCard from 'components/MyProfileCard';
 import { Link } from 'libs/link';
 import ProfileCard from 'components/ProfileCard';
-import Layout from 'components/Layout';
-import { useActivityPreloadRef } from '@stackflow/plugin-preload';
-import { ActivityComponentType } from '@stackflow/react';
+import { useEffect } from 'react';
+import useTokenStore from 'stores/token';
+import usePushToPage from 'hooks/usePushToPage';
+import { useAccountQuery } from 'apis/useAccountQuery';
+import useMyProfileStore from 'stores/myProfile';
+import AddPersonIcon from 'icons/AddPersonIcon';
+import Footer from 'components/Footer';
+import { AppScreen } from '@stackflow/plugin-basic-ui';
 
-const Main: ActivityComponentType = () => {
-  const preloadRef = useActivityPreloadRef();
-  console.log(preloadRef);
-
+const Main = () => {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
+  const { token, setToken } = useTokenStore();
+  const { replaceTo } = usePushToPage();
+  const { onEditProfileUrl } = useMyProfileStore();
+  const { data, isError, isLoading, isSuccess } = useAccountQuery();
+
+  console.log('Main', data);
+  useEffect(() => {
+    if (!token) {
+      replaceTo('SignInPage');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isError) {
+      console.log('isError');
+      setToken('');
+      replaceTo('SignInPage');
+    }
+  }, [isError]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      onEditProfileUrl(data.data.profilePictureUrl ?? '');
+    }
+  }, [isSuccess]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <Layout title="Main">
-      <div className="mt-4">
-        <Link activityName="MyProfilePage">
-          <MyProfileCard />
-        </Link>
-        <div className="w-full h-[1px] mt-4 mb-4 bg-lightGray"></div>
-        <div className="ml-4 text-[12px] text-darkGray mb-4">
-          회원목록 수 : {customerList.length}명
+    <AppScreen backgroundColor="#E9ECF0">
+      <div>
+        <div className="my-5">
+          <Link activityName="MyProfilePage">
+            <MyProfileCard
+              nickname={data?.data.nickname}
+              profileUrl={data?.data.profilePictureUrl}
+            />
+          </Link>
         </div>
-        <Scrollbars autoHeight autoHeightMin="73vh" autoHide>
-          {customerList.map((customer) => (
-            <Link
-              key={customer}
-              activityName="OtherProfile"
-              activityParams={{ id: String(customer) }}
-            >
-              <div className="flex flex-row h-12 py-4 mb-3 hover:bg-hoverGray hover:cursor-pointer">
-                <ProfileCard />
-                {/* {customer} */}
+        {/*회원 리스트 부분*/}
+        <div className="w-full bg-white rounded-tl-[32px] rounded-tr-[32px] h-full">
+          <div className="pl-5 pt-[30px] text-xl font-bold leading-normal flex flex-row items-center relative w-full">
+            회원
+            <span className="pl-1 text-xl font-normal leading-normal text-gray">
+              129
+            </span>
+            <div className="absolute text-sm font-semibold leading-tight text-right text-blue-500 right-5">
+              <div className="flex flex-row items-center space-x-1 text-mainBlue">
+                <AddPersonIcon />
+                <span>회원 추가</span>
               </div>
-            </Link>
-          ))}
-        </Scrollbars>
+            </div>
+          </div>
+          <Scrollbars autoHeight autoHeightMin="70vh" autoHide>
+            {customerList.map((customer) => (
+              <Link
+                key={customer}
+                activityName="OtherProfile"
+                activityParams={{ id: String(customer) }}
+              >
+                <div className="flex flex-row mt-8 hover:cursor-pointer">
+                  <ProfileCard />
+                  {/* {customer} */}
+                </div>
+              </Link>
+            ))}
+          </Scrollbars>
+        </div>
+        <Footer />
       </div>
-    </Layout>
+    </AppScreen>
   );
 };
 

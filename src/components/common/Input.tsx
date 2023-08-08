@@ -59,7 +59,6 @@ Input.TextField = forwardRef(
     { error, ...props }: TextFieldProps,
     ref: ForwardedRef<HTMLInputElement>,
   ) => {
-    console.log(error);
     return (
       <input
         className={cls(

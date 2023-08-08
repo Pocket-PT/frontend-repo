@@ -10,7 +10,7 @@ export const theme = {
     focus: theme('colors.gray.800'),
   }),
   fontFamily: {
-    sans: ['Noto Sans', 'sans-serif'],
+    sans: ['Pretendard-Regular', 'sans-serif'],
   },
   extend: {
     backgroundImage: {
@@ -23,11 +23,11 @@ export const theme = {
     white: '#FFFFFF',
     hoverGray: '#F1F4F9',
     mainPurple: '#8075F8',
-    mainBlue: '#4830F2',
+    mainBlue: '#3E66FB',
     lightGray: '#E9ECF0',
-    gray: '#C6C6C6',
+    gray: '#999999',
     darkGray: '#797979',
-    dark: '#333333',
+    dark: '#212121',
     red: '#DA291C',
   },
 };

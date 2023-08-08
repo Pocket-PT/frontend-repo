@@ -2,8 +2,11 @@ import KaKaoLogin from 'components/KaKaoLogin';
 import Layout from 'components/Layout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
 import { Link } from 'gatsby';
+import useTokenStore from 'stores/token';
 
 const SignInPage = () => {
+  const { token } = useTokenStore();
+  console.log('token:', token, token === '');
   return (
     <Layout title="로그인" hasFooter={false}>
       <div
@@ -17,9 +20,15 @@ const SignInPage = () => {
         </div>
         <div>
           <Link
-            to={`https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
-              'http://localhost:8000/#/before-login',
-            )}`}
+            to={
+              token !== ''
+                ? `https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
+                    'http://localhost:8000/#',
+                  )}`
+                : `https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
+                    'http://localhost:8000/#/before-login',
+                  )}`
+            }
           >
             <KaKaoLogin />
           </Link>

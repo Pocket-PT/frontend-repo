@@ -5,6 +5,7 @@ export interface IMyProfileStore {
   name: string;
   nickname: string;
   email: string;
+  profileUrl: string;
   birthDate: string;
   description: string;
   priceTable: {
@@ -26,6 +27,7 @@ export interface IMyProfileStore {
   }[];
   addPriceTable: (month: string, price: string) => void;
   deletePriceTable: (key: number) => void;
+  onEditProfileUrl: (profileUrl: string) => void;
   onEditNickname: (nickname: string) => void;
   onEditDescription: (description: string) => void;
   onAddPrizeTable: ({
@@ -52,6 +54,7 @@ const useMyProfileStore = create(
       name: '김일곤',
       nickname: '슈퍼맨',
       email: '1234@test.com',
+      profileUrl: '/sample-profile.png',
       birthDate: '1111-11-11',
       description: '상태메세지 최대 60자',
       priceTable: [
@@ -80,6 +83,11 @@ const useMyProfileStore = create(
         { key: 0, name: '생활체육지도사', date: '2023.05.17', rank: '2급' },
         { key: 1, name: '자격증명', date: '취득날짜', rank: '몇급' },
       ],
+      onEditProfileUrl: (profileUrl: string) => {
+        set(() => ({
+          profileUrl,
+        }));
+      },
       onEditNickname: (nickname: string) => {
         set(() => ({
           nickname,

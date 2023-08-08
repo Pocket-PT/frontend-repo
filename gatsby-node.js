@@ -21,6 +21,7 @@ exports.onCreateWebpackConfig = ({ actions }) => {
         videos: path.resolve(__dirname, 'src/videos'),
         libs: path.resolve(__dirname, 'src/libs'),
         stores: path.resolve(__dirname, 'src/stores'),
+        apis: path.resolve(__dirname, 'src/apis'),
       },
     },
   });

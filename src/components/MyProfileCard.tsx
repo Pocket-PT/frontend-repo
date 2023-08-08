@@ -1,13 +1,24 @@
-const MyProfileCard = () => {
+type MyProfileCardProps = {
+  nickname: string | undefined;
+  profileUrl: string | undefined;
+};
+
+const MyProfileCard = ({ nickname, profileUrl }: MyProfileCardProps) => {
+  console.log(profileUrl);
+
   return (
-    <div className="relative flex items-center w-full h-auto px-4 hover:bg-hoverGray hover:cursor-pointer">
-      <div className="flex items-center justify-between w-14 h-14 rounded-xl bg-mainPurple" />
+    <div className="relative flex items-center w-full h-auto px-5 hover:bg-hoverGray hover:cursor-pointer">
+      <div className="flex items-center justify-between rounded-full w-[68px] h-[68px]">
+        <img src={profileUrl ?? ''} alt="profileImg" className="rounded-full" />
+      </div>
       <div className="flex flex-row">
-        <div className="flex flex-col ml-3">
-          <div className="">슈퍼맨</div>
-        </div>
-        <div className="absolute transform -translate-y-1/2 top-1/2 right-4 text-[14px]">
-          상태메세지 너무길면 ...으로 표시
+        <div className="flex flex-col ml-4">
+          <div className="mr-1 text-xl font-extrabold leading-normal text-dark">
+            {nickname}
+          </div>
+          <div className="text-xs font-medium leading-none text-gray">
+            건강한 라이프스타일을 위한 스트레스 관리 방법
+          </div>
         </div>
       </div>
     </div>
