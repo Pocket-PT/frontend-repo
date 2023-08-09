@@ -39,7 +39,7 @@ const Main = () => {
     }
   }, [isSuccess]);
 
-  if (isLoading) {
+  if (isLoading || isError) {
     return <div>Loading...</div>;
   }
 
@@ -68,7 +68,12 @@ const Main = () => {
               </div>
             </div>
           </div>
-          <Scrollbars autoHeight autoHeightMin="70vh" autoHide>
+          <Scrollbars
+            autoHeight
+            autoHeightMin="75vh"
+            autoHide
+            style={{ paddingBottom: 16 }}
+          >
             {customerList.map((customer) => (
               <Link
                 key={customer}

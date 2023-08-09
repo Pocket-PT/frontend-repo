@@ -2,7 +2,7 @@ const ProfileCard = () => {
   return (
     <div className="flex items-center w-full h-auto px-5">
       <img
-        className="border border-black rounded-full w-11 h-11 border-opacity-5"
+        className="rounded-full w-11 h-11 border-opacity-5"
         src="https://via.placeholder.com/44x44"
         alt="profile"
       />

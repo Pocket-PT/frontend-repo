@@ -9,7 +9,7 @@ const Footer = () => {
   const { name } = useHashLocation();
 
   return (
-    <nav className="fixed bottom-0 z-50 h-[60px] flex items-center justify-between w-full bg-white border-t border-gray px-12">
+    <nav className="fixed bottom-0 z-50 h-[60px] flex items-center justify-between w-full bg-white border-t border-[#FAFAFA] px-12">
       <Link activityName="Main" animate={false}>
         <div
           className={cls(

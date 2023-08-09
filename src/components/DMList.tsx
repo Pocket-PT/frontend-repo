@@ -1,36 +1,24 @@
-import gravatar from 'gravatar';
-
 const DMList = () => {
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-full h-[81px] m-auto grid items-center justify-center grid-cols-7 hover:bg-hoverGray">
-        <img
-          src={gravatar.url(
-            '123@gmail.com',
-            {
-              s: '100',
-              r: 'x',
-              d: 'retro',
-            },
-            false,
-          )}
-          width={50}
-          height={50}
-          alt="avatar"
-          className="grid col-span-1 mx-auto rounded-full"
-        />
-        <div className="col-span-5">
-          <div className="text-[14px] font-medium">김일곤</div>
-          <div className="text-darkGray text-[12px] font-normal">
-            제일 최근 메세지
-          </div>
+    <div className="relative flex items-center w-full h-20 pl-5 mb-3 bg-white rounded-xl">
+      <img
+        className="w-12 h-12 rounded-full border-opacity-5"
+        src="https://via.placeholder.com/48x48"
+        alt="#"
+      />
+      <div className="flex flex-col w-1/2 ml-4">
+        <div className="text-base font-medium leading-tight">윤수민</div>
+        <div className="text-xs font-normal leading-none text-gray">
+          오늘도 화이팅!! 항상 잘하고 있어ㅎㅎ
         </div>
-        <div className="flex flex-col col-span-1">
-          <div className="text-neutral-500 text-[12px] font-normal">
-            오후 3:07
-          </div>
-          <div className="w-[47px] h-[19px] bg-mainPurple rounded-lg flex items-center justify-center text-[8px] font-light text-white">
-            10
+      </div>
+      <div className="absolute flex flex-col items-center w-12 space-y-1 right-5">
+        <div className="text-xs font-normal leading-none text-gray">
+          오후 3:07
+        </div>
+        <div className="w-8 h-6 p-2 bg-mainBlue rounded-xl flex-col justify-center items-end gap-2.5 inline-flex">
+          <div className="w-4 h-2 text-center text-white text-xs font-semibold leading-[8px]">
+            21
           </div>
         </div>
       </div>

@@ -21,7 +21,7 @@ export const theme = {
   },
   colors: {
     white: '#FFFFFF',
-    hoverGray: '#F1F4F9',
+    hoverGray: '#FAFAFA',
     mainPurple: '#8075F8',
     mainBlue: '#3E66FB',
     lightGray: '#E9ECF0',

@@ -1,8 +1,11 @@
+import { AppScreen } from '@stackflow/plugin-basic-ui';
 import { useStack } from '@stackflow/react';
 import DMList from 'components/DMList';
-import Layout from 'components/Layout';
+import Footer from 'components/Footer';
+import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
 import { Link } from 'libs/link';
 import { useEffect } from 'react';
+import Scrollbars from 'react-custom-scrollbars-2';
 import useSWR from 'swr';
 import fetcher from 'utils/fetcher';
 
@@ -18,19 +21,34 @@ const ChatListPage = () => {
   console.log('userData:', userData);
 
   return (
-    <Layout title="ChatList">
-      <div className="w-full">
-        {testList.map((item) => (
-          <Link
-            key={item}
-            activityName="ChatRoomPage"
-            activityParams={{ id: String(item) }}
-          >
-            <DMList />
-          </Link>
-        ))}
+    <AppScreen backgroundColor="#FAFAFA">
+      <div className="relative mt-5 h-7">
+        <div className="absolute text-xl font-extrabold leading-normal left-5">
+          채팅
+        </div>
+        <div className="absolute text-sm font-semibold leading-tight right-5 text-mainBlue top-[5px]">
+          편집
+        </div>
       </div>
-    </Layout>
+      <Scrollbars
+        autoHide
+        autoHeight
+        autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`}
+      >
+        <div className="w-full mt-7">
+          {testList.map((item) => (
+            <Link
+              key={item}
+              activityName="ChatRoomPage"
+              activityParams={{ id: String(item) }}
+            >
+              <DMList />
+            </Link>
+          ))}
+        </div>
+      </Scrollbars>
+      <Footer />
+    </AppScreen>
   );
 };
 
