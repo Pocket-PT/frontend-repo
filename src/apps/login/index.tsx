@@ -23,10 +23,10 @@ const SignInPage = () => {
             to={
               token !== ''
                 ? `https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
-                    'http://localhost:8000/#',
+                    'https://pocketpt.netlify.app/#',
                   )}`
                 : `https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
-                    'http://localhost:8000/#/before-login',
+                    'https://pocketpt.netlify.app/#/before-login',
                   )}`
             }
           >
