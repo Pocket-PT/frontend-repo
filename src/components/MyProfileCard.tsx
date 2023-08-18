@@ -1,9 +1,9 @@
 type MyProfileCardProps = {
-  nickname: string | undefined;
+  name: string | undefined;
   profileUrl: string | undefined;
 };
 
-const MyProfileCard = ({ nickname, profileUrl }: MyProfileCardProps) => {
+const MyProfileCard = ({ name, profileUrl }: MyProfileCardProps) => {
   console.log(profileUrl);
 
   return (
@@ -14,7 +14,7 @@ const MyProfileCard = ({ nickname, profileUrl }: MyProfileCardProps) => {
       <div className="flex flex-row">
         <div className="flex flex-col ml-4">
           <div className="mr-1 text-xl font-extrabold leading-normal text-dark">
-            {nickname}
+            {name}
           </div>
           <div className="text-xs font-medium leading-none text-gray">
             건강한 라이프스타일을 위한 스트레스 관리 방법

@@ -29,7 +29,7 @@ const Main = () => {
         <div className="my-5">
           <Link activityName="MyProfilePage">
             <MyProfileCard
-              nickname={data?.data.nickname}
+              name={data?.data.name}
               profileUrl={data?.data.profilePictureUrl}
             />
           </Link>

@@ -1,7 +1,6 @@
 import KaKaoLogin from 'components/KaKaoLogin';
 import Layout from 'components/Layout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
-import { Link } from 'gatsby';
 
 const SignInPage = () => {
   return (
@@ -16,15 +15,15 @@ const SignInPage = () => {
           LOGO
         </div>
         <div>
-          <Link
-            to={`${
+          <a
+            href={`${
               process.env.GATSBY_OAUTH_KAKAO_LOGIN
             }?redirectUri=${encodeURIComponent(
               'https://frontend.pocketpt.shop/#/after-login',
             )}`}
           >
             <KaKaoLogin />
-          </Link>
+          </a>
           <div className="mt-1 text-center">회원가입</div>
         </div>
       </div>
