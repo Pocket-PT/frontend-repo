@@ -20,7 +20,7 @@ const SignInPage = () => {
             to={`${
               process.env.GATSBY_OAUTH_KAKAO_LOGIN
             }?redirectUri=${encodeURIComponent(
-              'http://localhost:8000/#/after-login',
+              'https://frontend.pocketpt.shop/#/after-login',
             )}`}
           >
             <KaKaoLogin />
