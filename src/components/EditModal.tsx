@@ -7,6 +7,8 @@ import UndoIcon from 'icons/UndoIcon';
 import RedoIcon from 'icons/RedoIcon';
 import { Slider } from 'antd';
 import MenuIcon from 'icons/MenuIcon';
+import { cls } from 'utils/cls';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 type EditModalProps = {
   onCloseModal: () => void;
@@ -26,6 +28,13 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     height: canvasData.canvasHeight,
   });
   const [isColorMode, setIsColorMode] = useState(false);
+  const [isMode, setIsMode] = useState({
+    isDrawMode: true,
+    isColorMode: false,
+    isEraseMode: false,
+    isUndoMode: false,
+    isRedoMode: false,
+  });
   const [color, setColor] = useState('#000000');
   const img = document.createElement('img');
 
@@ -38,8 +47,19 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     setLineWidth(Number(e));
   };
 
+  const onColorClick = () => {
+    setIsMode({
+      isDrawMode: false,
+      isColorMode: true,
+      isEraseMode: false,
+      isUndoMode: false,
+      isRedoMode: false,
+    });
+  };
+
   const onColorPlateClick = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsColorMode(true);
+
     setColor(e.currentTarget.style.backgroundColor);
   };
 
@@ -68,6 +88,13 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
   const onErase = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
+    setIsMode({
+      isDrawMode: false,
+      isColorMode: false,
+      isEraseMode: true,
+      isUndoMode: false,
+      isRedoMode: false,
+    });
     if (ctx) {
       console.log('erase');
       ctx.globalCompositeOperation = 'destination-out';
@@ -76,7 +103,13 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
 
   const onDrawMode = () => {
     const canvas = canvasRef.current;
-    setIsColorMode(false);
+    setIsMode({
+      isDrawMode: true,
+      isColorMode: false,
+      isEraseMode: false,
+      isUndoMode: false,
+      isRedoMode: false,
+    });
     const ctx = canvas?.getContext('2d');
     if (ctx) {
       ctx.globalCompositeOperation = 'source-over';
@@ -244,16 +277,19 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
         ></canvas>
         <div className="w-full">
           <ColorAndLineModal
-            isColorMode={isColorMode}
+            isColorMode={isMode.isColorMode}
             lineWidth={lineWidth}
             onLineWidthChange={onLineWidthChange}
             onColorPlateClick={onColorPlateClick}
           />
         </div>
         <BottomButtons
+          isMode={isMode}
+          color={color}
+          isColorMode={isColorMode}
           onDrawMode={onDrawMode}
           onErase={onErase}
-          setIsColorMode={setIsColorMode}
+          onColorClick={onColorClick}
         />
       </div>
     </div>
@@ -278,17 +314,70 @@ const ColorAndLineModal = ({
     <div className="w-full mt-5 h-[7vh] bg-hoverGray bg-opacity-20 rounded-xl backdrop-blur-[80px]">
       {isColorMode ? (
         <div className="flex flex-row items-center w-full h-full gap-2">
-          {COLOR_PLATE.map((color) => {
-            return (
-              <div
-                role="presentation"
-                onClick={(e) => onColorPlateClick(e)}
-                key={color}
-                style={{ backgroundColor: color }}
-                className="w-6 h-6 border border-white rounded-full border-opacity-40"
+          <div className="w-7 h-7 p-2 bg-white rounded-full shadow justify-start items-start gap-2.5 inline-flex ml-2">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1.89705 2.05379L1.96967 1.96967C2.23594 1.7034 2.6526 1.6792 2.94621 1.89705L3.03033 1.96967L6 4.939L8.96967 1.96967C9.26256 1.67678 9.73744 1.67678 10.0303 1.96967C10.3232 2.26256 10.3232 2.73744 10.0303 3.03033L7.061 6L10.0303 8.96967C10.2966 9.23594 10.3208 9.6526 10.1029 9.94621L10.0303 10.0303C9.76406 10.2966 9.3474 10.3208 9.05379 10.1029L8.96967 10.0303L6 7.061L3.03033 10.0303C2.73744 10.3232 2.26256 10.3232 1.96967 10.0303C1.67678 9.73744 1.67678 9.26256 1.96967 8.96967L4.939 6L1.96967 3.03033C1.7034 2.76406 1.6792 2.3474 1.89705 2.05379L1.96967 1.96967L1.89705 2.05379Z"
+                fill="#212121"
               />
-            );
-          })}
+            </svg>
+          </div>
+          <Swiper
+            style={{
+              border: '1px solid red',
+              width: '100%',
+            }}
+            direction="horizontal"
+            autoHeight
+            spaceBetween={0}
+            slidesPerView={1}
+            onSlideChange={() => console.log('slide change')}
+            onSwiper={(swiper) => console.log(swiper)}
+          >
+            {COLOR_PLATE.map((color) => {
+              return (
+                <SwiperSlide key={color}>
+                  <div
+                    role="presentation"
+                    onClick={(e) => onColorPlateClick(e)}
+                    style={{ backgroundColor: color }}
+                    className="relative w-6 h-6 border border-white rounded-full border-opacity-40"
+                  />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+          {/* <Swiper
+            direction="horizontal"
+            keyboard={{
+              enabled: true,
+            }}
+            grabCursor={true}
+            pagination={false}
+            spaceBetween={0}
+            slidesPerView={1}
+            onSlideChange={() => console.log('slide change')}
+            onSwiper={(swiper) => console.log(swiper)}
+          >
+            {COLOR_PLATE.map((color) => {
+              return (
+                <SwiperSlide key={color}>
+                  <div
+                    role="presentation"
+                    onClick={(e) => onColorPlateClick(e)}
+                    style={{ backgroundColor: color }}
+                    className="w-6 h-6 border border-white rounded-full border-opacity-40"
+                  />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper> */}
         </div>
       ) : (
         <div className="flex items-center justify-center w-full h-full gap-4">
@@ -363,56 +452,86 @@ const ColorAndLineModal = ({
 };
 
 type BottomButtonsProps = {
-  setIsColorMode: React.Dispatch<React.SetStateAction<boolean>>;
+  color: string;
+  isMode: {
+    isDrawMode: boolean;
+    isColorMode: boolean;
+    isEraseMode: boolean;
+    isUndoMode: boolean;
+    isRedoMode: boolean;
+  };
+  isColorMode: boolean;
   onDrawMode: () => void;
   onErase: () => void;
+  onColorClick: () => void;
 };
 
 const BottomButtons = ({
-  setIsColorMode,
+  color,
+  isMode,
   onDrawMode,
   onErase,
+  onColorClick,
 }: BottomButtonsProps) => {
   return (
     <div className="w-full mt-2 h-[9vh] bg-hoverGray bg-opacity-20 rounded-xl backdrop-blur-[80px] flex flex-row items-center justify-between gap-2 px-4">
       <div className="flex flex-row gap-2">
         <button
           onClick={onDrawMode}
-          className="flex items-center justify-center w-10 h-10 border-2 border-white rounded-full bg-mainBlue"
+          className={cls(
+            'flex items-center justify-center w-10 h-10 border-2 border-white rounded-full',
+            isMode.isDrawMode ? 'bg-mainBlue' : 'bg-white',
+          )}
         >
           <div
             className="w-4 h-4 bg-center bg-no-repeat bg-cover"
             style={{
-              backgroundImage: "url('paintButton.png')",
+              backgroundImage: isMode.isDrawMode
+                ? "url('paintButton.png')"
+                : "url('paintButton-noClick.png')",
             }}
           />
         </button>
         <button
           onClick={onErase}
-          className="flex items-center justify-center w-10 h-10 bg-white rounded-full"
+          className={cls(
+            'flex items-center justify-center w-10 h-10 rounded-full border-white border-2',
+            isMode.isEraseMode
+              ? 'bg-mainBlue text-white'
+              : 'bg-white text-dark',
+          )}
         >
           <EraseIcon />
         </button>
       </div>
       <div className="flex flex-row gap-2">
-        <button className="flex items-center justify-center w-10 h-10 bg-white rounded-full">
+        <button
+          className={cls(
+            'flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray',
+          )}
+        >
           <UndoIcon />
         </button>
-        <button className="flex items-center justify-center w-10 h-10 bg-white rounded-full">
+        <button className="flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray">
           <RedoIcon />
         </button>
       </div>
       <div className="flex flex-row gap-2">
-        <button className="flex items-center justify-center w-10 h-10 p-3 bg-white rounded-full">
+        <button
+          disabled
+          className="flex items-center justify-center w-10 h-10 p-3 bg-white rounded-full"
+        >
           <MenuIcon />
         </button>
         <button
-          onClick={() => setIsColorMode(true)}
+          onClick={onColorClick}
           className="flex items-center justify-center w-10 h-10 rounded-full"
         >
           <div
             className="w-10 h-10 bg-center bg-no-repeat bg-cover"
             style={{
+              backgroundColor: color,
+              borderRadius: '9999px',
               backgroundImage: "url('colorPalette.png')",
             }}
           />

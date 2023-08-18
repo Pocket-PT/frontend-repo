@@ -78,7 +78,7 @@ const ChatList = ({
     },
     {
       number: 3,
-      url: 'http://s3.pocketpt.shop/final_test_short.mp4',
+      url: 'https://cdn.pocketpt.shop/demo.mp4',
     },
   ].map((v) => {
     return {
