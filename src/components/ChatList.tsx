@@ -76,6 +76,10 @@ const ChatList = ({
       number: 2,
       url: 'https://d2skf4k4569cnz.cloudfront.net/chatting/1/0365b708-c3ab-4aa6-8940-6c975722113e/test.mov',
     },
+    {
+      number: 3,
+      url: 'http://s3.pocketpt.shop/final_test_short.mp4',
+    },
   ].map((v) => {
     return {
       number: v.number,

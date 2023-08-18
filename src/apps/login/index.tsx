@@ -19,7 +19,7 @@ const SignInPage = () => {
             href={`${
               process.env.GATSBY_OAUTH_KAKAO_LOGIN
             }?redirectUri=${encodeURIComponent(
-              'https://pocketpt.netlify.app/#/after-login',
+              'https://frontend.pocketpt.shop/#/after-login',
             )}`}
           >
             <KaKaoLogin />
