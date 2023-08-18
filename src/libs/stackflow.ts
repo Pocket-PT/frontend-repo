@@ -12,6 +12,8 @@ import PortfolioPage from 'apps/MyProfilePage/Portfolio';
 import MyProfileEditPage from 'apps/MyProfilePage/Edit';
 import PricePage from 'apps/MyProfilePage/Price';
 import BeforeLogin from 'apps/login/BeforeLogin';
+import AfterLogin from 'apps/login/AfterLogin';
+import IncomePage from 'apps/MyProfilePage/Income';
 
 const activities = {
   Main,
@@ -23,7 +25,9 @@ const activities = {
   PortfolioPage,
   MyProfileEditPage,
   PricePage,
+  IncomePage,
   BeforeLogin,
+  AfterLogin,
 };
 
 export const { Stack, useStepFlow } = stackflow({
@@ -45,7 +49,9 @@ export const { Stack, useStepFlow } = stackflow({
         PortfolioPage: '/mypage/portfolio',
         MyProfileEditPage: '/mypage/edit',
         PricePage: '/mypage/price',
+        IncomePage: '/mypage/income',
         BeforeLogin: '/before-login',
+        AfterLogin: '/after-login',
       },
       fallbackActivity: () => 'Main',
       useHash: true,

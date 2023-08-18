@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import { useMutation, UseMutationResult, useQueryClient } from 'react-query';
-import { getServerInstance } from '../apis/instance';
+import { getServerInstance } from 'apis/instance';
 
 type TrainerData = {
   name: string;

@@ -1,26 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react/prop-types */
 import { ActivityComponentType } from '@stackflow/react';
 import EditModal from 'components/EditModal';
 import Layout from 'components/Layout';
-import Message from 'components/Message';
-import { FOOTER_HEIGHT, HEADER_HEIGHT, PUB_URL } from 'constants/global';
+import { PUB_URL } from 'constants/global';
 import useInput from 'hooks/useInput';
-import {
-  KeyboardEvent,
-  RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import Scrollbars from 'react-custom-scrollbars-2';
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import useMessagesQuery from 'apis/useMessagesQuery';
 import useSocket from 'hooks/useSocket';
 import React from 'react';
 import useMessageStore from 'stores/message';
-import { useAccountQuery } from 'apis/useAccountQuery';
+import useUser from 'hooks/useUser';
+import AddIcon from 'icons/AddIcon';
+import ArrowUpIcon from 'icons/ArrowUpIcon';
+import MyDropzone from 'components/MyDropzone';
+import ImageIcon from 'icons/ImageIcon';
+import usePostFile from 'hooks/usePostFile';
+import BackIcon from 'icons/BackIcon';
+import MenuIcon from 'icons/MenuIcon';
+import useMessageInfiniteQuery from 'apis/useMessageInfiniteQuery';
+import ChatList from 'components/ChatList';
+import usePushToPage from 'hooks/usePushToPage';
 
 interface CanvasData {
   canvasURL: string;
@@ -33,11 +32,17 @@ type ChatRoomPageProps = {
 };
 
 type CreateMessageProps = {
+  postFile: (file: FormData) => void;
   publish: (url: string, message: string) => void;
+  fileContainerOpen: boolean;
+  setFileContainerOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const CreateMessage = React.memo(function CreateMessage({
   publish,
+  postFile,
+  fileContainerOpen,
+  setFileContainerOpen,
 }: CreateMessageProps) {
   const [message, onChangeMessage, setMessage] = useInput('');
   const { handleSubmit } = useForm();
@@ -50,57 +55,79 @@ const CreateMessage = React.memo(function CreateMessage({
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.preventDefault();
+      setFileContainerOpen(!fileContainerOpen);
     },
-    [],
+    [fileContainerOpen],
   );
+
   const handleKeyPress = (e: KeyboardEvent) => {
     if (!e.nativeEvent.isComposing && e.key === 'Enter') {
       if (message.trim() === '') return;
-      console.log(e.nativeEvent.isComposing);
       e.preventDefault();
       handleSubmit(onValid)();
     }
   };
 
   return (
-    <form
-      className="fixed inset-x-0 bottom-0 h-10 mx-auto"
-      onSubmit={handleSubmit(onValid)}
-      name="message"
-    >
-      <input
-        type="text"
-        className="w-full h-full pl-6 bg-lightGray"
-        value={message}
-        onChange={onChangeMessage}
-        onKeyDown={handleKeyPress}
-      />
-      <button
-        onClick={onClick}
-        className="absolute inset-y-0 flex text-xl bg-none left-2 place-items-center text-gray hover:text-dark"
+    <div className="w-full bg-white -top-1">
+      <form
+        className="flex flex-row w-full h-auto"
+        onSubmit={handleSubmit(onValid)}
+        name="message"
       >
-        +
-      </button>
-      <div className="absolute inset-y-0 right-0 flex">
+        <button
+          onClick={onClick}
+          className="flex items-center justify-center w-12 h-12 text-white rounded-full bg-[#FAFAFA]"
+        >
+          <div className="w-6 h-6 text-gray">
+            <AddIcon />
+          </div>
+        </button>
+        <input
+          type="text"
+          className="w-[80%] h-12 ml-3 bg-hoverGray rounded-[30px] pl-4"
+          value={message}
+          onChange={onChangeMessage}
+          onKeyDown={handleKeyPress}
+          placeholder="채팅 입력"
+        />
         <button
           type="submit"
-          className="px-3 text-white text-md bg-mainPurple focus:ring-2 focus:ring-offset-2 focus:ring-mainPurple hover:bg-mainPurple"
+          className="rounded-full absolute right-8 top-[9px] w-8 h-8 bg-[#EEEEEE] flex justify-center items-center"
         >
-          &rarr;
+          <div className="text-white">
+            <ArrowUpIcon />
+          </div>
         </button>
-      </div>
-    </form>
+      </form>
+      {fileContainerOpen && (
+        <div className="box-border w-full p-3 bg-white h-44">
+          <MyDropzone postFile={postFile}>
+            <div className="w-14 h-14">
+              <div className="flex items-center justify-center w-full h-full pl-px text-white rounded-full bg-mainBlue">
+                <ImageIcon />
+              </div>
+              <div className="mt-1 text-sm text-center">앨범</div>
+            </div>
+          </MyDropzone>
+        </div>
+      )}
+    </div>
   );
 });
 
 const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
-  const { data: messageData, refetch } = useMessagesQuery(+params.id);
-  const { data: myData } = useAccountQuery();
+  // const { data: messageData, refetch, isError } = useMessagesQuery(+params.id);
+  const messageData = useMessageInfiniteQuery(+params.id);
+  const { data: userData } = useUser();
   const { messages: newMessageData, resetMessages } = useMessageStore();
-  const scrollbarRef = useRef<Scrollbars>(null);
-  console.log('message: ', messageData);
-  console.log('newMessageData: ', newMessageData);
+  const { mutate } = usePostFile(+params.id);
+  const [fileContainerOpen, setFileContainerOpen] = useState(false);
+  const { pop } = usePushToPage();
 
+  // console.log('message: ', messageData?.data.chattingMessageGetResponseList);
+  console.log('messageInfiniteData: ', messageData.data);
+  console.log('newMessageData: ', newMessageData);
   const { client, publish } = useSocket();
   const clientRef = useRef<unknown>(null);
 
@@ -110,7 +137,7 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
       console.log('create new websocket');
       client?.activate();
       clientRef.current = client;
-      refetch();
+      messageData.refetch();
     }
 
     //컴포넌트가 언마운트되면 웹소켓 연결을 종료합니다.
@@ -121,16 +148,8 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
       }
     };
   }, [publish]);
-
-  //로딩 및 메세지 추가시 스크롤바를 맨 아래로 이동시킵니다.
-  useEffect(() => {
-    if (
-      messageData?.data &&
-      messageData.data.chattingMessageGetResponseList.length >= 1
-    ) {
-      scrollbarRef.current?.scrollToBottom();
-    }
-  }, [messageData, newMessageData]);
+  console.log('hasNextPage: ', messageData.hasNextPage);
+  console.log('isLoading: ', messageData.isLoading);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -144,86 +163,66 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
     canvasHeight: 0,
   });
 
-  const handleCapture = useCallback(
-    (ref: RefObject<HTMLVideoElement> | null) => {
-      const playerElement = ref?.current;
-      const scale = 0.5;
-      if (playerElement) {
-        const canvas = document.createElement('canvas');
-        const canvas2d = canvas.getContext('2d');
-        canvas.width = playerElement.videoWidth * scale;
-        canvas.height = playerElement.videoHeight * scale;
-        canvas2d?.drawImage(playerElement, 0, 0, canvas.width, canvas.height);
+  const postFile = useCallback((file: FormData) => {
+    mutate(file);
+  }, []);
 
-        const img = document.createElement('img');
-        img.src = canvas.toDataURL();
-        console.log(canvas.toDataURL());
-        setCanvasData({
-          canvasURL: canvas.toDataURL(),
-          canvasWidth: canvas.width,
-          canvasHeight: canvas.height,
-        });
-      }
-      setModalOpen(true);
-    },
-    [],
-  );
+  if (messageData.isError) {
+    return <div>에러가 발생했습니다. 캐시된 데이터입니다</div>;
+  }
 
-  const videoTest = [1, 2, 3].map((v) => {
-    return {
-      number: v,
-      //ref callback으로 수정해야함
-      ref: useRef<HTMLVideoElement>(null),
-    };
-  });
+  if (messageData.isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <Layout title={`회원넘버 : ${params.id}`} hasFooter={false}>
-      <div className="box-border w-full mx-auto mt-2 overflow-hidden bg-white">
-        <Scrollbars
-          autoHide
-          autoHeight
-          autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`}
-          ref={scrollbarRef}
-        >
-          {messageData?.data?.chattingMessageGetResponseList.map(
-            (item, idx) => (
-              <div className="mb-2 mr-4" key={idx}>
-                <Message
-                  message={item.content}
-                  myId={myData?.data.accountId}
-                  chatId={item.chattingAccountId}
-                  createAt={item.updatedAt}
-                  fileUrl={item.fileUrl}
-                />
-              </div>
-            ),
-          )}
-          {newMessageData.map((item, idx) => (
-            <div className="mb-2 mr-4" key={idx}>
-              <Message
-                message={item.message}
-                myId={myData?.data.accountId}
-                chatId={item.chattingAccountId}
-                createAt={item.createAt}
-                fileUrl={null}
-              />
+    <Layout hasFooter={false}>
+      <div className="box-border w-full mx-auto overflow-hidden">
+        <div className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray">
+          <div
+            className="w-6 h-6"
+            onClick={() => pop()}
+            onKeyDown={() => pop()}
+            role="presentation"
+          >
+            <BackIcon />
+          </div>
+          <img
+            className="ml-5 rounded-full w-11 h-11"
+            src={userData?.data.profilePictureUrl}
+            alt="#"
+          />
+          <div className="ml-3 space-y-1">
+            <div className="text-base font-bold leading-tight">
+              {userData?.data.name}
             </div>
-          ))}
-          {/* {videoTest.map((v) => (
-            <Message
-              key={v.number}
-              message={null}
-              fileUrl="sample-baduck.mp4"
-              handleCapture={() => handleCapture(v.ref)}
-              videoRef={v.ref}
-            />
-          ))} */}
-        </Scrollbars>
+            <div className="text-xs font-normal leading-none text-gray">
+              {userData?.data.email}
+            </div>
+          </div>
+          <div className="absolute w-6 h-6 text-dark right-5">
+            <MenuIcon />
+          </div>
+        </div>
+        <ChatList
+          userData={userData}
+          messageData={messageData}
+          postFile={postFile}
+          setCanvasData={setCanvasData}
+          setModalOpen={setModalOpen}
+          fileContainerOpen={fileContainerOpen}
+        />
         {modalOpen ? (
           <EditModal canvasData={canvasData} onCloseModal={onCloseModal} />
         ) : null}
-        <CreateMessage publish={publish} />
+        <div className="fixed w-full transition-all bottom-2">
+          <CreateMessage
+            postFile={postFile}
+            publish={publish}
+            fileContainerOpen={fileContainerOpen}
+            setFileContainerOpen={setFileContainerOpen}
+          />
+        </div>
       </div>
     </Layout>
   );

@@ -17,7 +17,7 @@ export const getMockInstance = () => {
 };
 
 const serverInstance = axios.create({
-  baseURL: 'https://back.pocketpt.shop',
+  baseURL: process.env.GATSBY_HOST_URL,
   timeout: 3000,
   headers: {
     Authorization: '',
@@ -28,5 +28,6 @@ const serverInstance = axios.create({
 export const getServerInstance = () => {
   const { token } = useTokenStore();
   serverInstance.defaults.headers.Authorization = `Bearer ${token}`;
+  serverInstance.defaults.headers['Access-Control-Allow-Origin'] = '*';
   return serverInstance;
 };

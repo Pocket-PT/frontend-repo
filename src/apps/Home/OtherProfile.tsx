@@ -9,15 +9,27 @@ import SmsIcon from 'icons/SmsIcon';
 import BottomModal from 'components/common/BottomModal';
 import BackIcon from 'icons/BackIcon';
 import MoreIcon from 'icons/MoreIcon';
+import usePushToPage from 'hooks/usePushToPage';
+import { Link } from 'libs/link';
 
 const OhterProfile: React.FC = () => {
   const stack = useStack();
+  const { pop } = usePushToPage();
+
   useEffect(() => {
     console.log('OtherProfilePage', stack);
   }, [stack]);
 
   return (
-    <AppScreen backgroundColor="#f77575">
+    <AppScreen backgroundColor="#E9ECF0">
+      <div
+        className="absolute z-10 w-6 h-6 text-white top-5 left-5"
+        onClick={() => pop()}
+        onKeyDown={() => pop()}
+        role="presentation"
+      >
+        <BackIcon />
+      </div>
       <div className="overflow-hidden h-[100vh]">
         <div
           className="absolute w-full h-full bg-center bg-repeat bg-cover -z-10"
@@ -25,15 +37,12 @@ const OhterProfile: React.FC = () => {
             backgroundImage: "url('otherprofile-background.png')",
           }}
         />
-        <div className="absolute text-white left-5 top-5">
-          <BackIcon />
-        </div>
         <div className="absolute text-white right-5 top-5">
           <MoreIcon />
         </div>
         <div className="w-full h-[394px] flex-col justify-start items-center gap-4 inline-flex relative mb-5 mt-5">
           <img
-            className="w-40 h-40 border border-black rounded-full border-opacity-5"
+            className="w-40 h-40 rounded-full border-opacity-5"
             src="https://via.placeholder.com/160x160"
             alt="#"
           />
@@ -55,30 +64,29 @@ const OhterProfile: React.FC = () => {
               </div>
             </div>
             <div className="justify-start items-start gap-2.5 inline-flex">
-              <div className="w-[28vw] h-[72px] relative">
-                <div className="w-[28vw] h-[72px] left-0 top-0 absolute bg-dark bg-opacity-20 rounded-xl" />
-                <div className="w-6 h-6 left-[46px] top-[12px] absolute text-white">
-                  <ChatIcon />
+              <Link activityName="ChatRoomPage" activityParams={{ id: '1' }}>
+                <div className="w-[28vw] h-[72px] relative bg-dark bg-opacity-20 rounded-xl flex justify-center items-center gap-2 flex-col">
+                  <div className="w-6 h-6 text-white">
+                    <ChatIcon />
+                  </div>
+                  <div className="w-[28vw] text-center text-white text-xs font-medium leading-none">
+                    채팅
+                  </div>
                 </div>
-                <div className="w-[28vw] left-0 top-[44px] absolute text-center text-white text-xs font-medium leading-none">
-                  채팅
-                </div>
-              </div>
-              <div className="w-[28vw] h-[72px] relative">
-                <div className="w-[28vw] h-[72px] left-0 top-0 absolute bg-dark bg-opacity-20 rounded-xl" />
-                <div className="w-6 h-6 left-[46px] top-[12px] absolute text-white">
+              </Link>
+              <div className="w-[28vw] h-[72px] relative bg-dark bg-opacity-20 rounded-xl flex justify-center items-center gap-2 flex-col">
+                <div className="w-6 h-6 text-white">
                   <TelIcon />
                 </div>
-                <div className="w-[28vw] left-0 top-[44px] absolute text-center text-white text-xs font-medium leading-none">
+                <div className="w-[28vw] text-center text-white text-xs font-medium leading-none">
                   통화
                 </div>
               </div>
-              <div className="w-[28vw] h-[72px] relative">
-                <div className="w-[28vw] h-[72px] left-0 top-0 absolute bg-dark bg-opacity-20 rounded-xl" />
-                <div className="w-6 h-6 left-[46px] top-[12px] absolute text-white">
+              <div className="w-[28vw] h-[72px] relative bg-dark bg-opacity-20 rounded-xl flex justify-center items-center gap-2 flex-col">
+                <div className="w-6 h-6 text-white">
                   <SmsIcon />
                 </div>
-                <div className="w-[28vw] left-0 top-[44px] absolute text-center text-white text-xs font-medium leading-none">
+                <div className="w-[28vw] text-center text-white text-xs font-medium leading-none">
                   문자
                 </div>
               </div>
@@ -105,7 +113,7 @@ const GoalCard = () => {
       <div className="absolute top-0 text-base font-medium leading-tight">
         바디프로필
       </div>
-      <div className="absolute text-xs font-normal leading-none text-gray top-5">
+      <div className="absolute mt-1 text-xs font-normal leading-none text-gray top-5">
         목표를 간단히 입력한 내용입니다
       </div>
       <div className="absolute right-0 text-base font-bold leading-tight text-right text-mainBlue top-2">

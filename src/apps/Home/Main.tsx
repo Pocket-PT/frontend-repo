@@ -3,39 +3,19 @@ import MyProfileCard from 'components/MyProfileCard';
 import { Link } from 'libs/link';
 import ProfileCard from 'components/ProfileCard';
 import { useEffect } from 'react';
-import useTokenStore from 'stores/token';
-import usePushToPage from 'hooks/usePushToPage';
-import { useAccountQuery } from 'apis/useAccountQuery';
 import useMyProfileStore from 'stores/myProfile';
 import AddPersonIcon from 'icons/AddPersonIcon';
 import Footer from 'components/Footer';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
+import useUser from 'hooks/useUser';
 
 const Main = () => {
   const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
-  const { token, setToken } = useTokenStore();
-  const { replaceTo } = usePushToPage();
   const { onEditProfileUrl } = useMyProfileStore();
-  const { data, isError, isLoading, isSuccess } = useAccountQuery();
-
-  console.log('Main', data);
-  useEffect(() => {
-    if (!token) {
-      replaceTo('SignInPage');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isError) {
-      console.log('isError');
-      setToken('');
-      replaceTo('SignInPage');
-    }
-  }, [isError]);
-
+  const { data, isSuccess, isLoading, isError } = useUser();
   useEffect(() => {
     if (isSuccess) {
-      onEditProfileUrl(data.data.profilePictureUrl ?? '');
+      onEditProfileUrl(data?.data.profilePictureUrl ?? '');
     }
   }, [isSuccess]);
 

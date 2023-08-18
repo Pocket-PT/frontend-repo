@@ -12,6 +12,7 @@ export interface IMyProfileStore {
     key: number;
     price: string;
     month: string;
+    description: string;
   }[];
   prizeTable: {
     key: number;
@@ -25,8 +26,9 @@ export interface IMyProfileStore {
     date?: string;
     rank?: string;
   }[];
-  addPriceTable: (month: string, price: string) => void;
-  deletePriceTable: (key: number) => void;
+  onAddPriceTable: (month: string, price: string) => void;
+  onEditPriceTable: (key: number, month: string, price: string) => void;
+  onDeletePriceTable: (key: number) => void;
   onEditProfileUrl: (profileUrl: string) => void;
   onEditNickname: (nickname: string) => void;
   onEditDescription: (description: string) => void;
@@ -58,8 +60,18 @@ const useMyProfileStore = create(
       birthDate: '1111-11-11',
       description: '상태메세지 최대 60자',
       priceTable: [
-        { key: 0, price: '50000', month: '1개월 당' },
-        { key: 1, price: '30000', month: '3개월 당' },
+        {
+          key: 0,
+          price: '50000',
+          month: '1개월 플랜',
+          description: '50,000원/월',
+        },
+        {
+          key: 1,
+          price: '90000',
+          month: '3개월 플랜',
+          description: '30,000원/월',
+        },
       ],
       prizeTable: [
         {
@@ -67,16 +79,12 @@ const useMyProfileStore = create(
           name: 'IFBB PRO',
           date: '2023.05.17',
           rank: '1등',
-          isEdit: false,
-          isActive: false,
         },
         {
           key: 1,
           name: '대회',
           date: '2023.05.17',
           rank: '입상',
-          isEdit: false,
-          isActive: false,
         },
       ],
       licenseTable: [
@@ -99,15 +107,29 @@ const useMyProfileStore = create(
         }));
       },
       //매출표 Actions
-      addPriceTable: (month: string, price: string) => {
+      onAddPriceTable: (month: string, price: string) => {
         set((state) => ({
           priceTable: [
             ...state.priceTable,
-            { key: state.priceTable.length, month, price },
+            {
+              key: state.priceTable.length,
+              month,
+              price,
+              description: `${price}원/${month}`,
+            },
           ],
         }));
       },
-      deletePriceTable: (key: number) => {
+      onEditPriceTable: (key: number, month: string, price: string) => {
+        set((state) => ({
+          priceTable: state.priceTable.map((item) =>
+            item.key === key
+              ? { key, month, price, description: `${price}원/${month}` }
+              : item,
+          ),
+        }));
+      },
+      onDeletePriceTable: (key: number) => {
         set((state) => ({
           priceTable: state.priceTable.filter((item) => item.key !== key),
         }));
@@ -151,6 +173,7 @@ const useMyProfileStore = create(
           prizeTable: state.prizeTable.filter((item) => item.key !== key),
         }));
       },
+      //자격증 Actions
     }),
     {
       name: 'myProfile-storage',

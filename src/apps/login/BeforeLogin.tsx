@@ -12,6 +12,7 @@ import { koreanOrEnglishRegex, koreanPhoneNumberRegex } from 'constants/global';
 import React from 'react';
 import usePostAccountMutation from 'hooks/usePostMutation';
 import usePushToPage from 'hooks/usePushToPage';
+import useUser from 'hooks/useUser';
 
 type BeforeLoginProps = {
   title?: string;
@@ -29,6 +30,8 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   const [phoneNumber, onChangePhoneNumber] = useInput('');
   const { mutate } = usePostAccountMutation();
   const { replaceTo } = usePushToPage();
+  const { data } = useUser();
+  console.log('userData', data);
 
   useEffect(() => {
     setToken(props.accessToken ?? '');
@@ -97,7 +100,7 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   };
 
   return (
-    <AppScreen appBar={{ title: '회원가입' }}>
+    <AppScreen>
       <div>
         <h1>{params.title ?? 'hi'}</h1>
         {params.title !== 'Next Title' ? (

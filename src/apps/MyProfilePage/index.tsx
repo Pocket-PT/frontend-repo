@@ -1,5 +1,8 @@
-import Layout from 'components/Layout';
+import { AppScreen } from '@stackflow/plugin-basic-ui';
+import BottomModal from 'components/common/BottomModal';
+import usePushToPage from 'hooks/usePushToPage';
 import ArrowRightIcon from 'icons/ArrowRightIcon';
+import BackIcon from 'icons/BackIcon';
 import GraphIcon from 'icons/GraphIcon';
 import PrizeIcon from 'icons/PrizeIcon';
 import { Link } from 'libs/link';
@@ -13,47 +16,24 @@ type MyProfileCardProps = {
   email: string;
 };
 
-const MyProfileCard = ({
-  name,
-  nickname,
-  description,
-  birthDate,
-  email,
-}: MyProfileCardProps) => {
+const MyProfileCard = ({ name, description, email }: MyProfileCardProps) => {
   return (
-    <div>
-      <div className="flex h-auto py-6">
-        <div className="w-20 h-20 rounded-full bg-mainPurple ring-4 ring-lightGray" />
-        <div className="flex flex-col justify-center ml-8">
-          <div className="mb-2 text-3xl font-extrabold">
-            {nickname}
-            <span className="pl-2 text-sm font-light text-darkGray">
-              {email}
-            </span>
-          </div>
-          <div>{description}</div>
+    <div className="w-full h-[30vh] flex-col justify-start items-center gap-4 inline-flex">
+      <img
+        className="w-[15vh] rounded-full h-[15vh] border-opacity-5"
+        src="https://via.placeholder.com/160x160"
+        alt="$"
+      />
+      <div className="flex flex-col items-start justify-start gap-1">
+        <div className="w-full text-2xl font-extrabold leading-7 text-center text-white">
+          {name}
+        </div>
+        <div className="w-full text-xs font-normal leading-none text-center text-white text-opacity-60">
+          {email}
         </div>
       </div>
-      <div className="mb-8 text-lg">
-        <div>
-          <div className="w-full h-[1px] bg-lightGray rounded-full" />
-          <div className="relative flex items-center h-16">
-            <div className="absolute text-sm font-light top-2 left-4 self-baseline text-darkGray">
-              개인정보
-            </div>
-            <div className="absolute flex flex-row gap-8 py-4 right-12">
-              <div className="flex flex-col items-center justify-center">
-                <div className="mb-1 font-bold">{name}</div>
-                <div className="text-sm text-gray">이름</div>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <div className="mb-1 font-bold">{birthDate}</div>
-                <div className="text-sm text-gray">생년월일</div>
-              </div>
-            </div>
-          </div>
-          <div className="w-full h-[1px] rounded-full bg-lightGray" />
-        </div>
+      <div className="w-full text-sm font-medium leading-tight text-center text-white">
+        {description}
       </div>
     </div>
   );
@@ -61,23 +41,25 @@ const MyProfileCard = ({
 
 const InfoCard = ({ title }: { title: string }) => {
   const getIcon = (title: string) => {
-    if (title === '이력관리')
+    if (title === '포트폴리오')
       return (
-        <div className="text-mainPurple">
+        <div className="stroke-dark">
           <PrizeIcon />
         </div>
       );
-    if (title === '매출관리')
+    if (title === '가격 플랜')
       return (
-        <div className="text-mainPurple">
+        <div className="">
           <GraphIcon />
         </div>
       );
   };
   return (
-    <div className="relative flex flex-row items-center w-full h-auto py-3 border rounded shadow border-lightGray hover:border-dark group">
-      <div className="w-6 h-6 ml-3">{getIcon(title)}</div>
-      <div className="pt-1 ml-8 font-bold text-mainPurple">{title}</div>
+    <div className="relative flex flex-row items-center w-full h-[60px] bg-hoverGray rounded-xl">
+      <div className="w-5 h-5 ml-5">{getIcon(title)}</div>
+      <div className="pt-1 ml-3 text-base font-medium leading-tight">
+        {title}
+      </div>
       <div className="absolute w-6 h-6 right-6 text-gray group">
         <ArrowRightIcon />
       </div>
@@ -88,10 +70,31 @@ const InfoCard = ({ title }: { title: string }) => {
 const MyProfilePage = () => {
   const { name, nickname, description, birthDate, email } = useMyProfileStore();
   console.log('MyProfilePage', name, nickname, description, birthDate, email);
+  const { pop } = usePushToPage();
 
   return (
-    <Layout title="MyProfile">
-      <div className="px-6 pb-8">
+    <AppScreen backgroundColor="#E9ECF0">
+      <div
+        className="absolute w-6 h-6 text-white top-5 left-5"
+        onClick={() => pop()}
+        onKeyDown={() => pop()}
+        role="presentation"
+      >
+        <BackIcon />
+      </div>
+
+      <div className="absolute text-sm text-white top-5 right-5">
+        <Link activityName="MyProfileEditPage">편집</Link>
+      </div>
+
+      <div className="w-full h-full bg-dark bg-opacity-20 backdrop-blur-[80px] absolute -z-10" />
+      <div
+        className="absolute w-full h-full bg-center bg-repeat bg-cover -z-20"
+        style={{
+          backgroundImage: "url('otherprofile-background.png')",
+        }}
+      />
+      <div className="px-5 mt-8 mb-5">
         <MyProfileCard
           name={name}
           nickname={nickname}
@@ -99,26 +102,28 @@ const MyProfilePage = () => {
           birthDate={birthDate}
           email={email}
         />
-        <Link activityName="MyProfileEditPage">
-          <div className="flex items-center justify-center w-full h-8 pt-1 -mt-4 border rounded-full border-gray text-gray hover:border-dark hover:text-dark active:border-mainPurple active:text-mainPurple">
-            편집하기
-          </div>
-        </Link>
-        <div className="mt-12 mb-1 text-lg font-bold">내 정보관리</div>
+      </div>
+      <BottomModal>
+        <div className="text-xl font-bold leading-normal">내 정보 관리</div>
         <div className="space-y-2">
           <div>
             <Link activityName="PortfolioPage">
-              <InfoCard title="이력관리" />
+              <InfoCard title="포트폴리오" />
             </Link>
           </div>
           <div>
             <Link activityName="PricePage">
-              <InfoCard title="매출관리" />
+              <InfoCard title="가격 플랜" />
+            </Link>
+          </div>
+          <div>
+            <Link activityName="IncomePage">
+              <InfoCard title="매출 조회" />
             </Link>
           </div>
         </div>
-      </div>
-    </Layout>
+      </BottomModal>
+    </AppScreen>
   );
 };
 

@@ -1,9 +1,19 @@
 /* eslint-disable jsx-a11y/media-has-caption */
+import EditIcon from 'icons/EditIcon';
 import React, { ForwardedRef, forwardRef } from 'react';
+import { cls } from 'utils/cls';
 
 const VideoMessage = forwardRef(
   (
-    { handleCapture }: { handleCapture: (() => void) | undefined },
+    {
+      isMyMessage,
+      handleCapture,
+      src,
+    }: {
+      isMyMessage: boolean;
+      handleCapture: (() => void) | undefined;
+      src?: string;
+    },
     ref: ForwardedRef<HTMLVideoElement>,
   ) => {
     const pauseVideo = () => {
@@ -18,9 +28,19 @@ const VideoMessage = forwardRef(
     };
 
     return (
-      <div className="w-full h-full">
-        <video ref={ref} src="/sample-baduck.mp4" controls autoPlay />
-        <button onClick={handleCaptureAndPause}>캡처하기</button>
+      <div className="relative w-full h-full">
+        <video ref={ref} src={src} controls autoPlay className="rounded-lg" />
+        <button
+          className={cls(
+            'absolute top-1/2 text-mainBlue',
+            isMyMessage ? '-left-12' : '-right-12',
+          )}
+          onClick={handleCaptureAndPause}
+        >
+          <div className="p-3 rounded-full bg-lightGray">
+            <EditIcon />
+          </div>
+        </button>
       </div>
     );
   },

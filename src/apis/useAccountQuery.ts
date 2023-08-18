@@ -1,8 +1,9 @@
 import { UseQueryResult, useQuery } from 'react-query';
 import { getServerInstance } from './instance';
 import { AxiosResponse } from 'axios';
+import { myprofileKeys } from 'constants/querykey';
 
-interface AccountData {
+export interface AccountData {
   accountId: number;
   role: string;
   provider: string;
@@ -21,11 +22,11 @@ type AccountQueryResult = UseQueryResult<AxiosResponse<AccountData>, unknown>;
 export const useAccountQuery = (): AccountQueryResult => {
   const serverInstance = getServerInstance();
   const result = useQuery(
-    ['myprofile', 'account'],
+    myprofileKeys.account(),
     () => serverInstance.get('/api/v1/account/detail'),
     {
       select: (response: AxiosResponse) => response.data,
-      staleTime: 1000 * 60 * 60 * 24,
+      staleTime: 300000,
       retry: 0,
     },
   );
