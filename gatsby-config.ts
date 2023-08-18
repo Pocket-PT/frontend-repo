@@ -19,7 +19,7 @@ const gatsbyRequiredRules = path.join(
 );
 
 dotenv.config({
-  path: `.env.${process.env.NODE_ENV}`,
+  path: `.env`,
 });
 
 const config: GatsbyConfig = {
