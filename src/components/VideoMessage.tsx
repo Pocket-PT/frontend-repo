@@ -14,7 +14,9 @@ const VideoMessage = forwardRef(
       handleCapture: (() => void) | undefined;
       src?: string;
     },
-    ref: ForwardedRef<HTMLVideoElement>,
+    ref: ForwardedRef<
+      HTMLDivElement | HTMLVideoElement | HTMLImageElement | HTMLAnchorElement
+    >,
   ) => {
     const pauseVideo = () => {
       if (typeof ref === 'object') {
@@ -27,9 +29,16 @@ const VideoMessage = forwardRef(
       pauseVideo();
     };
 
+    console.log('videoMessageRef: ', ref);
     return (
       <div className="relative w-full h-full">
-        <video ref={ref} src={src} controls autoPlay className="rounded-lg" />
+        <video
+          crossOrigin="anonymous"
+          ref={ref}
+          src={src}
+          controls
+          className="rounded-lg"
+        />
         <button
           className={cls(
             'absolute top-1/2 text-mainBlue',

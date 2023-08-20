@@ -12,7 +12,7 @@ import { koreanOrEnglishRegex, koreanPhoneNumberRegex } from 'constants/global';
 import React from 'react';
 import usePostAccountMutation from 'hooks/usePostMutation';
 import usePushToPage from 'hooks/usePushToPage';
-import useUser from 'hooks/useUser';
+//import useUser from 'hooks/useUser';
 
 type BeforeLoginProps = {
   title?: string;
@@ -30,8 +30,8 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   const [phoneNumber, onChangePhoneNumber] = useInput('');
   const { mutate } = usePostAccountMutation();
   const { replaceTo } = usePushToPage();
-  const { data } = useUser();
-  console.log('userData', data);
+  // const { data } = useUser();
+  // console.log('userData', data);
 
   useEffect(() => {
     setToken(props.accessToken ?? '');
@@ -102,9 +102,8 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   return (
     <AppScreen>
       <div>
-        <h1>{params.title ?? 'hi'}</h1>
         {params.title !== 'Next Title' ? (
-          <div className="px-6">
+          <div className="px-6 mt-5">
             <div className="flex flex-row w-full h-16 mb-8 rounded shadow">
               <div
                 onClick={(e) => onClick(e)}
@@ -113,7 +112,7 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
                 className={cls(
                   'flex items-center justify-center w-1/2 h-full border-r border-lightGray rounded-tl-xl rounded-bl-xl transition-all duration-300 ease-in-out',
                   selectedString === '트레이너'
-                    ? 'bg-mainPurple text-white'
+                    ? 'bg-mainBlue text-white'
                     : 'bg-white text-darkGray',
                 )}
               >
@@ -123,7 +122,7 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
                 className={cls(
                   'flex items-center justify-center w-1/2 h-full rounded-tr-xl rounded-br-xl  transition-all duration-300 ease-in-out',
                   selectedString === '일반회원'
-                    ? 'bg-mainPurple text-white'
+                    ? 'bg-mainBlue text-white'
                     : 'bg-white text-darkGray',
                 )}
                 onClick={(e) => onClick(e)}
@@ -138,14 +137,14 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
               disabled={isDisabled}
               className={cls(
                 'w-full h-10 pt-1 text-white rounded-full',
-                isDisabled ? 'bg-lightGray' : 'bg-mainPurple',
+                isDisabled ? 'bg-lightGray' : 'bg-mainBlue',
               )}
             >
               다음
             </button>
           </div>
         ) : (
-          <div className="px-6 space-y-4">
+          <div className="px-6 mt-5 space-y-4">
             <Input>
               <Input.TextField
                 value={inputName}
@@ -172,7 +171,7 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
               disabled={isSubmit}
               className={cls(
                 'w-full h-10 pt-1 text-white rounded-full',
-                isSubmit ? 'bg-lightGray' : 'bg-mainPurple',
+                isSubmit ? 'bg-lightGray' : 'bg-mainBlue',
               )}
             >
               회원가입

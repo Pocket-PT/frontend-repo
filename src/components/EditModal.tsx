@@ -8,25 +8,35 @@ import RedoIcon from 'icons/RedoIcon';
 import { Slider } from 'antd';
 import MenuIcon from 'icons/MenuIcon';
 import { cls } from 'utils/cls';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import DataURIToBlob from 'utils/dataURIToBlob';
 
 type EditModalProps = {
+  postFile: (file: FormData) => void;
   onCloseModal: () => void;
   canvasData: {
     canvasURL: string;
     canvasWidth: number;
     canvasHeight: number;
   };
+  setCanvasData: React.Dispatch<
+    React.SetStateAction<{
+      canvasURL: string;
+      canvasWidth: number;
+      canvasHeight: number;
+    }>
+  >;
 };
 
-const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
+const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvas = canvasRef.current;
+  const ctx = canvasRef.current?.getContext('2d');
   const divRef = useRef<HTMLDivElement>(null);
   const [lineWidth, setLineWidth] = useState(5);
-  const [canvasSize, setCanvasSize] = useState({
-    width: canvasData.canvasWidth,
-    height: canvasData.canvasHeight,
-  });
+  // const [canvasSize] = useState({
+  //   width: canvasData.canvasWidth,
+  //   height: canvasData.canvasHeight,
+  // });
   const [isColorMode, setIsColorMode] = useState(false);
   const [isMode, setIsMode] = useState({
     isDrawMode: true,
@@ -36,14 +46,62 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     isRedoMode: false,
   });
   const [color, setColor] = useState('#000000');
-  const img = document.createElement('img');
+  const [canvasStep, setCanvasStep] = useState({ step: 0, mode: 'undo' });
+  const [canvasState, setCanvasState] = useState<string[]>([]);
+  const [trigger, setTrigger] = useState(false);
 
-  useEffect(() => {
-    img.src = canvasData.canvasURL;
-  }, [canvasData.canvasURL, img]);
+  //const [testState, setTestState] = useState<string[]>([]);
+
+  // useEffect(() => {
+  //   img.crossOrigin = 'anonymous';
+  //   img.src = canvasData.canvasURL;
+  // }, [canvasData.canvasURL, img]);
+
+  // const handleCapture = useCallback((url: string) => {
+  //   const playerElement = divRef.current;
+  //   const scale = 0.5;
+
+  //   if (playerElement) {
+  //     const canvas = document.createElement('canvas');
+  //     const ctx = canvas.getContext('2d');
+  //     const img = imgRef.current;
+  //     if (img) {
+  //       img.crossOrigin = 'Anonymous';
+  //       img.src = url;
+  //       canvas.width = img.width * scale;
+  //       canvas.height = img.height * scale;
+  //       ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+  //       console.log(canvas.toDataURL());
+
+  //       // setCanvasData({
+  //       //   canvasURL: canvas.toDataURL(),
+  //       //   canvasWidth: canvas.width,
+  //       //   canvasHeight: canvas.height,
+  //       // });
+  //     }
+
+  //     console.log('img', img);
+  //   }
+  //   // if (playerElement) {
+  //   //   const canvas = document.createElement('canvas');
+  //   //   const canvas2d = canvas.getContext('2d');
+  //   //   playerElement.crossOrigin = 'anonymous';
+  //   //   canvas.width = playerElement.videoWidth * scale;
+  //   //   canvas.height = playerElement.videoHeight * scale;
+  //   //   console.log(canvas);
+  //   //   canvas2d?.drawImage(playerElement, 0, 0, canvas.width, canvas.height);
+
+  //   //   console.log(canvas.toDataURL());
+  //   //   setCanvasData({
+  //   //     canvasURL: canvas.toDataURL(),
+  //   //     canvasWidth: canvas.width,
+  //   //     canvasHeight: canvas.height,
+  //   //   });
+  //   // }
+  //   setModalOpen(true);
+  // }, []);
 
   const onLineWidthChange = (e: number) => {
-    console.log(e);
     setLineWidth(Number(e));
   };
 
@@ -59,7 +117,6 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
 
   const onColorPlateClick = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsColorMode(true);
-
     setColor(e.currentTarget.style.backgroundColor);
   };
 
@@ -79,15 +136,19 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     if (divElement) {
       html2canvas(divElement).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
-        console.log(imgData);
         saveAsImage(imgData, 'test.png');
+        const blob = DataURIToBlob(imgData);
+        console.log('dataURI:', DataURIToBlob(imgData));
+        const formData = new FormData();
+        formData.append('file', blob, 'image.png');
+        console.log(formData.get('file'));
+        postFile(formData);
+        onCloseModal();
       });
     }
   };
 
   const onErase = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
     setIsMode({
       isDrawMode: false,
       isColorMode: false,
@@ -102,7 +163,6 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
   };
 
   const onDrawMode = () => {
-    const canvas = canvasRef.current;
     setIsMode({
       isDrawMode: true,
       isColorMode: false,
@@ -110,80 +170,195 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
       isUndoMode: false,
       isRedoMode: false,
     });
-    const ctx = canvas?.getContext('2d');
+
     if (ctx) {
       ctx.globalCompositeOperation = 'source-over';
     }
   };
 
+  const onUndo = () => {
+    if (ctx && canvasStep.step > 0) {
+      setCanvasStep((prev) => {
+        return { step: prev.step - 1, mode: 'undo' };
+      });
+      // onUndoFunc(ctx);
+      // img.onload = () => {
+      //   console.log('onUndo img:', img.src, canvasStep - 1);
+      //   ctx.drawImage(img, 0, 0);
+      // };
+    } else {
+      console.log('이전에 그린 그림이 없습니다.');
+      setCanvasStep((prev) => {
+        return { step: prev.step, mode: 'add' };
+      });
+    }
+  };
+
+  const onDraw = () => {
+    console.log('onDraw 실행!');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = canvasState[canvasStep.step - 1];
+    console.log('img.onLoad 실행 전', canvasState[canvasStep.step - 1]);
+    setTrigger(!trigger);
+
+    ctx?.drawImage(img, 0, 0, canvasData.canvasWidth, canvasData.canvasHeight);
+    setTrigger(!trigger);
+    console.log(
+      'onDraw img:',
+      img.src,
+      'state: ',
+      canvasState[canvasStep.step - 1],
+    );
+  };
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (canvas && ctx) {
-      console.log('hi');
-      canvas.width = canvasData.canvasWidth;
-      canvas.height = canvasData.canvasHeight;
-      //ctx.drawImage(img, 0, 0, canvasData.canvasWidth, canvasData.canvasHeight);
+    console.log('trigger rerender', trigger);
+    console.log('canvasStep: ', canvasStep.step - 1);
+    console.log('canvasState: ', canvasState);
+    console.log('canvasRef: ', canvasRef.current);
+  }, []);
+
+  const onRedo = () => {
+    if (ctx && canvasStep.step - 1 < canvasState.length - 1) {
+      setCanvasStep((prev) => {
+        return { step: prev.step + 1, mode: 'redo' };
+      });
+    } else {
+      console.log('이후에 그린 그림이 없습니다.');
+      setCanvasStep((prev) => {
+        return { step: prev.step, mode: 'add' };
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (canvasStep.mode === 'undo') {
+      console.log('onUndoFunc 실행!');
+      onDraw();
+    }
+    if (canvasStep.mode === 'redo') {
+      console.log('onRedoFuc 실행!');
+      onDraw();
+    }
+  }, [canvasStep]);
+
+  const canvasAdd = () => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    if (ctx) {
+      setCanvasState((prev) => [...prev, canvas?.toDataURL()]);
+      img.src = canvasState[canvasStep.step - 1];
+      console.log('canvasAdd img:', img.src);
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ctx?.drawImage(
+          img,
+          0,
+          0,
+          canvasData.canvasWidth,
+          canvasData.canvasHeight,
+        );
+      };
+    }
+    // setIsMode({
+    //   isDrawMode: true,
+    //   isColorMode: false,
+    //   isEraseMode: false,
+    //   isUndoMode: false,
+    //   isRedoMode: false,
+    // });
+    setCanvasStep((prev) => {
+      return { step: prev.step + 1, mode: 'add' };
+    });
+  };
+
+  let isPainting = false;
+  let mousePressed = false;
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isPainting && ctx && mousePressed) {
+      const rect = canvas?.getBoundingClientRect();
+      if (rect && canvas) {
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        x = x * (canvas.width / rect.width);
+        y = y * (canvas.height / rect.height);
+        ctx?.lineTo(x, y);
+        ctx?.stroke();
+        return;
+      }
     }
 
-    let isPainting = false;
-    const onMove = (e: MouseEvent | PointerEvent) => {
-      if (isPainting && ctx) {
-        const rect = canvas?.getBoundingClientRect();
-        if (rect && canvas) {
-          let x = e.clientX - rect.left;
-          let y = e.clientY - rect.top;
-          x = x * (canvas.width / rect.width);
-          y = y * (canvas.height / rect.height);
-          ctx?.lineTo(x, y);
-          ctx?.stroke();
-          return;
-        }
-      }
-      //ctx?.moveTo(e.offsetX, e.offsetY);
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (isPainting) {
-        const rect = canvas?.getBoundingClientRect();
-        if (rect && canvas) {
-          let x = e.touches[0].clientX - rect.left;
-          let y = e.touches[0].clientY - rect.top;
-          x = x * (canvas.width / rect.width);
-          y = y * (canvas.height / rect.height);
-          ctx?.lineTo(x, y);
-          ctx?.stroke();
-          return;
-        }
-      }
-      //ctx?.moveTo(e.touches[0].clientX, e.touches[0].clientY);
-    };
-    const onMoveDown = () => {
-      isPainting = true;
-    };
-    const cancelPainting = () => {
-      isPainting = false;
-      ctx?.beginPath();
-    };
+    //ctx?.moveTo(e.offsetX, e.offsetY);
+  };
 
-    // 컴포넌트 마운트 시에 이벤트 리스너 등록
-    canvas?.addEventListener('mousemove', onMove);
-    canvas?.addEventListener('mousedown', onMoveDown);
-    canvas?.addEventListener('mouseup', cancelPainting);
-    canvas?.addEventListener('mouseleave', cancelPainting);
-    canvas?.addEventListener('touchmove', onTouchMove);
-    canvas?.addEventListener('touchstart', onMoveDown);
-    canvas?.addEventListener('touchend', cancelPainting);
-    // 컴포넌트 언마운트 시에 이벤트 리스너 제거
-    return () => {
-      canvas?.removeEventListener('mousemove', onMove);
-      canvas?.removeEventListener('mousedown', onMoveDown);
-      canvas?.removeEventListener('mouseup', cancelPainting);
-      canvas?.removeEventListener('mouseleave', cancelPainting);
-      canvas?.removeEventListener('touchmove', onTouchMove);
-      canvas?.removeEventListener('touchstart', onMoveDown);
-      canvas?.removeEventListener('touchend', cancelPainting);
-    };
-  }, [canvasData.canvasWidth, canvasData.canvasHeight]);
+  const handleTouchMove = (e: TouchEvent) => {
+    if (isPainting && ctx && mousePressed) {
+      const rect = canvas?.getBoundingClientRect();
+      if (rect && canvas) {
+        let x = e.touches[0].clientX - rect.left;
+        let y = e.touches[0].clientY - rect.top;
+        x = x * (canvas.width / rect.width);
+        y = y * (canvas.height / rect.height);
+        ctx?.lineTo(x, y);
+        ctx?.stroke();
+        return;
+      }
+    }
+    //ctx?.moveTo(e.touches[0].clientX, e.touches[0].clientY);
+  };
+
+  const handleMouseDown = () => {
+    isPainting = true;
+    mousePressed = true;
+  };
+  const cancelPainting = () => {
+    isPainting = false;
+
+    console.log('그리기 끝!');
+    ctx?.beginPath();
+  };
+
+  const cancelPaintingWithAdd = () => {
+    console.log('canvasAdd 실행!');
+    if (mousePressed) {
+      mousePressed = false;
+      cancelPainting();
+      canvasAdd();
+    }
+  };
+
+  // useEffect(() => {
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas?.getContext('2d');
+
+  //   if (canvas && ctx) {
+  //     canvas.width = canvasData.canvasWidth;
+  //     canvas.height = canvasData.canvasHeight;
+  //     console.log('canvasAdd 실행 전');
+  //     canvasAdd();
+  //     //ctx.drawImage(img, 0, 0, canvasData.canvasWidth, canvasData.canvasHeight);
+  //   }
+
+  //   // 컴포넌트 마운트 시에 이벤트 리스너 등록
+  //   canvas?.addEventListener('mousemove', onMove);
+  //   canvas?.addEventListener('mousedown', onMoveDown);
+  //   canvas?.addEventListener('mouseup', cancelPaintingWithAdd);
+  //   canvas?.addEventListener('mouseleave', cancelPaintingWithAdd);
+  //   canvas?.addEventListener('touchmove', onTouchMove);
+  //   canvas?.addEventListener('touchstart', onMoveDown);
+  //   canvas?.addEventListener('touchend', cancelPaintingWithAdd);
+  //   // 컴포넌트 언마운트 시에 이벤트 리스너 제거
+  //   return () => {
+  //     canvas?.removeEventListener('mousemove', onMove);
+  //     canvas?.removeEventListener('mousedown', onMoveDown);
+  //     canvas?.removeEventListener('mouseup', cancelPaintingWithAdd);
+  //     canvas?.removeEventListener('mouseleave', cancelPainting);
+  //     canvas?.removeEventListener('touchmove', onTouchMove);
+  //     canvas?.removeEventListener('touchstart', onMoveDown);
+  //     canvas?.removeEventListener('touchend', cancelPaintingWithAdd);
+  //   };
+  // }, [canvasData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -202,87 +377,101 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
     }
   }, [color]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      // 리사이즈 이벤트 발생 시 실행되는 로직을 작성합니다.
-      setCanvasSize({
-        width: divRef.current?.clientWidth || 0,
-        height: divRef.current?.clientHeight || 0,
-      });
-      console.log(canvasSize.width, canvasSize.height);
-    };
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     // 리사이즈 이벤트 발생 시 실행되는 로직을 작성합니다.
+  //     setCanvasSize({
+  //       width: divRef.current?.clientWidth || 0,
+  //       height: divRef.current?.clientHeight || 0,
+  //     });
+  //     console.log(canvasSize.width, canvasSize.height);
+  //   };
 
-    // 컴포넌트가 마운트될 때 이벤트 리스너를 추가합니다.
-    window.addEventListener('resize', handleResize);
+  //   // 컴포넌트가 마운트될 때 이벤트 리스너를 추가합니다.
+  //   window.addEventListener('resize', handleResize);
 
-    // 컴포넌트가 언마운트될 때 이벤트 리스너를 제거합니다.
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [canvasSize.width, canvasSize.height]);
+  //   // 컴포넌트가 언마운트될 때 이벤트 리스너를 제거합니다.
+  //   return () => {
+  //     window.removeEventListener('resize', handleResize);
+  //   };
+  // }, [canvasSize.width, canvasSize.height]);
+  console.log('rightnow:', canvasRef.current?.toDataURL());
 
   return (
-    <div className="fixed top-0 z-50 w-full h-full pt-5 pl-5 overflow-hidden bg-dark">
-      <button
-        onClick={onCloseModal}
-        className="w-11 h-11 bg-white rounded-full shadow items-center justify-center gap-2.5 flex"
-      >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+    <div className="fixed top-0 z-50 w-[100vw] h-full px-5 pt-5 overflow-hidden bg-dark">
+      <div className="flex flex-row items-center justify-between">
+        <button
+          onClick={onCloseModal}
+          className="w-11 h-11 bg-white rounded-full shadow items-center justify-center gap-2.5 flex"
         >
-          <path
-            d="M3.89705 4.05379L3.96967 3.96967C4.23594 3.7034 4.6526 3.6792 4.94621 3.89705L5.03033 3.96967L10 8.939L14.9697 3.96967C15.2359 3.7034 15.6526 3.6792 15.9462 3.89705L16.0303 3.96967C16.2966 4.23594 16.3208 4.6526 16.1029 4.94621L16.0303 5.03033L11.061 10L16.0303 14.9697C16.2966 15.2359 16.3208 15.6526 16.1029 15.9462L16.0303 16.0303C15.7641 16.2966 15.3474 16.3208 15.0538 16.1029L14.9697 16.0303L10 11.061L5.03033 16.0303C4.76406 16.2966 4.3474 16.3208 4.05379 16.1029L3.96967 16.0303C3.7034 15.7641 3.6792 15.3474 3.89705 15.0538L3.96967 14.9697L8.939 10L3.96967 5.03033C3.7034 4.76406 3.6792 4.3474 3.89705 4.05379L3.96967 3.96967L3.89705 4.05379Z"
-            fill="#212121"
-          />
-        </svg>
-      </button>
-      <div className="w-[65px] absolute right-5 top-5 h-11 px-5 py-3 bg-white rounded-full shadow justify-start items-start gap-2.5 inline-flex">
-        <div
-          className="text-sm font-semibold leading-tight text-center"
-          onClick={onSubmit}
-          onKeyDown={onSubmit}
-          role="presentation"
-        >
-          완료
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3.89705 4.05379L3.96967 3.96967C4.23594 3.7034 4.6526 3.6792 4.94621 3.89705L5.03033 3.96967L10 8.939L14.9697 3.96967C15.2359 3.7034 15.6526 3.6792 15.9462 3.89705L16.0303 3.96967C16.2966 4.23594 16.3208 4.6526 16.1029 4.94621L16.0303 5.03033L11.061 10L16.0303 14.9697C16.2966 15.2359 16.3208 15.6526 16.1029 15.9462L16.0303 16.0303C15.7641 16.2966 15.3474 16.3208 15.0538 16.1029L14.9697 16.0303L10 11.061L5.03033 16.0303C4.76406 16.2966 4.3474 16.3208 4.05379 16.1029L3.96967 16.0303C3.7034 15.7641 3.6792 15.3474 3.89705 15.0538L3.96967 14.9697L8.939 10L3.96967 5.03033C3.7034 4.76406 3.6792 4.3474 3.89705 4.05379L3.96967 3.96967L3.89705 4.05379Z"
+              fill="#212121"
+            />
+          </svg>
+        </button>
+        <div className="w-[65px] h-11 px-5 py-3 bg-white rounded-full shadow justify-start items-start gap-2.5 inline-flex">
+          <div
+            className="text-sm font-semibold leading-tight text-center"
+            onClick={onSubmit}
+            onKeyDown={onSubmit}
+            role="presentation"
+          >
+            완료
+          </div>
         </div>
       </div>
-      <div
-        ref={divRef}
-        style={{
-          backgroundImage: `url(${canvasData.canvasURL})`,
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          width: canvasData.canvasWidth,
-          height: canvasData.canvasHeight,
-          backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-          maxWidth: '95vw',
-          maxHeight: '68vh',
-          borderRadius: '20px',
-          marginTop: '20px',
-        }}
-      >
-        <canvas
-          ref={canvasRef}
+      <div className="m-auto">
+        <div
+          ref={divRef}
           style={{
-            width: `${canvasSize.width}px`,
-            height: `${canvasSize.height}px`,
-            maxWidth: '95vw',
+            backgroundImage: `url(${canvasData.canvasURL})`,
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            // width: canvasData.canvasWidth,
+            // height: canvasData.canvasHeight,
+            minWidth: '90vw',
+            minHeight: '60vh',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            maxWidth: '90vw',
             maxHeight: '68vh',
+            borderRadius: '20px',
+            marginTop: '20px',
           }}
-        ></canvas>
-        <div className="w-full">
-          <ColorAndLineModal
-            isColorMode={isMode.isColorMode}
-            lineWidth={lineWidth}
-            onLineWidthChange={onLineWidthChange}
-            onColorPlateClick={onColorPlateClick}
+        >
+          <canvas
+            ref={canvasRef}
+            style={{
+              borderRadius: '20px',
+              minWidth: '90vw',
+              minHeight: 'auto',
+              maxWidth: '90vw',
+              maxHeight: '68vh',
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseUp={cancelPaintingWithAdd}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={cancelPaintingWithAdd}
+            onTouchMove={handleTouchMove}
+            onTouchStart={handleMouseDown}
+            onTouchEnd={cancelPaintingWithAdd}
           />
         </div>
+        <ColorAndLineModal
+          color={color}
+          isColorMode={isMode.isColorMode}
+          lineWidth={lineWidth}
+          onLineWidthChange={onLineWidthChange}
+          onColorPlateClick={onColorPlateClick}
+        />
         <BottomButtons
           isMode={isMode}
           color={color}
@@ -290,6 +479,8 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
           onDrawMode={onDrawMode}
           onErase={onErase}
           onColorClick={onColorClick}
+          onUndo={onUndo}
+          onRedo={onRedo}
         />
       </div>
     </div>
@@ -297,6 +488,7 @@ const EditModal = ({ onCloseModal, canvasData }: EditModalProps) => {
 };
 
 type ColorAndLineModalProps = {
+  color: string;
   isColorMode: boolean;
   lineWidth: number;
   onLineWidthChange: (e: number) => void;
@@ -304,12 +496,12 @@ type ColorAndLineModalProps = {
 };
 
 const ColorAndLineModal = ({
+  color,
   isColorMode,
   lineWidth,
   onLineWidthChange,
   onColorPlateClick,
 }: ColorAndLineModalProps) => {
-  console.log('isColorMode: ', isColorMode);
   return (
     <div className="w-full mt-5 h-[7vh] bg-hoverGray bg-opacity-20 rounded-xl backdrop-blur-[80px]">
       {isColorMode ? (
@@ -328,31 +520,18 @@ const ColorAndLineModal = ({
               />
             </svg>
           </div>
-          <Swiper
-            style={{
-              border: '1px solid red',
-              width: '100%',
-            }}
-            direction="horizontal"
-            autoHeight
-            spaceBetween={0}
-            slidesPerView={1}
-            onSlideChange={() => console.log('slide change')}
-            onSwiper={(swiper) => console.log(swiper)}
-          >
-            {COLOR_PLATE.map((color) => {
-              return (
-                <SwiperSlide key={color}>
-                  <div
-                    role="presentation"
-                    onClick={(e) => onColorPlateClick(e)}
-                    style={{ backgroundColor: color }}
-                    className="relative w-6 h-6 border border-white rounded-full border-opacity-40"
-                  />
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
+
+          {COLOR_PLATE.map((color) => {
+            return (
+              <div
+                key={color}
+                role="presentation"
+                onClick={(e) => onColorPlateClick(e)}
+                style={{ backgroundColor: color }}
+                className="relative w-6 h-6 border border-white rounded-full border-opacity-40"
+              />
+            );
+          })}
           {/* <Swiper
             direction="horizontal"
             keyboard={{
@@ -413,11 +592,11 @@ const ColorAndLineModal = ({
                 width: '24px',
                 height: '24px',
                 background: 'white',
-                border: '3px solid #212121',
+                border: `3px solid ${color}`,
                 borderRadius: '9999px',
               }}
               trackStyle={{
-                backgroundColor: '#212121',
+                backgroundColor: color,
                 marginTop: '2px',
                 height: '12px',
                 borderRadius: '9999px',
@@ -461,6 +640,8 @@ type BottomButtonsProps = {
     isRedoMode: boolean;
   };
   isColorMode: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
   onDrawMode: () => void;
   onErase: () => void;
   onColorClick: () => void;
@@ -472,6 +653,8 @@ const BottomButtons = ({
   onDrawMode,
   onErase,
   onColorClick,
+  onRedo,
+  onUndo,
 }: BottomButtonsProps) => {
   return (
     <div className="w-full mt-2 h-[9vh] bg-hoverGray bg-opacity-20 rounded-xl backdrop-blur-[80px] flex flex-row items-center justify-between gap-2 px-4">
@@ -509,10 +692,14 @@ const BottomButtons = ({
           className={cls(
             'flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray',
           )}
+          onClick={onUndo}
         >
           <UndoIcon />
         </button>
-        <button className="flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray">
+        <button
+          className="flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray"
+          onClick={onRedo}
+        >
           <RedoIcon />
         </button>
       </div>

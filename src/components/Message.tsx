@@ -1,8 +1,10 @@
 import { cls } from 'utils/cls';
 import VideoMessage from './VideoMessage';
-import React, { MutableRefObject } from 'react';
+import React, { ForwardedRef, MutableRefObject, forwardRef } from 'react';
 import dayjs from 'dayjs';
 import Scrollbars from 'react-custom-scrollbars-2';
+import { classifyUrl } from 'utils/classifyUrl';
+import EditIcon from 'icons/EditIcon';
 
 type MessageProps = {
   message: string | null;
@@ -11,7 +13,14 @@ type MessageProps = {
   chatId: number;
   createAt: string;
   videoRef?: React.RefObject<HTMLVideoElement> | null;
-  handleCapture?: () => void;
+  messageRef?: React.RefObject<
+    HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
+  >;
+  handleCapture: (
+    ref: React.ForwardedRef<
+      HTMLDivElement | HTMLVideoElement | HTMLImageElement | HTMLAnchorElement
+    >,
+  ) => void;
   postFile?: (file: FormData) => void;
   scrollbarRef?: MutableRefObject<Scrollbars | null>;
   isScrollTop?: boolean;
@@ -90,66 +99,73 @@ const MediaMessageWrapper = ({
   );
 };
 
-const Message = ({
-  message,
-  myId,
-  chatId,
-  createAt,
-  fileUrl,
-  handleCapture,
-  videoRef,
-  scrollbarRef,
-  isScrollTop,
-}: MessageProps) => {
-  const isMyMessage = myId === chatId;
+const Message = forwardRef(
+  (
+    {
+      message,
+      myId,
+      chatId,
+      createAt,
+      fileUrl,
+      handleCapture,
+      scrollbarRef,
+      isScrollTop,
+    }: MessageProps,
+    ref: ForwardedRef<
+      HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
+    >,
+  ) => {
+    const isMyMessage = myId === chatId;
 
-  const classifyUrl = (url: string | null) => {
-    const imageRegex = /\.(png|jpg|jpeg|gif)$/i; // 대소문자 구분 없이 이미지 확장자 매칭
-    const videoRegex = /\.(mp4|avi|mov|wmv)$/i;
-    if (imageRegex.test(url ?? '')) {
-      return 'image';
-    }
-    if (videoRegex.test(url ?? '')) {
-      return 'video';
-    }
-    if (message === null) {
-      return 'file';
-    }
-  };
+    const uri = classifyUrl(fileUrl, message);
 
-  const uri = classifyUrl(fileUrl);
+    return uri === 'image' || uri === 'video' ? (
+      <MediaMessageWrapper
+        scrollbarRef={scrollbarRef}
+        isMyMessage={isMyMessage}
+        createAt={createAt}
+      >
+        {uri === 'video' && (
+          <VideoMessage
+            isMyMessage={isMyMessage}
+            src={fileUrl ?? ''}
+            handleCapture={() => handleCapture(ref)}
+            ref={ref}
+          />
+        )}
+        {uri === 'image' && (
+          <>
+            <img
+              src={fileUrl ?? ''}
+              alt="img"
+              className="w-full h-auto rounded-xl"
+              loading="lazy"
+              onLoad={() => {
+                if (!isScrollTop) scrollbarRef?.current?.scrollToBottom();
+              }}
+            />
+            <button
+              className={cls(
+                'absolute top-1/2 text-mainBlue',
+                isMyMessage ? '-left-12' : '-right-12',
+              )}
+              onClick={() => handleCapture(ref)}
+            >
+              <div className="p-3 rounded-full bg-lightGray">
+                <EditIcon />
+              </div>
+            </button>
+          </>
+        )}
+      </MediaMessageWrapper>
+    ) : (
+      <MessageWrapper isMyMessage={isMyMessage} createAt={createAt}>
+        <p className="break-words whitespace-normal">{message}</p>
+      </MessageWrapper>
+    );
+  },
+);
 
-  return uri === 'image' || uri === 'video' ? (
-    <MediaMessageWrapper
-      scrollbarRef={scrollbarRef}
-      isMyMessage={isMyMessage}
-      createAt={createAt}
-    >
-      {uri === 'video' && (
-        <VideoMessage
-          isMyMessage={isMyMessage}
-          src={fileUrl ?? ''}
-          handleCapture={handleCapture}
-          ref={videoRef}
-        />
-      )}
-      {uri === 'image' && (
-        <img
-          src={fileUrl ?? ''}
-          alt="img"
-          className="w-full h-auto rounded-xl"
-          loading="lazy"
-          onLoad={() => {
-            if (!isScrollTop) scrollbarRef?.current?.scrollToBottom();
-          }}
-        />
-      )}
-    </MediaMessageWrapper>
-  ) : (
-    <MessageWrapper isMyMessage={isMyMessage} createAt={createAt}>
-      <p className="break-words whitespace-normal">{message}</p>
-    </MessageWrapper>
-  );
-};
+Message.displayName = 'Message';
 
 export default React.memo(Message);

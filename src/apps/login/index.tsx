@@ -16,15 +16,12 @@ const SignInPage = () => {
         </div>
         <div>
           <a
-            href={`${
-              process.env.GATSBY_OAUTH_KAKAO_LOGIN
-            }?redirectUri=${encodeURIComponent(
-              'http://localhost:8000/#/after-login',
+            href={`https://back.pocketpt.shop?redirectUri=${encodeURIComponent(
+              'https://pocketpt.netlify.app/#/after-login',
             )}`}
           >
             <KaKaoLogin />
           </a>
-          <div className="mt-1 text-center">회원가입</div>
         </div>
       </div>
     </Layout>

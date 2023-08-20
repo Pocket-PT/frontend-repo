@@ -16,7 +16,6 @@ const useMessageStore = create<IMessageStore>((set) => ({
   messages: [],
   setMessages: (message: IMessage) =>
     set((prev) => ({ messages: [...prev.messages, message] })),
-
   resetMessages: () => set({ messages: [] }),
 }));
 

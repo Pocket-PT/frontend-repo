@@ -17,8 +17,8 @@ export const getMockInstance = () => {
 };
 
 const serverInstance = axios.create({
-  baseURL: process.env.GATSBY_HOST_URL,
-  timeout: 3000,
+  baseURL: 'https://back.pocketpt.shop/oauth2/authorization/kakao',
+  timeout: Infinity,
   headers: {
     Authorization: '',
     'Content-Type': 'application/json',

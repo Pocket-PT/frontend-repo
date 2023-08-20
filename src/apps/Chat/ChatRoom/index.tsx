@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { ActivityComponentType } from '@stackflow/react';
-import EditModal from 'components/EditModal';
 import Layout from 'components/Layout';
 import { PUB_URL } from 'constants/global';
 import useInput from 'hooks/useInput';
@@ -20,12 +19,8 @@ import MenuIcon from 'icons/MenuIcon';
 import useMessageInfiniteQuery from 'apis/useMessageInfiniteQuery';
 import ChatList from 'components/ChatList';
 import usePushToPage from 'hooks/usePushToPage';
-
-interface CanvasData {
-  canvasURL: string;
-  canvasWidth: number;
-  canvasHeight: number;
-}
+import LoadingSpinner from 'components/common/LoadingSpinner';
+import Scrollbars, { positionValues } from 'react-custom-scrollbars-2';
 
 type ChatRoomPageProps = {
   id: string;
@@ -123,13 +118,50 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
   const { messages: newMessageData, resetMessages } = useMessageStore();
   const { mutate } = usePostFile(+params.id);
   const [fileContainerOpen, setFileContainerOpen] = useState(false);
+  const [isScrollTop, setIsScrollTop] = useState(false);
   const { pop } = usePushToPage();
 
   // console.log('message: ', messageData?.data.chattingMessageGetResponseList);
   console.log('messageInfiniteData: ', messageData.data);
   console.log('newMessageData: ', newMessageData);
+  const scrollbarRef = useRef<Scrollbars>(null);
   const { client, publish } = useSocket();
   const clientRef = useRef<unknown>(null);
+
+  useEffect(() => {
+    console.log('컴포넌트 진입 시 실행?');
+    // if (
+    //   messageData.data &&
+    //   messageData.data.pages[0].chattingMessageGetResponseList.length >= 1
+    // ) {
+    console.log('scrollToBottom 실행!');
+    scrollbarRef.current?.scrollToBottom();
+    //}
+  }, [newMessageData, fileContainerOpen]);
+
+  //로드 시 스크롤바 유지
+  useEffect(() => {
+    if (
+      !messageData.data?.pageParams ||
+      messageData.data?.pageParams.length <= 1
+    )
+      return;
+    const id =
+      messageData.data?.pages[1].chattingMessageGetResponseList[0]
+        .chattingMessageId;
+
+    const element = document.getElementById(`${id}`);
+    if (element) {
+      console.log(
+        '로드 시 스크롤바 유지: ',
+        element,
+        messageData.data.pageParams,
+      );
+      scrollbarRef.current?.scrollTop(
+        element?.getBoundingClientRect().y - element?.scrollHeight - 16,
+      );
+    }
+  }, [messageData.data?.pageParams]);
 
   useEffect(() => {
     // 웹소켓 연결이 없는 경우에만 새로운 웹소켓을 생성하고 연결합니다.
@@ -138,6 +170,7 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
       client?.activate();
       clientRef.current = client;
       messageData.refetch();
+      scrollbarRef.current?.scrollToBottom();
     }
 
     //컴포넌트가 언마운트되면 웹소켓 연결을 종료합니다.
@@ -148,31 +181,34 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
       }
     };
   }, [publish]);
-  console.log('hasNextPage: ', messageData.hasNextPage);
-  console.log('isLoading: ', messageData.isLoading);
-
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const onCloseModal = useCallback(() => {
-    setModalOpen(false);
-  }, []);
-
-  const [canvasData, setCanvasData] = useState<CanvasData>({
-    canvasURL: '',
-    canvasWidth: 0,
-    canvasHeight: 0,
-  });
+  console.log('ChatRoom hasNextPage: ', messageData.hasNextPage);
+  console.log('ChatRoom isLoading: ', messageData.isLoading);
 
   const postFile = useCallback((file: FormData) => {
     mutate(file);
   }, []);
+
+  const onScroll = useCallback(
+    (values: positionValues) => {
+      if (values.scrollTop === 0 && messageData.hasNextPage) {
+        console.log('가장 위', messageData);
+        messageData.fetchNextPage();
+        setIsScrollTop(true);
+      }
+    },
+    [scrollbarRef, messageData.hasNextPage, messageData.fetchNextPage],
+  );
 
   if (messageData.isError) {
     return <div>에러가 발생했습니다. 캐시된 데이터입니다</div>;
   }
 
   if (messageData.isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Layout hasFooter={false}>
+        <LoadingSpinner />
+      </Layout>
+    );
   }
 
   return (
@@ -204,17 +240,27 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
             <MenuIcon />
           </div>
         </div>
-        <ChatList
-          userData={userData}
-          messageData={messageData}
-          postFile={postFile}
-          setCanvasData={setCanvasData}
-          setModalOpen={setModalOpen}
-          fileContainerOpen={fileContainerOpen}
-        />
-        {modalOpen ? (
-          <EditModal canvasData={canvasData} onCloseModal={onCloseModal} />
-        ) : null}
+        <Scrollbars
+          style={{ backgroundColor: '#FAFAFA' }}
+          autoHide
+          onScrollFrame={onScroll}
+          autoHeight
+          autoHeightMin={
+            fileContainerOpen
+              ? `calc(100vh - ${52}px - 176px - 16px - 64px)`
+              : `calc(100vh - ${52}px - 16px - 64px)`
+          }
+          ref={scrollbarRef}
+        >
+          <ChatList
+            scrollbarRef={scrollbarRef}
+            isScrollTop={isScrollTop}
+            userData={userData}
+            messageData={messageData}
+            postFile={postFile}
+            fileContainerOpen={fileContainerOpen}
+          />
+        </Scrollbars>
         <div className="fixed w-full transition-all bottom-2">
           <CreateMessage
             postFile={postFile}

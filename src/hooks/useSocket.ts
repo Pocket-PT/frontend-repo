@@ -19,13 +19,13 @@ const useSocket = () => {
         brokerURL: 'wss://back.pocketpt.shop/ws-stomp',
         connectHeaders: {
           login: 'admin',
-          passcode: 'admin',
+          passcode: 'adminnnn',
           Authorization: `Bearer ${token}`,
         },
         debug: function (str) {
           console.log(str);
         },
-        reconnectDelay: 5000,
+        reconnectDelay: 1000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         onConnect: (frame) => {
@@ -70,6 +70,8 @@ const useSocket = () => {
           //console.log(`Received: ${payload}`);
           console.log(JSON.parse(payload.body).data.content);
           const data = JSON.parse(payload.body).data;
+          console.log('data.content: ', data.content);
+          if (data.content === null) return;
           setMessages({
             message: data.content,
             chattingAccountId: data.chattingAccountId,

@@ -1,12 +1,14 @@
+import useMessageInfiniteQuery from 'apis/useMessageInfiniteQuery';
 import Layout from 'components/Layout';
 
 const TestPage = () => {
-  const code = new URL(window.location.href).searchParams.get('code');
-  console.log('testCode: ', code);
+  const { data, fetchNextPage } = useMessageInfiniteQuery(1);
+  console.log(data);
   return (
-    <Layout title="Test">
+    <Layout hasFooter={false}>
       <div>
         <h1>Test Page</h1>
+        <button onClick={() => fetchNextPage()}>NEXT PAGE</button>
       </div>
     </Layout>
   );
