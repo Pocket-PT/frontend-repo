@@ -1,4 +1,7 @@
+import useMockOtherUserStore from 'stores/mockOtherUser';
+
 const DMList = () => {
+  const { data } = useMockOtherUserStore();
   return (
     <div className="relative flex items-center w-full h-20 pl-5 mb-3 bg-white rounded-xl">
       <img
@@ -7,7 +10,7 @@ const DMList = () => {
         alt="#"
       />
       <div className="flex flex-col w-1/2 ml-4">
-        <div className="text-base font-medium leading-tight">윤수민</div>
+        <div className="text-base font-medium leading-tight">{data.name}</div>
         <div className="text-xs font-normal leading-none text-gray">
           오늘도 화이팅!! 항상 잘하고 있어ㅎㅎ
         </div>

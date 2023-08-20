@@ -1,7 +1,8 @@
+/* eslint-disable react/prop-types */
 // import { cls } from 'utils/cls';
 // import ChatIcon from 'icons/ChatIcon';
 import { useEffect } from 'react';
-import { useStack } from '@stackflow/react';
+import { ActivityComponentType, useStack } from '@stackflow/react';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import ChatIcon from 'icons/ChatIcon';
 import TelIcon from 'icons/TelIcon';
@@ -11,14 +12,33 @@ import BackIcon from 'icons/BackIcon';
 import MoreIcon from 'icons/MoreIcon';
 import usePushToPage from 'hooks/usePushToPage';
 import { Link } from 'libs/link';
+import useMemeberQuery, { MemberData } from 'apis/useMemberQuery';
+import Layout from 'components/Layout';
+import LoadingSpinner from 'components/common/LoadingSpinner';
 
-const OhterProfile: React.FC = () => {
+type OtherProfileProps = {
+  id: string;
+};
+
+const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
   const stack = useStack();
   const { pop } = usePushToPage();
+  const { data: memberData, isLoading } = useMemeberQuery({
+    select: (res) =>
+      res.data.data.filter(
+        (member: MemberData) => member.ptMatchingId === +params.id,
+      ),
+  });
 
   useEffect(() => {
     console.log('OtherProfilePage', stack);
   }, [stack]);
+
+  if (isLoading) {
+    <Layout hasFooter={false}>
+      <LoadingSpinner />
+    </Layout>;
+  }
 
   return (
     <AppScreen backgroundColor="#E9ECF0">
@@ -42,16 +62,16 @@ const OhterProfile: React.FC = () => {
         </div>
         <div className="w-full h-[394px] flex-col justify-start items-center gap-4 inline-flex relative mb-5 mt-5">
           <img
-            className="w-40 h-40 rounded-full border-opacity-5"
-            src="https://via.placeholder.com/160x160"
+            className="w-40 h-40 rounded-full"
+            src={memberData[0]?.profilePictureUrl}
             alt="#"
           />
           <div className="flex flex-col items-start justify-start gap-1">
             <div className="w-full text-2xl font-extrabold leading-7 text-center text-white">
-              신도윤
+              {memberData[0]?.name}
             </div>
             <div className="w-[280px] text-center text-white text-opacity-60 text-xs font-normal leading-none">
-              park456@kakao.com
+              {memberData[0]?.email}
             </div>
           </div>
           <div className="flex-col justify-start items-start gap-2.5 flex">

@@ -70,7 +70,7 @@ const useSocket = () => {
           //console.log(`Received: ${payload}`);
           console.log(JSON.parse(payload.body).data.content);
           const data = JSON.parse(payload.body).data;
-          console.log('data.content: ', data.content);
+          console.log('data ', data);
           if (data.content === null) return;
           setMessages({
             message: data.content,

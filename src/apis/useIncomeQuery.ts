@@ -37,9 +37,6 @@ const useIncomeQuery = (
 ) => {
   const serverInstance = getServerInstance();
   console.log('query', filters);
-  serverInstance.defaults.headers.common[
-    'Authorization'
-  ] = `eyJhbGciOiJIUzUxMiJ9.eyJhdXRob3JpdGllcyI6WyJtZW1iZXIiXSwic3ViIjoia2ltdGtzNDU2QG5hdmVyLmNvbSIsImlhdCI6MTY5MTEzMzg2MSwiZXhwIjoxNzAxNTAxODYxfQ.ZNHYOzUN5QSjNE_S_6kuPIkUQl_2-TGlopu9mFcvS3gS1j0zwY1rr4WncL0m-C5f16NDfmGmFiObSfUTTkeBLQ`;
   const result = useQuery(
     myprofileKeys.income(),
     () => serverInstance.get(`/api/v1/account/trainer/sales/total`),

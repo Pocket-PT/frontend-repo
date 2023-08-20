@@ -460,7 +460,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
             style={{
               borderRadius: '20px',
               minWidth: '90vw',
-              minHeight: 'auto',
+              minHeight: '68vh',
               maxWidth: '90vw',
               maxHeight: '68vh',
             }}
@@ -699,7 +699,7 @@ const BottomButtons = ({
         <button
           disabled
           className={cls(
-            'flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray',
+            'flex items-center justify-center w-10 h-10 bg-gray bg-opacity-20 rounded-full active:bg-hoverGray',
           )}
           onClick={onUndo}
         >
@@ -707,7 +707,7 @@ const BottomButtons = ({
         </button>
         <button
           disabled
-          className="flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray bg-opacity-20 active:bg-hoverGray"
           onClick={onRedo}
         >
           <RedoIcon />

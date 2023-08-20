@@ -8,11 +8,16 @@ import AddPersonIcon from 'icons/AddPersonIcon';
 import Footer from 'components/Footer';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import useUser from 'hooks/useUser';
+import useMemeberQuery from 'apis/useMemberQuery';
 
 const Main = () => {
-  const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
+  // const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
   const { onEditProfileUrl } = useMyProfileStore();
   const { data, isSuccess, isLoading, isError } = useUser();
+  const { data: memberData } = useMemeberQuery({
+    select: (response) => response.data,
+  });
+  console.log('memberData: ', memberData);
   useEffect(() => {
     if (isSuccess) {
       onEditProfileUrl(data?.data.profilePictureUrl ?? '');
@@ -39,7 +44,7 @@ const Main = () => {
           <div className="pl-5 pt-[30px] text-xl font-bold leading-normal flex flex-row items-center relative w-full">
             회원
             <span className="pl-1 text-xl font-normal leading-normal text-gray">
-              129
+              {memberData?.data.length}
             </span>
             <div className="absolute text-sm font-semibold leading-tight text-right text-blue-500 right-5">
               <div className="flex flex-row items-center space-x-1 text-gray text-opacity-40">
@@ -54,14 +59,18 @@ const Main = () => {
             autoHide
             style={{ paddingBottom: 16 }}
           >
-            {customerList.map((customer) => (
+            {memberData?.data.map((member) => (
               <Link
-                key={customer}
+                key={member.ptMatchingId}
                 activityName="OtherProfile"
-                activityParams={{ id: String(customer) }}
+                activityParams={{ id: String(member.ptMatchingId) }}
               >
                 <div className="flex flex-row mt-8 hover:cursor-pointer">
-                  <ProfileCard />
+                  <ProfileCard
+                    name={member.name}
+                    email={member.email}
+                    profilePictureUrl={member.profilePictureUrl}
+                  />
                   {/* {customer} */}
                 </div>
               </Link>

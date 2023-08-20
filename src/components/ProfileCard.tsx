@@ -1,18 +1,24 @@
-const ProfileCard = () => {
+type ProfileCardProps = {
+  name: string;
+  email: string;
+  profilePictureUrl: string;
+};
+
+const ProfileCard = ({ name, email, profilePictureUrl }: ProfileCardProps) => {
   return (
     <div className="flex items-center w-full h-auto px-5">
       <img
-        className="rounded-full w-11 h-11 border-opacity-5"
-        src="https://via.placeholder.com/44x44"
+        className="rounded-full w-11 h-11"
+        src={profilePictureUrl}
         alt="profile"
       />
 
       <div className="flex flex-col ml-3">
         <div className="box-border pb-1 text-base font-medium leading-tight text-dark">
-          최주원
+          {name}
         </div>
         <div className="text-xs font-normal leading-none text-gray">
-          yoo@gmail.com
+          {email}
         </div>
       </div>
     </div>
