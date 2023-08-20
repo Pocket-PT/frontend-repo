@@ -1,7 +1,7 @@
 import type { GatsbyConfig } from 'gatsby';
 
 import path from 'path';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const lessToJson = require('less-to-json');
@@ -18,9 +18,9 @@ const gatsbyRequiredRules = path.join(
   'eslint-rules',
 );
 
-dotenv.config({
-  path: `.env`,
-});
+// dotenv.config({
+//   path: `.env`,
+// });
 
 const config: GatsbyConfig = {
   siteMetadata: {

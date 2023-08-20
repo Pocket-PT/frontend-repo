@@ -48,10 +48,14 @@ const ChatList = ({
   }, []);
 
   const handleCapture = useCallback(
-    (ref: RefObject<HTMLVideoElement> | null) => {
+    (
+      ref: RefObject<
+        HTMLVideoElement | HTMLDivElement | HTMLImageElement | HTMLAnchorElement
+      > | null,
+    ) => {
       const playerElement = ref?.current;
       const scale = 0.5;
-      if (playerElement) {
+      if (playerElement && playerElement instanceof HTMLVideoElement) {
         const canvas = document.createElement('canvas');
         const canvas2d = canvas.getContext('2d');
 
@@ -105,7 +109,6 @@ const ChatList = ({
           createAt={item.createAt}
           fileUrl={null}
           postFile={postFile}
-          handleCapture={() => handleCapture(item.ref)}
         />
       ))}
       {modalOpen ? (

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import EditIcon from 'icons/EditIcon';
-import React, { ForwardedRef, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import { cls } from 'utils/cls';
 
 const VideoMessage = forwardRef(
@@ -14,12 +14,12 @@ const VideoMessage = forwardRef(
       handleCapture: (() => void) | undefined;
       src?: string;
     },
-    ref: ForwardedRef<
-      HTMLDivElement | HTMLVideoElement | HTMLImageElement | HTMLAnchorElement
+    ref: React.ForwardedRef<
+      HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
     >,
   ) => {
     const pauseVideo = () => {
-      if (typeof ref === 'object') {
+      if (typeof ref === 'object' && ref?.current instanceof HTMLVideoElement) {
         ref?.current?.pause();
       }
     };

@@ -16,9 +16,9 @@ type MessageProps = {
   messageRef?: React.RefObject<
     HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
   >;
-  handleCapture: (
-    ref: React.ForwardedRef<
-      HTMLDivElement | HTMLVideoElement | HTMLImageElement | HTMLAnchorElement
+  handleCapture?: (
+    ref: React.RefObject<
+      HTMLVideoElement | HTMLDivElement | HTMLImageElement | HTMLAnchorElement
     >,
   ) => void;
   postFile?: (file: FormData) => void;
@@ -129,7 +129,13 @@ const Message = forwardRef(
           <VideoMessage
             isMyMessage={isMyMessage}
             src={fileUrl ?? ''}
-            handleCapture={() => handleCapture(ref)}
+            handleCapture={
+              handleCapture
+                ? () => {
+                    handleCapture(ref);
+                  }
+                : undefined
+            }
             ref={ref}
           />
         )}
@@ -149,7 +155,13 @@ const Message = forwardRef(
                 'absolute top-1/2 text-mainBlue',
                 isMyMessage ? '-left-12' : '-right-12',
               )}
-              onClick={() => handleCapture(ref)}
+              // onClick={() => {
+              //   handleCapture
+              //     ? () => {
+              //         handleCapture(ref);
+              //       }
+              //     : undefined;
+              // }}
             >
               <div className="p-3 rounded-full bg-lightGray">
                 <EditIcon />
