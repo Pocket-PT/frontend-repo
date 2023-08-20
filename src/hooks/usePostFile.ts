@@ -15,7 +15,7 @@ export default function usePostFile(
   return useMutation(
     (data) => {
       return serverInstance.post(
-        `${process.env.GATSBY_HOST_URL}/api/v1/chatting/rooms/${chattingRoomId}/messages/files`,
+        `/api/v1/chatting/rooms/${chattingRoomId}/messages/files`,
         data,
       );
     },
