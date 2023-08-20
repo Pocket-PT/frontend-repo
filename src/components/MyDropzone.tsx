@@ -8,7 +8,7 @@ interface Props extends PropsWithChildren {
 function MyDropzone({ children, postFile }: Props) {
   console.log(postFile);
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: (string | Blob)[]) => {
     const formData = new FormData();
     formData.append('file', acceptedFiles[0]);
     console.log(formData.get('file'));

@@ -44,7 +44,9 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
     });
   };
 
-  const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const onClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent,
+  ) => {
     const target = e.target as HTMLDivElement;
     console.log(target.innerText);
     setSelectedString(target.innerText);

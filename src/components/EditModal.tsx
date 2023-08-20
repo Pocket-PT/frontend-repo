@@ -198,7 +198,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
     console.log('onDraw 실행!');
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = canvasState[canvasStep.step - 1];
+    img.src = canvasState[canvasStep.step - 1] ?? '';
     console.log('img.onLoad 실행 전', canvasState[canvasStep.step - 1]);
     setTrigger(!trigger);
 
@@ -247,7 +247,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     if (ctx) {
-      setCanvasState((prev) => [...prev, canvas?.toDataURL()]);
+      setCanvasState((prev) => [...prev, canvas?.toDataURL() ?? '']);
       img.src = canvasState[canvasStep.step - 1];
       console.log('canvasAdd img:', img.src);
       img.crossOrigin = 'anonymous';
@@ -275,7 +275,9 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
 
   let isPainting = false;
   let mousePressed = false;
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = (
+    e: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
+  ) => {
     if (isPainting && ctx && mousePressed) {
       const rect = canvas?.getBoundingClientRect();
       if (rect && canvas) {
@@ -292,7 +294,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
     //ctx?.moveTo(e.offsetX, e.offsetY);
   };
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (isPainting && ctx && mousePressed) {
       const rect = canvas?.getBoundingClientRect();
       if (rect && canvas) {
@@ -458,9 +460,9 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
             }}
             onMouseDown={handleMouseDown}
             onMouseUp={cancelPaintingWithAdd}
-            onMouseMove={handleMouseMove}
+            onMouseMove={(e) => handleMouseMove(e)}
             onMouseLeave={cancelPaintingWithAdd}
-            onTouchMove={handleTouchMove}
+            onTouchMove={(e) => handleTouchMove(e)}
             onTouchStart={handleMouseDown}
             onTouchEnd={cancelPaintingWithAdd}
           />
