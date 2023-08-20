@@ -1,7 +1,7 @@
 import { COLOR_PLATE } from 'constants/global';
 import { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import { saveAsImage } from 'utils/saveImage';
+//import { saveAsImage } from 'utils/saveImage';
 import EraseIcon from 'icons/EraseIcon';
 import UndoIcon from 'icons/UndoIcon';
 import RedoIcon from 'icons/RedoIcon';
@@ -47,7 +47,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
   });
   const [color, setColor] = useState('#000000');
   const [canvasStep, setCanvasStep] = useState({ step: 0, mode: 'undo' });
-  const [canvasState, setCanvasState] = useState<string[]>([]);
+  const [canvasState] = useState<string[]>([]);
   const [trigger, setTrigger] = useState(false);
 
   //const [testState, setTestState] = useState<string[]>([]);
@@ -136,7 +136,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
     if (divElement) {
       html2canvas(divElement).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
-        saveAsImage(imgData, 'test.png');
+        //saveAsImage(imgData, 'test.png');
         const blob = DataURIToBlob(imgData);
         console.log('dataURI:', DataURIToBlob(imgData));
         const formData = new FormData();
@@ -243,38 +243,40 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
     }
   }, [canvasStep]);
 
-  const canvasAdd = () => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    if (ctx) {
-      setCanvasState((prev) => [...prev, canvas?.toDataURL() ?? '']);
-      img.src = canvasState[canvasStep.step - 1];
-      console.log('canvasAdd img:', img.src);
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        ctx?.drawImage(
-          img,
-          0,
-          0,
-          canvasData.canvasWidth,
-          canvasData.canvasHeight,
-        );
-      };
-    }
-    // setIsMode({
-    //   isDrawMode: true,
-    //   isColorMode: false,
-    //   isEraseMode: false,
-    //   isUndoMode: false,
-    //   isRedoMode: false,
-    // });
-    setCanvasStep((prev) => {
-      return { step: prev.step + 1, mode: 'add' };
-    });
-  };
+  // const canvasAdd = () => {
+  //   const img = new Image();
+  //   img.crossOrigin = 'anonymous';
+  //   if (ctx) {
+  //     setCanvasState((prev) => [...prev, canvas?.toDataURL() ?? '']);
+  //     img.src = canvasState[canvasStep.step - 1];
+  //     console.log('canvasAdd img:', img.src);
+  //     img.crossOrigin = 'anonymous';
+  //     img.onload = () => {
+  //       ctx?.drawImage(
+  //         img,
+  //         0,
+  //         0,
+  //         canvasData.canvasWidth,
+  //         canvasData.canvasHeight,
+  //       );
+  //     };
+  //   }
+  //   // setIsMode({
+  //   //   isDrawMode: true,
+  //   //   isColorMode: false,
+  //   //   isEraseMode: false,
+  //   //   isUndoMode: false,
+  //   //   isRedoMode: false,
+  //   // });
+  //   setCanvasStep((prev) => {
+  //     return { step: prev.step + 1, mode: 'add' };
+  //   });
+  // };
 
-  let isPainting = false;
-  let mousePressed = false;
+  const [isPainting, setIsPainting] = useState(false);
+  const [mousePressed, setMousePressed] = useState(false);
+  //let isPainting = false;
+  //let mousePressed = false;
   const handleMouseMove = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>,
   ) => {
@@ -311,11 +313,14 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
   };
 
   const handleMouseDown = () => {
-    isPainting = true;
-    mousePressed = true;
+    //isPainting = true;
+    setIsPainting(true);
+    //mousePressed = true;
+    setMousePressed(true);
   };
   const cancelPainting = () => {
-    isPainting = false;
+    //isPainting = false;
+    setIsPainting(false);
 
     console.log('그리기 끝!');
     ctx?.beginPath();
@@ -324,9 +329,10 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
   const cancelPaintingWithAdd = () => {
     console.log('canvasAdd 실행!');
     if (mousePressed) {
-      mousePressed = false;
+      //mousePressed = false;
+      //setMousePressed(false);
       cancelPainting();
-      canvasAdd();
+      //canvasAdd();
     }
   };
 
@@ -691,6 +697,7 @@ const BottomButtons = ({
       </div>
       <div className="flex flex-row gap-2">
         <button
+          disabled
           className={cls(
             'flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray',
           )}
@@ -699,6 +706,7 @@ const BottomButtons = ({
           <UndoIcon />
         </button>
         <button
+          disabled
           className="flex items-center justify-center w-10 h-10 bg-white rounded-full active:bg-hoverGray"
           onClick={onRedo}
         >

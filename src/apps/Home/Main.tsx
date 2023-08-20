@@ -42,7 +42,7 @@ const Main = () => {
               129
             </span>
             <div className="absolute text-sm font-semibold leading-tight text-right text-blue-500 right-5">
-              <div className="flex flex-row items-center space-x-1 text-mainBlue">
+              <div className="flex flex-row items-center space-x-1 text-gray text-opacity-40">
                 <AddPersonIcon />
                 <span>회원 추가</span>
               </div>

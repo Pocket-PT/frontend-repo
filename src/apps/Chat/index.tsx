@@ -14,7 +14,7 @@ const ChatListPage = () => {
         <div className="absolute text-xl font-extrabold leading-normal left-5">
           채팅
         </div>
-        <div className="absolute text-sm font-semibold leading-tight right-5 text-mainBlue top-[5px]">
+        <div className="absolute text-sm font-semibold leading-tight right-5 text-gray text-opacity-40 top-[5px]">
           편집
         </div>
       </div>

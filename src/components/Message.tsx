@@ -4,7 +4,7 @@ import React, { ForwardedRef, MutableRefObject, forwardRef } from 'react';
 import dayjs from 'dayjs';
 import Scrollbars from 'react-custom-scrollbars-2';
 import { classifyUrl } from 'utils/classifyUrl';
-import EditIcon from 'icons/EditIcon';
+//import EditIcon from 'icons/EditIcon';
 
 type MessageProps = {
   message: string | null;
@@ -150,7 +150,7 @@ const Message = forwardRef(
                 if (!isScrollTop) scrollbarRef?.current?.scrollToBottom();
               }}
             />
-            <button
+            {/* <button
               className={cls(
                 'absolute top-1/2 text-mainBlue',
                 isMyMessage ? '-left-12' : '-right-12',
@@ -166,7 +166,7 @@ const Message = forwardRef(
               <div className="p-3 rounded-full bg-lightGray">
                 <EditIcon />
               </div>
-            </button>
+            </button> */}
           </>
         )}
       </MediaMessageWrapper>
