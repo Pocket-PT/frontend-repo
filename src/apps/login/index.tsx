@@ -16,7 +16,7 @@ const SignInPage = () => {
         </div>
         <div>
           <a
-            href={`https://back.pocketpt.shop?redirectUri=${encodeURIComponent(
+            href={`https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
               'https://pocketpt.netlify.app/#/after-login',
             )}`}
           >
