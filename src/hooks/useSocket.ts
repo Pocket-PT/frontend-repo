@@ -1,6 +1,8 @@
 import { Client } from '@stomp/stompjs';
 import { SUB_URL } from 'constants/global';
+import { myprofileKeys } from 'constants/querykey';
 import { useCallback, useEffect, useRef } from 'react';
+import { useQueryClient } from 'react-query';
 import useMessageStore from 'stores/message';
 import useTokenStore from 'stores/token';
 import WebSocket from 'ws';
@@ -10,6 +12,7 @@ Object.assign(global, WebSocket);
 const useSocket = () => {
   const { token } = useTokenStore();
   const { setMessages } = useMessageStore();
+  const queryClient = useQueryClient();
 
   const ref = useRef<Client>(null);
   console.log('ref: ', ref.current);
@@ -78,6 +81,8 @@ const useSocket = () => {
             createAt: data.createdAt,
           });
         });
+        queryClient.invalidateQueries(myprofileKeys.chatRoom());
+        queryClient.refetchQueries(myprofileKeys.chatRoom());
       }
     },
     [ref.current],

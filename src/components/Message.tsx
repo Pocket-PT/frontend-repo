@@ -102,14 +102,14 @@ const MediaMessageWrapper = ({
 const Message = forwardRef(
   (
     {
+      isScrollTop,
       message,
       myId,
       chatId,
       createAt,
       fileUrl,
       handleCapture,
-      scrollbarRef,
-      isScrollTop,
+      scrollbarRef, //isScrollTop,
     }: MessageProps,
     ref: ForwardedRef<
       HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
@@ -127,6 +127,8 @@ const Message = forwardRef(
       >
         {uri === 'video' && (
           <VideoMessage
+            scrollTop={isScrollTop}
+            scrollbarRef={scrollbarRef}
             isMyMessage={isMyMessage}
             src={fileUrl ?? ''}
             handleCapture={
@@ -145,7 +147,6 @@ const Message = forwardRef(
               src={fileUrl ?? ''}
               alt="img"
               className="w-full h-auto rounded-xl"
-              loading="lazy"
               onLoad={() => {
                 if (!isScrollTop) scrollbarRef?.current?.scrollToBottom();
               }}

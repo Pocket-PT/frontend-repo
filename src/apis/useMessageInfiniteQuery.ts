@@ -59,9 +59,6 @@ const useMessageInfiniteQuery = (
       onSettled: () => {
         queryClient.cancelQueries(messageKeys.message(id));
       },
-      // onSuccess: () => {
-      //   resetMessages();
-      // },
       select: (data: InfiniteData<AxiosResponse<AxiosResponse<IMessage>>>) => {
         return {
           pages: data.pages

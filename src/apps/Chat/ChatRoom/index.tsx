@@ -20,6 +20,7 @@ import ChatList from 'components/ChatList';
 import usePushToPage from 'hooks/usePushToPage';
 import LoadingSpinner from 'components/common/LoadingSpinner';
 import Scrollbars, { positionValues } from 'react-custom-scrollbars-2';
+import useChatRoomQuery, { IChatRoomData } from 'apis/useChatRoomQuery';
 
 type ChatRoomPageProps = {
   id: string;
@@ -124,6 +125,16 @@ const CreateMessage = React.memo(function CreateMessage({
 const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
   // const { data: messageData, refetch, isError } = useMessagesQuery(+params.id);
   const messageData = useMessageInfiniteQuery(+params.id);
+  const { data: chatRoomData } = useChatRoomQuery({
+    select: (res) => {
+      console.log('chatRoomPageRes: ', res);
+      return res.data.data.filter(
+        (item: IChatRoomData) => item.chattingRoomId === +params.id,
+      )[0].chattingParticipantResponseList[0];
+    },
+  });
+  console.log('ChatRoomPageParamsId', +params.id);
+  console.log('ChatRoomPage: ', chatRoomData);
   const { data: userData } = useUser();
   const { messages: newMessageData, resetMessages } = useMessageStore();
   const { mutate } = usePostFile(+params.id);
@@ -235,15 +246,12 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
           </div>
           <img
             className="ml-5 rounded-full w-11 h-11"
-            src={userData?.data.profilePictureUrl}
+            src={chatRoomData?.accountProfilePictureUrl}
             alt="#"
           />
           <div className="ml-3 space-y-1">
             <div className="text-base font-bold leading-tight">
-              {userData?.data.name}
-            </div>
-            <div className="text-xs font-normal leading-none text-gray">
-              {userData?.data.email}
+              {chatRoomData?.accountNickName}
             </div>
           </div>
           <div className="absolute w-6 h-6 text-gray text-opacity-40 right-5">

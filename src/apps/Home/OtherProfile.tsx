@@ -15,6 +15,7 @@ import { Link } from 'libs/link';
 import useMemeberQuery, { MemberData } from 'apis/useMemberQuery';
 import Layout from 'components/Layout';
 import LoadingSpinner from 'components/common/LoadingSpinner';
+import useChatRoomQuery from 'apis/useChatRoomQuery';
 
 type OtherProfileProps = {
   id: string;
@@ -23,13 +24,16 @@ type OtherProfileProps = {
 const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
   const stack = useStack();
   const { pop } = usePushToPage();
+  const { data: chatRoomData } = useChatRoomQuery({
+    select: (res) => res.data,
+  });
   const { data: memberData, isLoading } = useMemeberQuery({
     select: (res) =>
       res.data.data.filter(
         (member: MemberData) => member.ptMatchingId === +params.id,
       ),
   });
-
+  console.log('otherProfile chatRoomData', chatRoomData);
   useEffect(() => {
     console.log('OtherProfilePage', stack);
   }, [stack]);
@@ -84,7 +88,10 @@ const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
               </div>
             </div>
             <div className="justify-start items-start gap-2.5 inline-flex">
-              <Link activityName="ChatRoomPage" activityParams={{ id: '1' }}>
+              <Link
+                activityName="ChatRoomPage"
+                activityParams={{ id: params.id }}
+              >
                 <div className="w-[28vw] h-[72px] relative bg-dark bg-opacity-20 rounded-xl flex justify-center items-center gap-2 flex-col">
                   <div className="w-6 h-6 text-white">
                     <ChatIcon />

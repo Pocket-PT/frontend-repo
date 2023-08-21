@@ -1,15 +1,20 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import EditIcon from 'icons/EditIcon';
 import React, { forwardRef } from 'react';
+import Scrollbars from 'react-custom-scrollbars-2';
 import { cls } from 'utils/cls';
 
 const VideoMessage = forwardRef(
   (
     {
+      scrollTop,
+      scrollbarsRef,
       isMyMessage,
       handleCapture,
       src,
     }: {
+      scrollTop?: boolean;
+      scrollbarsRef?: React.RefObject<Scrollbars>;
       isMyMessage: boolean;
       handleCapture: (() => void) | undefined;
       src?: string;
@@ -33,6 +38,9 @@ const VideoMessage = forwardRef(
     return (
       <div className="relative w-full h-full">
         <video
+          onLoadedData={() => {
+            if (!scrollTop) scrollbarsRef?.current?.scrollToBottom();
+          }}
           crossOrigin="anonymous"
           ref={ref}
           src={src}

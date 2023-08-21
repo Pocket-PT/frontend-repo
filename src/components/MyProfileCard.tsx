@@ -4,13 +4,14 @@ type MyProfileCardProps = {
 };
 
 const MyProfileCard = ({ name, profileUrl }: MyProfileCardProps) => {
-  console.log(profileUrl);
-
   return (
     <div className="relative flex items-center w-full h-auto px-5 hover:bg-hoverGray hover:cursor-pointer">
-      <div className="flex items-center justify-between rounded-full w-[68px] h-[68px]">
-        <img src={profileUrl ?? ''} alt="profileImg" className="rounded-full" />
-      </div>
+      <img
+        src={profileUrl ?? ''}
+        alt="profileImg"
+        className="w-16 h-16 rounded-full"
+      />
+
       <div className="flex flex-row">
         <div className="flex flex-col ml-4">
           <div className="mr-1 text-xl font-extrabold leading-normal text-dark">
