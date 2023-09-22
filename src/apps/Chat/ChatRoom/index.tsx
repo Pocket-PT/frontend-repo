@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { ActivityComponentType } from '@stackflow/react';
-import Layout from 'components/Layout';
 import { PUB_URL } from 'constants/global';
 import useInput from 'hooks/useInput';
 import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
@@ -8,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import useSocket from 'hooks/useSocket';
 import React from 'react';
 import useMessageStore from 'stores/message';
-import useUser from 'hooks/useUser';
 import ArrowUpIcon from 'icons/ArrowUpIcon';
 import MyDropzone from 'components/MyDropzone';
 import ImageIcon from 'icons/ImageIcon';
@@ -20,7 +18,9 @@ import ChatList from 'components/ChatList';
 import usePushToPage from 'hooks/usePushToPage';
 import LoadingSpinner from 'components/common/LoadingSpinner';
 import Scrollbars, { positionValues } from 'react-custom-scrollbars-2';
-import useChatRoomQuery, { IChatRoomData } from 'apis/useChatRoomQuery';
+import useChatRoomQuery from 'apis/useChatRoomQuery';
+import MyLayout from 'components/MyLayout';
+import { AccountQueryResult } from 'apis/useAccountQuery';
 
 type ChatRoomPageProps = {
   id: string;
@@ -64,7 +64,7 @@ const CreateMessage = React.memo(function CreateMessage({
   };
 
   return (
-    <div className="w-full bg-white -top-1">
+    <div className="w-full pt-2 bg-white">
       <form
         className="flex flex-row w-full h-auto"
         onSubmit={handleSubmit(onValid)}
@@ -99,7 +99,7 @@ const CreateMessage = React.memo(function CreateMessage({
         />
         <button
           type="submit"
-          className="rounded-full absolute right-8 top-[9px] w-8 h-8 bg-[#EEEEEE] flex justify-center items-center"
+          className="rounded-full absolute right-8 top-4 w-8 h-8 bg-[#EEEEEE] flex justify-center items-center"
         >
           <div className="text-white">
             <ArrowUpIcon />
@@ -122,42 +122,54 @@ const CreateMessage = React.memo(function CreateMessage({
   );
 });
 
-const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
-  // const { data: messageData, refetch, isError } = useMessagesQuery(+params.id);
+const ChatRoomPageWrapper: ActivityComponentType<ChatRoomPageProps> = ({
+  params,
+}) => {
+  return (
+    <MyLayout hasFooter={false}>
+      <ChatRoomPage params={params} />
+    </MyLayout>
+  );
+};
+
+type Props = {
+  params: { id: string };
+  result: AccountQueryResult;
+};
+
+type ChatRoomSelectedDataProps = {
+  accountId: number;
+  accountNickName: string;
+  accountProfilePictureUrl: string;
+  isHost: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   const messageData = useMessageInfiniteQuery(+params.id);
-  const { data: chatRoomData } = useChatRoomQuery({
+  const { data: chatRoomData } = useChatRoomQuery<ChatRoomSelectedDataProps>({
     select: (res) => {
-      console.log('chatRoomPageRes: ', res);
       return res.data.data.filter(
-        (item: IChatRoomData) => item.chattingRoomId === +params.id,
+        (item) => item.chattingRoomId === +params.id,
       )[0].chattingParticipantResponseList[0];
     },
   });
-  console.log('ChatRoomPageParamsId', +params.id);
-  console.log('ChatRoomPage: ', chatRoomData);
-  const { data: userData } = useUser();
+
+  const { data: userData } = result;
   const { messages: newMessageData, resetMessages } = useMessageStore();
   const { mutate } = usePostFile(+params.id);
   const [fileContainerOpen, setFileContainerOpen] = useState(false);
   const [isScrollTop, setIsScrollTop] = useState(false);
   const { pop } = usePushToPage();
-
-  // console.log('message: ', messageData?.data.chattingMessageGetResponseList);
-  console.log('messageInfiniteData: ', messageData.data);
-  console.log('newMessageData: ', newMessageData);
   const scrollbarRef = useRef<Scrollbars>(null);
   const { client, publish } = useSocket();
   const clientRef = useRef<unknown>(null);
 
   useEffect(() => {
-    console.log('컴포넌트 진입 시 실행?');
-    // if (
-    //   messageData.data &&
-    //   messageData.data.pages[0].chattingMessageGetResponseList.length >= 1
-    // ) {
     console.log('scrollToBottom 실행!');
     scrollbarRef.current?.scrollToBottom();
-    //}
   }, [newMessageData, fileContainerOpen]);
 
   //로드 시 스크롤바 유지
@@ -226,70 +238,68 @@ const ChatRoomPage: ActivityComponentType<ChatRoomPageProps> = ({ params }) => {
 
   if (messageData.isLoading) {
     return (
-      <Layout hasFooter={false}>
+      <MyLayout>
         <LoadingSpinner />
-      </Layout>
+      </MyLayout>
     );
   }
 
   return (
-    <Layout hasFooter={false}>
-      <div className="box-border w-full mx-auto overflow-hidden">
-        <div className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray">
-          <div
-            className="w-6 h-6"
-            onClick={() => pop()}
-            onKeyDown={() => pop()}
-            role="presentation"
-          >
-            <BackIcon />
-          </div>
-          <img
-            className="ml-5 rounded-full w-11 h-11"
-            src={chatRoomData?.accountProfilePictureUrl}
-            alt="#"
-          />
-          <div className="ml-3 space-y-1">
-            <div className="text-base font-bold leading-tight">
-              {chatRoomData?.accountNickName}
-            </div>
-          </div>
-          <div className="absolute w-6 h-6 text-gray text-opacity-40 right-5">
-            <MenuIcon />
+    <div className="box-border w-full mx-auto overflow-hidden">
+      <div className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray">
+        <div
+          className="w-6 h-6"
+          onClick={() => pop()}
+          onKeyDown={() => pop()}
+          role="presentation"
+        >
+          <BackIcon />
+        </div>
+        <img
+          className="ml-5 rounded-full w-11 h-11"
+          src={chatRoomData?.accountProfilePictureUrl}
+          alt="#"
+        />
+        <div className="ml-3 space-y-1">
+          <div className="text-base font-bold leading-tight">
+            {chatRoomData?.accountNickName}
           </div>
         </div>
-        <Scrollbars
-          style={{ backgroundColor: '#FAFAFA' }}
-          autoHide
-          onScrollFrame={onScroll}
-          autoHeight
-          autoHeightMin={
-            fileContainerOpen
-              ? `calc(100vh - ${52}px - 176px - 16px - 64px)`
-              : `calc(100vh - ${52}px - 16px - 64px)`
-          }
-          ref={scrollbarRef}
-        >
-          <ChatList
-            scrollbarRef={scrollbarRef}
-            isScrollTop={isScrollTop}
-            userData={userData}
-            messageData={messageData}
-            postFile={postFile}
-            fileContainerOpen={fileContainerOpen}
-          />
-        </Scrollbars>
-        <div className="fixed w-full transition-all bottom-2">
-          <CreateMessage
-            postFile={postFile}
-            publish={publish}
-            fileContainerOpen={fileContainerOpen}
-            setFileContainerOpen={setFileContainerOpen}
-          />
+        <div className="absolute w-6 h-6 text-gray text-opacity-40 right-5">
+          <MenuIcon />
         </div>
       </div>
-    </Layout>
+      <Scrollbars
+        style={{ backgroundColor: '#FAFAFA' }}
+        autoHide
+        onScrollFrame={onScroll}
+        autoHeight
+        autoHeightMin={
+          fileContainerOpen
+            ? `calc(100vh - ${52}px - 176px - 16px - 64px)`
+            : `calc(100vh - ${52}px - 16px - 64px)`
+        }
+        ref={scrollbarRef}
+      >
+        <ChatList
+          scrollbarRef={scrollbarRef}
+          isScrollTop={isScrollTop}
+          userData={userData}
+          messageData={messageData}
+          postFile={postFile}
+          fileContainerOpen={fileContainerOpen}
+        />
+      </Scrollbars>
+      <div className="fixed bottom-0 w-full transition-all">
+        <CreateMessage
+          postFile={postFile}
+          publish={publish}
+          fileContainerOpen={fileContainerOpen}
+          setFileContainerOpen={setFileContainerOpen}
+        />
+      </div>
+    </div>
   );
 };
 
-export default React.memo(ChatRoomPage);
+export default React.memo(ChatRoomPageWrapper);

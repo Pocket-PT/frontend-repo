@@ -1,47 +1,54 @@
 /* eslint-disable react/prop-types */
-// import { cls } from 'utils/cls';
-// import ChatIcon from 'icons/ChatIcon';
 import { useEffect } from 'react';
 import { ActivityComponentType, useStack } from '@stackflow/react';
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import ChatIcon from 'icons/ChatIcon';
 import TelIcon from 'icons/TelIcon';
 import SmsIcon from 'icons/SmsIcon';
-import BottomModal from 'components/common/BottomModal';
+import BottomWhitePlain from 'components/common/BottomWhitePlain';
 import BackIcon from 'icons/BackIcon';
 import MoreIcon from 'icons/MoreIcon';
 import usePushToPage from 'hooks/usePushToPage';
 import { Link } from 'libs/link';
 import useMemeberQuery, { MemberData } from 'apis/useMemberQuery';
-import Layout from 'components/Layout';
 import LoadingSpinner from 'components/common/LoadingSpinner';
-import useChatRoomQuery from 'apis/useChatRoomQuery';
+import MyLayout from 'components/MyLayout';
 
 type OtherProfileProps = {
   id: string;
 };
 
-const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
+const OtherProfileWrapper: ActivityComponentType<OtherProfileProps> = ({
+  params,
+}) => {
+  return (
+    <MyLayout hasFooter={false}>
+      <OhterProfile params={params} />
+    </MyLayout>
+  );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const OhterProfile: React.FC<any> = ({
+  params,
+}: {
+  params: { id: string };
+}) => {
   const stack = useStack();
   const { pop } = usePushToPage();
-  const { data: chatRoomData } = useChatRoomQuery({
-    select: (res) => res.data,
-  });
-  const { data: memberData, isLoading } = useMemeberQuery({
+  const { data: memberData, isLoading } = useMemeberQuery<MemberData>({
     select: (res) =>
-      res.data.data.filter(
-        (member: MemberData) => member.ptMatchingId === +params.id,
-      ),
+      res.data.data.filter((member) => member.ptMatchingId === +params.id)[0],
   });
-  console.log('otherProfile chatRoomData', chatRoomData);
+
   useEffect(() => {
     console.log('OtherProfilePage', stack);
   }, [stack]);
 
   if (isLoading) {
-    <Layout hasFooter={false}>
+    <MyLayout hasFooter={false}>
       <LoadingSpinner />
-    </Layout>;
+    </MyLayout>;
   }
 
   return (
@@ -67,15 +74,15 @@ const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
         <div className="w-full h-[394px] flex-col justify-start items-center gap-4 inline-flex relative mb-5 mt-5">
           <img
             className="w-40 h-40 rounded-full"
-            src={memberData[0]?.profilePictureUrl}
+            src={memberData?.profilePictureUrl}
             alt="#"
           />
           <div className="flex flex-col items-start justify-start gap-1">
             <div className="w-full text-2xl font-extrabold leading-7 text-center text-white">
-              {memberData[0]?.name}
+              {memberData?.name}
             </div>
             <div className="w-[280px] text-center text-white text-opacity-60 text-xs font-normal leading-none">
-              {memberData[0]?.email}
+              {memberData?.email}
             </div>
           </div>
           <div className="flex-col justify-start items-start gap-2.5 flex">
@@ -120,7 +127,7 @@ const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
             </div>
           </div>
         </div>
-        <BottomModal>
+        <BottomWhitePlain>
           <div className="text-xl font-bold leading-normal">
             목표
             <span className="pl-1 font-normal leading-normal text-gray">3</span>
@@ -128,7 +135,7 @@ const OhterProfile: ActivityComponentType<OtherProfileProps> = ({ params }) => {
           {[1, 2, 3].map((v) => (
             <GoalCard key={v} />
           ))}
-        </BottomModal>
+        </BottomWhitePlain>
       </div>
     </AppScreen>
   );
@@ -150,4 +157,4 @@ const GoalCard = () => {
   );
 };
 
-export default OhterProfile;
+export default OtherProfileWrapper;

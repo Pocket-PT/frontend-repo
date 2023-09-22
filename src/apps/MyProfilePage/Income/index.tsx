@@ -1,4 +1,3 @@
-import { AppScreen } from '@stackflow/plugin-basic-ui';
 import usePushToPage from 'hooks/usePushToPage';
 import BackIcon from 'icons/BackIcon';
 import { DatePicker, DatePickerProps, Select } from 'antd';
@@ -7,6 +6,16 @@ import 'dayjs/locale/ko';
 import useIncomeQuery from 'apis/useIncomeQuery';
 import { useState } from 'react';
 import { splitNumber } from 'utils/splitNumber';
+import MyLayout from 'components/MyLayout';
+import Scrollbars from 'react-custom-scrollbars-2';
+
+const IncomeWrapper = () => {
+  return (
+    <MyLayout hasFooter={false}>
+      <IncomePage />
+    </MyLayout>
+  );
+};
 
 const IncomePage = () => {
   const { pop } = usePushToPage();
@@ -52,7 +61,7 @@ const IncomePage = () => {
   }
 
   return (
-    <AppScreen>
+    <>
       <div className="relative flex flex-row items-center mx-5 mt-5">
         <div
           className="w-6 h-6"
@@ -92,21 +101,23 @@ const IncomePage = () => {
             options={options}
             onSelect={onPlanSelect}
           />
-          {data?.data.ptMatchingSummaryList.map((item) => {
-            return (
-              <PlanCard
-                key={item.email}
-                period={item.subscriptionPeriod}
-                expiredDate={item.expiredDate}
-                paymentAmount={item.paymentAmount}
-                name={item.name}
-                profilePictureUrl={item.profilePictureUrl}
-              />
-            );
-          })}
+          <Scrollbars autoHide autoHeight autoHeightMin={'60vh'}>
+            {data?.data.ptMatchingSummaryList.map((item) => {
+              return (
+                <PlanCard
+                  key={item.ptMatchingId}
+                  period={item.subscriptionPeriod}
+                  expiredDate={item.expiredDate}
+                  paymentAmount={item.paymentAmount}
+                  name={item.name}
+                  profilePictureUrl={item.profilePictureUrl}
+                />
+              );
+            })}
+          </Scrollbars>
         </div>
       </div>
-    </AppScreen>
+    </>
   );
 };
 
@@ -148,4 +159,4 @@ const PlanCard = ({
   );
 };
 
-export default IncomePage;
+export default IncomeWrapper;

@@ -1,19 +1,27 @@
+/* eslint-disable react/prop-types */
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import DMList from 'components/DMList';
 import Footer from 'components/Footer';
+import MyLayout from 'components/MyLayout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
-import useUser from 'hooks/useUser';
 import { Link } from 'libs/link';
 import Scrollbars from 'react-custom-scrollbars-2';
 
-const ChatListPage = () => {
-  const { data: myData } = useUser();
-  console.log('myData', myData);
-  const { data } = useChatRoomQuery({
+const ChatLisPageWrapper = () => {
+  return (
+    <MyLayout>
+      <ChatListPage />
+    </MyLayout>
+  );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ChatListPage: React.FC<any> = () => {
+  const { data: chatRoomData } = useChatRoomQuery({
     select: (res) => res.data,
   });
-  console.log('chatList', data);
+
   return (
     <AppScreen backgroundColor="#FAFAFA">
       <div className="relative mt-5 h-7">
@@ -30,7 +38,7 @@ const ChatListPage = () => {
         autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`}
       >
         <div className="w-full px-5 mt-7">
-          {data?.data.map((item) => (
+          {chatRoomData?.data.map((item) => (
             <Link
               key={item.chattingRoomId}
               activityName="ChatRoomPage"
@@ -59,4 +67,4 @@ const ChatListPage = () => {
   );
 };
 
-export default ChatListPage;
+export default ChatLisPageWrapper;

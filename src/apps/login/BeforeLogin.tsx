@@ -10,7 +10,7 @@ import { cls } from 'utils/cls';
 import useInput from 'hooks/useInput';
 import { koreanOrEnglishRegex, koreanPhoneNumberRegex } from 'constants/global';
 import React from 'react';
-import usePostAccountMutation from 'hooks/usePostMutation';
+import usePostAccountMutation from 'hooks/usePostAccountMutation';
 import usePushToPage from 'hooks/usePushToPage';
 //import useUser from 'hooks/useUser';
 

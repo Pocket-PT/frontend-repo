@@ -1,4 +1,4 @@
-import Layout from 'components/Layout';
+import Layout from 'components/MyLayout';
 import useInput from 'hooks/useInput';
 import usePushToPage from 'hooks/usePushToPage';
 import EditIcon from 'icons/EditIcon';

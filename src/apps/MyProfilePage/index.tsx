@@ -1,5 +1,5 @@
-import { AppScreen } from '@stackflow/plugin-basic-ui';
-import BottomModal from 'components/common/BottomModal';
+import MyLayout from 'components/MyLayout';
+import BottomWhitePlain from 'components/common/BottomWhitePlain';
 import usePushToPage from 'hooks/usePushToPage';
 import ArrowRightIcon from 'icons/ArrowRightIcon';
 import BackIcon from 'icons/BackIcon';
@@ -67,13 +67,21 @@ const InfoCard = ({ title }: { title: string }) => {
   );
 };
 
+const MyProfilePageWrapper = () => {
+  return (
+    <MyLayout hasFooter={false}>
+      <MyProfilePage />
+    </MyLayout>
+  );
+};
+
 const MyProfilePage = () => {
   const { name, nickname, description, birthDate, email } = useMyProfileStore();
   console.log('MyProfilePage', name, nickname, description, birthDate, email);
   const { pop } = usePushToPage();
 
   return (
-    <AppScreen backgroundColor="#E9ECF0">
+    <>
       <div
         className="absolute w-6 h-6 text-white top-5 left-5"
         onClick={() => pop()}
@@ -103,7 +111,7 @@ const MyProfilePage = () => {
           email={email}
         />
       </div>
-      <BottomModal>
+      <BottomWhitePlain>
         <div className="text-xl font-bold leading-normal">내 정보 관리</div>
         <div className="space-y-2">
           <div>
@@ -122,9 +130,9 @@ const MyProfilePage = () => {
             </Link>
           </div>
         </div>
-      </BottomModal>
-    </AppScreen>
+      </BottomWhitePlain>
+    </>
   );
 };
 
-export default MyProfilePage;
+export default MyProfilePageWrapper;

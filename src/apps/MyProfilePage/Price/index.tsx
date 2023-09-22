@@ -16,8 +16,6 @@ const PricePage = () => {
     useMyProfileStore();
   const { pop } = usePushToPage();
 
-  console.log(priceTable);
-
   return (
     <AppScreen>
       <div className="relative w-full h-full pl-5 pr-5 overflow-hidden">
