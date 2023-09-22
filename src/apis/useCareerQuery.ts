@@ -3,30 +3,29 @@ import { getServerInstance } from './instance';
 import { AxiosResponse } from 'axios';
 import { myprofileKeys } from 'constants/querykey';
 
-export interface AccountData {
-  accountId: number;
-  role: string;
-  provider: string;
-  email: string;
-  name: string;
-  phoneNumber: string;
-  nickname: string;
-  profilePictureUrl: string;
-  gender: null;
-  birthdate: null;
+export interface CareerListData {
+  careerId: number;
+  type: string;
+  title: string;
+  date: string;
+}
+
+export interface CareerData {
+  trainerAccountId: number;
+  careerList: CareerListData[];
 }
 
 //useAccountQuery 훅의 반환 타입을 정의
-export type AccountQueryResult = UseQueryResult<
-  AxiosResponse<AccountData>,
+export type CareerQueryResult = UseQueryResult<
+  AxiosResponse<CareerData>,
   unknown
 >;
 
-export const useAccountQuery = (): AccountQueryResult => {
+export const useCareerQuery = (id: number | undefined): CareerQueryResult => {
   const serverInstance = getServerInstance();
   const result = useQuery(
-    myprofileKeys.account(),
-    () => serverInstance.get('/api/v1/account/detail'),
+    myprofileKeys.career(),
+    () => serverInstance.get(`/api/v1/account/trainer/career/${id}`),
     {
       select: (response: AxiosResponse) => response.data,
       staleTime: 300000,

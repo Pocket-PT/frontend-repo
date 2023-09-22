@@ -31,7 +31,12 @@ export interface IncomeData {
 const useIncomeQuery = (
   filters: { value: string; date: string },
   options?: Omit<
-    UseQueryOptions<AxiosResponse, unknown, IncomeData, MyProfileKeyReturnType>,
+    UseQueryOptions<
+      AxiosResponse<IncomeData>,
+      unknown,
+      IncomeData,
+      MyProfileKeyReturnType
+    >,
     'queryKey' | 'queryFn'
   >,
 ) => {

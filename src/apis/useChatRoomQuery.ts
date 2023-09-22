@@ -23,7 +23,7 @@ export interface IChatRoomData {
   latestChattingMessageCreatedAt: null;
 }
 
-interface IData {
+export interface IChatQueryData {
   code: string;
   message: string;
   data: IChatRoomData[];
@@ -32,9 +32,14 @@ interface IData {
 type ChatRoomReturnType<T extends () => unknown> = ReturnType<T>;
 type MyProfileKeyReturnType = ChatRoomReturnType<IMyProfileKeys['chatRoom']>;
 
-const useChatRoomQuery = (
+const useChatRoomQuery = <T = IChatQueryData>(
   options?: Omit<
-    UseQueryOptions<AxiosResponse, unknown, IData, MyProfileKeyReturnType>,
+    UseQueryOptions<
+      AxiosResponse<IChatQueryData>,
+      unknown,
+      T,
+      MyProfileKeyReturnType
+    >,
     'queryKey' | 'queryFn'
   >,
 ) => {

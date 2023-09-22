@@ -3,7 +3,7 @@ import { getServerInstance } from './instance';
 import { IMyProfileKeys, myprofileKeys } from 'constants/querykey';
 import { AxiosResponse } from 'axios';
 
-export interface MemberData {
+export interface IPTData {
   ptMatchingId: number;
   status: string;
   subscriptionPeriod: number;
@@ -16,28 +16,36 @@ export interface MemberData {
   profilePictureUrl: string;
 }
 
-interface IData {
+export interface IPTMangementData {
   code: string;
   message: string;
-  data: MemberData[];
+  data: IPTData[];
 }
 
-type MemberReturnType<T extends () => unknown> = ReturnType<T>;
-type MyProfileKeyReturnType = MemberReturnType<IMyProfileKeys['member']>;
+type PTManagementReturnType<T extends () => unknown> = ReturnType<T>;
+type MyProfileKeyReturnType = PTManagementReturnType<
+  IMyProfileKeys['ptManagement']
+>;
 
-const useMemeberQuery = <T = IData>(
+const usePTManagementQuery = <T = IPTMangementData>(
+  mode: string,
   options?: Omit<
-    UseQueryOptions<AxiosResponse<IData>, unknown, T, MyProfileKeyReturnType>,
+    UseQueryOptions<
+      AxiosResponse<IPTMangementData>,
+      unknown,
+      T,
+      MyProfileKeyReturnType
+    >,
     'queryKey' | 'queryFn'
   >,
 ) => {
   const serverInstance = getServerInstance();
   const result = useQuery(
-    myprofileKeys.member(),
-    () => serverInstance.get(`/api/v1/matching?mode=active`),
+    myprofileKeys.ptManagement(),
+    () => serverInstance.get(`/api/v1/matching?mode=${mode}`),
     {
       ...options,
-      staleTime: Infinity,
+      select: (response: AxiosResponse) => response.data,
       retry: 0,
     },
   );
@@ -45,4 +53,4 @@ const useMemeberQuery = <T = IData>(
   return result;
 };
 
-export default useMemeberQuery;
+export default usePTManagementQuery;
