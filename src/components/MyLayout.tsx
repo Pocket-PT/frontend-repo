@@ -1,5 +1,7 @@
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import Footer from './Footer';
+import useUser from 'hooks/useUser';
+import React, { PropsWithChildren } from 'react';
 // import DropdownButton from './common/Dropdown';
 // import PersonIcon from 'icons/PersonIcon';
 // import { MenuProps } from 'antd';
@@ -32,20 +34,22 @@ import Footer from './Footer';
 //   );
 // };
 
-const Layout = ({
-  children,
-  hasFooter = true,
-}: {
-  children: React.ReactNode;
-  title?: string;
+type Props = {
+  children: React.ReactElement;
   hasFooter?: boolean;
-}) => {
+};
+
+const MyLayout = ({ children, hasFooter = true }: PropsWithChildren<Props>) => {
+  const result = useUser();
+
   return (
     <AppScreen backgroundColor="#FAFAFA">
-      <main>{children}</main>
+      <main className="overflow-hidden h-[100vh]">
+        {React.cloneElement(children, { result })}
+      </main>
       {hasFooter && <Footer />}
     </AppScreen>
   );
 };
 
-export default Layout;
+export default MyLayout;
