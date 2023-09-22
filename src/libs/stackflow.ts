@@ -15,6 +15,7 @@ import BeforeLogin from 'apps/login/BeforeLogin';
 import AfterLogin from 'apps/login/AfterLogin';
 import IncomePage from 'apps/MyProfilePage/Income';
 import Test from 'apps/Test';
+import PTManagementPage from 'apps/PTManagementPage';
 
 const activities = {
   Main,
@@ -29,6 +30,7 @@ const activities = {
   IncomePage,
   BeforeLogin,
   AfterLogin,
+  PTManagementPage,
   Test,
 };
 
@@ -54,6 +56,7 @@ export const { Stack, useStepFlow } = stackflow({
         IncomePage: '/mypage/income',
         BeforeLogin: '/before-login',
         AfterLogin: '/after-login',
+        PTManagementPage: '/pt-management',
         Test: '/test',
       },
       fallbackActivity: () => 'Main',
