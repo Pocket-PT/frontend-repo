@@ -8,7 +8,7 @@ const useUser = () => {
   const { token, setToken } = useTokenStore();
   const { replaceTo } = usePushToPage();
 
-  console.log('user', data, 'token: ', token);
+  console.log('useUser 실행!');
   useEffect(() => {
     if (!token && !isLoading) {
       console.log('isLoading', isLoading);
