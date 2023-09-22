@@ -31,7 +31,9 @@ English | **한국어**
 # Installation
 
 ```
+npm i
 
+npm run dev
 ```
   
 # Team Member
