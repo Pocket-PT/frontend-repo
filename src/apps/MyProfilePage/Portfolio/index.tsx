@@ -1,5 +1,8 @@
-import { AppScreen } from '@stackflow/plugin-basic-ui';
+import { CareerListData, useCareerQuery } from 'apis/useCareerQuery';
+import MyLayout from 'components/MyLayout';
+import usePatchCareerMutation from 'hooks/usePatchCareerMutation';
 import useInput from 'hooks/useInput';
+import usePostCareerMutation from 'hooks/usePostCareerMutation';
 import usePushToPage from 'hooks/usePushToPage';
 import AddIcon from 'icons/AddIcon';
 import BackIcon from 'icons/BackIcon';
@@ -8,43 +11,36 @@ import EditIcon from 'icons/EditIcon';
 import ExitIcon from 'icons/ExitIcon';
 import { useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
-import useMyProfileStore from 'stores/myProfile';
 import { cls } from 'utils/cls';
 import truncateString from 'utils/truncateString';
+import useDeleteCareerMutation from 'hooks/useDeleteCareerMutation';
+import { AccountQueryResult } from 'apis/useAccountQuery';
 
 type CategoryProps = {
   title: string;
-  handleAdd: () => void;
-  prizeTable: {
-    key: number;
-    name: string;
-    date?: string;
-    rank?: string;
-  }[];
-  onEditPrizeTable: (
-    key: number,
-    name: string,
-    date: string | undefined,
-    rank: string | undefined,
+  data?: CareerListData[];
+  handleAdd: (
+    type: string,
+    defaultData: { type: string; title: string; date: string },
   ) => void;
-  onDeletePrizeTable: (key: number) => void;
 };
 
-const Category = ({
-  title,
-  handleAdd,
-  prizeTable,
-  onEditPrizeTable,
-  onDeletePrizeTable,
-}: CategoryProps) => {
+const Category = ({ title, data, handleAdd }: CategoryProps) => {
+  const categoryType = title === '대회' ? 'competition' : 'license';
+  const defaultData = {
+    type: categoryType,
+    title: '제목을 입력해주세요',
+    date: '취득날짜를 입력해주세요',
+  };
+
   return (
     <>
       <div className="relative flex flex-row items-center mt-8 mb-1 text-lg font-bold">
         <div>{title}</div>
         <div
           className="absolute flex flex-row right-5 text-mainBlue hover:cursor-pointer"
-          onClick={handleAdd}
-          onKeyDown={handleAdd}
+          onClick={() => handleAdd(categoryType, defaultData)}
+          onKeyDown={() => handleAdd(categoryType, defaultData)}
           role="presentation"
         >
           <div className="w-4 h-4 mr-1">
@@ -55,38 +51,56 @@ const Category = ({
           </span>
         </div>
       </div>
-      {prizeTable.map((prize) => (
+      {data?.map((career) => (
         <Card
-          key={prize.key}
-          uniqueKey={prize.key}
-          title={prize.name}
-          date={prize.date}
-          rank={prize.rank}
-          onEditPrizeTable={onEditPrizeTable}
-          onDeletePrizeTable={onDeletePrizeTable}
+          key={career.careerId}
+          id={career.careerId}
+          title={career.title}
+          date={career.date}
         />
       ))}
     </>
   );
 };
 
-const PortfolioPage = () => {
-  const { prizeTable, onEditPrizeTable, onAddPrizeTable, onDeletePrizeTable } =
-    useMyProfileStore();
-  const defaultNewPrize = {
-    name: '대회명',
-    date: '취득날짜',
-    rank: '랭킹',
-  };
+const PortfolioPageWrapper = () => {
+  return (
+    <MyLayout hasFooter={false}>
+      <PortfolioPage />
+    </MyLayout>
+  );
+};
 
-  const handleAdd = () => {
-    onAddPrizeTable(defaultNewPrize);
+type PortfolioPageProp = {
+  result: AccountQueryResult;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PortfolioPage: React.FC<any> = ({ result }: PortfolioPageProp) => {
+  console.log('result', result);
+  const userId = result.data?.data.accountId;
+  const { data: careerData } = useCareerQuery(userId);
+  const { mutate } = usePostCareerMutation();
+
+  const handleAdd = (
+    type: string,
+    defaultData: { type: string; title: string; date: string },
+  ) => {
+    console.log('handleAdd', type);
+    if (type === 'competition') {
+      console.log('대회');
+      mutate({ careerList: [defaultData] });
+    }
+    if (type === 'license') {
+      console.log('자격증');
+      mutate({ careerList: [defaultData] });
+    }
   };
 
   const { pop } = usePushToPage();
 
   return (
-    <AppScreen>
+    <>
       <div className="relative flex flex-row items-center mt-5 ml-5">
         <div
           className="w-6 h-6"
@@ -99,61 +113,45 @@ const PortfolioPage = () => {
         <div className="ml-4 text-xl font-extrabold leading-normal">
           포트폴리오
         </div>
-        <div className="absolute text-sm font-semibold leading-tight text-right text-mainBlue right-5">
-          편집
-        </div>
       </div>
       <div className="w-full h-full">
         <Scrollbars autoHide autoHeight autoHeightMin={'80vh'}>
           <div className="px-6">
             <Category
               title="대회"
+              data={careerData?.data.careerList.filter(
+                (career) => career.type === 'competition',
+              )}
               handleAdd={handleAdd}
-              prizeTable={prizeTable}
-              onEditPrizeTable={onEditPrizeTable}
-              onDeletePrizeTable={onDeletePrizeTable}
             />
             <Category
               title="자격증"
+              data={careerData?.data.careerList.filter(
+                (career) => career.type === 'license',
+              )}
               handleAdd={handleAdd}
-              prizeTable={prizeTable}
-              onEditPrizeTable={onEditPrizeTable}
-              onDeletePrizeTable={onDeletePrizeTable}
             />
           </div>
         </Scrollbars>
       </div>
-    </AppScreen>
+    </>
   );
 };
 
 type CardProps = {
-  uniqueKey: number;
+  id: number;
   title: string;
-  date?: string;
-  rank?: string;
-  onEditPrizeTable: (
-    key: number,
-    name: string,
-    date: string | undefined,
-    rank: string | undefined,
-  ) => void;
-  onDeletePrizeTable: (key: number) => void;
+  date: string;
 };
 
-const Card = ({
-  uniqueKey,
-  title,
-  date,
-  rank,
-  onEditPrizeTable,
-  onDeletePrizeTable,
-}: CardProps) => {
+const Card = ({ id, title, date }: CardProps) => {
   const [isActive, setIsActive] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editTitle, onChangeEditTitle, setEditTitle] = useInput(title);
   const [editDate, onChangeEditDate, setEditDate] = useInput(date);
-  const [editRank, onChangeEditRank, setEditRank] = useInput(rank);
+  const { mutate: deleteCareer } = useDeleteCareerMutation(id);
+  const { mutate: patchCareer } = usePatchCareerMutation(id);
+  console.log('cardId', id);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -172,14 +170,13 @@ const Card = ({
     setIsEdit((prev) => !prev);
   };
   const handleCheck = (e: React.MouseEvent) => {
-    onEditPrizeTable(uniqueKey, editTitle, editDate, editRank);
-    console.log('test');
+    console.log('handleCheck');
+    onValidDation();
+    patchCareer({ title: editTitle, date: editDate });
     setEditTitle(editTitle);
     setEditDate(editDate);
-    setEditRank(editRank);
     setIsEdit(false);
     setIsActive(false);
-    onValidDation();
     e.stopPropagation();
   };
 
@@ -188,8 +185,6 @@ const Card = ({
       return setEditTitle('대회명을 입력해주세요');
     } else if (editDate && editDate.trim() === '') {
       return setEditDate('취득날짜를 입력해주세요');
-    } else if (editRank && editRank.trim() === '') {
-      return setEditRank('랭킹을 입력해주세요');
     }
   };
 
@@ -203,7 +198,6 @@ const Card = ({
       setIsEdit(false);
       setEditTitle(title);
       setEditDate(date);
-      setEditRank(rank);
       console.log('outside');
     }
   };
@@ -248,11 +242,6 @@ const Card = ({
                 onChange={onChangeEditDate}
               />
             </div>
-            <input
-              className="absolute block w-8 text-base font-bold right-6 focus-within:outline-none focus-within:border-b focus-within:border-b-gray"
-              value={editRank}
-              onChange={onChangeEditRank}
-            />
           </>
         ) : (
           <>
@@ -263,9 +252,6 @@ const Card = ({
               <div className="pt-1 text-xs font-normal leading-none text-gray">
                 {truncateString(date, 20)}
               </div>
-            </div>
-            <div className="absolute text-base font-bold right-6">
-              {truncateString(rank, 5)}
             </div>
           </>
         )}
@@ -299,8 +285,14 @@ const Card = ({
         </div>
         <div
           className="w-8 h-8 bg-red rounded-[22px] flex justify-center items-center stroke-white text-white"
-          onClick={() => onDeletePrizeTable(uniqueKey)}
-          onKeyDown={() => onDeletePrizeTable(uniqueKey)}
+          onClick={() => {
+            deleteCareer();
+            console.log('delete');
+          }}
+          onKeyDown={() => {
+            deleteCareer();
+            console.log('delete');
+          }}
           role="presentation"
         >
           <ExitIcon />
@@ -310,4 +302,4 @@ const Card = ({
   );
 };
 
-export default PortfolioPage;
+export default PortfolioPageWrapper;
