@@ -11,6 +11,7 @@ import usePushToPage from 'hooks/usePushToPage';
 //import useMessageStore from 'stores/message';
 import { AxiosResponse } from 'axios';
 import { classifyUrl } from 'utils/classifyUrl';
+import useMessageStore from 'stores/message';
 
 export interface IMessage {
   chattingMessageGetResponseList: MessageData[];
@@ -47,6 +48,7 @@ const useMessageInfiniteQuery = (
   const serverInstance = getServerInstance();
   const queryClient = useQueryClient();
   const { replaceTo } = usePushToPage();
+  const { resetMessages } = useMessageStore();
   //const { resetMessages } = useMessageStore();
   const result = useInfiniteQuery(
     messageKeys.message(id),
@@ -55,9 +57,9 @@ const useMessageInfiniteQuery = (
         `/api/v1/chatting/rooms/${id}/messages?page=${pageParam}&size=20`,
       ),
     {
-      staleTime: Infinity,
       onSettled: () => {
         queryClient.cancelQueries(messageKeys.message(id));
+        resetMessages();
       },
       select: (data: InfiniteData<AxiosResponse<AxiosResponse<IMessage>>>) => {
         return {
@@ -90,19 +92,12 @@ const useMessageInfiniteQuery = (
           pageParams: data.pages.map((page) => page.data.data.pageNum),
         };
       },
-      getNextPageParam: (lastPage, allpage) => {
+      getNextPageParam: (lastPage) => {
         const { data } = lastPage;
         if (data.data.hasNextPage) {
-          console.log(
-            'lastPage: ',
-            lastPage,
-            'allpage: ',
-            allpage,
-            data.data.hasNextPage,
-            data.data.pageNum + 1,
-          );
           return data.data.pageNum + 1;
         }
+        return undefined;
       },
     },
   );

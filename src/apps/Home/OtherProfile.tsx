@@ -46,21 +46,17 @@ const OhterProfile: React.FC<any> = ({
   }, [stack]);
 
   if (isLoading) {
-    <MyLayout hasFooter={false}>
-      <LoadingSpinner />
-    </MyLayout>;
+    <LoadingSpinner />;
   }
 
   return (
     <AppScreen backgroundColor="#E9ECF0">
-      <div
+      <button
         className="absolute z-10 w-6 h-6 text-white top-5 left-5"
         onClick={() => pop()}
-        onKeyDown={() => pop()}
-        role="presentation"
       >
         <BackIcon />
-      </div>
+      </button>
       <div className="overflow-hidden h-[100vh]">
         <div
           className="absolute w-full h-full bg-center bg-repeat bg-cover -z-10"
@@ -71,9 +67,9 @@ const OhterProfile: React.FC<any> = ({
         <div className="absolute text-white right-5 top-5">
           <MoreIcon />
         </div>
-        <div className="w-full h-[394px] flex-col justify-start items-center gap-4 inline-flex relative mb-5 mt-5">
+        <div className="w-full h-[46vh] flex-col justify-start items-center gap-4 inline-flex relative mb-5 mt-5">
           <img
-            className="w-40 h-40 rounded-full"
+            className="w-1/3 rounded-full h-1/3"
             src={memberData?.profilePictureUrl}
             alt="#"
           />
@@ -86,8 +82,8 @@ const OhterProfile: React.FC<any> = ({
             </div>
           </div>
           <div className="flex-col justify-start items-start gap-2.5 flex">
-            <div className="w-full h-[72px] bg-dark bg-opacity-20 pl-5 rounded-xl box-border">
-              <div className="mt-5 text-xs font-normal leading-none text-white text-opacity-60">
+            <div className="w-full h-[8vh] bg-dark bg-opacity-20 pl-5 rounded-xl box-border py-5">
+              <div className="text-xs font-normal leading-none text-white text-opacity-60">
                 회원 등록 기간
               </div>
               <div className="mt-1 text-sm font-semibold leading-tight text-white">

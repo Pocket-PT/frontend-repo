@@ -14,6 +14,16 @@ export interface AccountData {
   profilePictureUrl: string;
   gender: null;
   birthdate: null;
+  introduce: string;
+  identificationCode: string;
+  totalSales: number;
+  purposeList: unknown[];
+  careerList: {
+    careerId: number;
+    type: string;
+    title: string;
+    date: string;
+  }[];
 }
 
 //useAccountQuery 훅의 반환 타입을 정의

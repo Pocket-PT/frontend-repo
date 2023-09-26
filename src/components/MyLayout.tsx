@@ -37,13 +37,18 @@ import React, { PropsWithChildren } from 'react';
 type Props = {
   children: React.ReactElement;
   hasFooter?: boolean;
+  backgroundWhite?: boolean;
 };
 
-const MyLayout = ({ children, hasFooter = true }: PropsWithChildren<Props>) => {
+const MyLayout = ({
+  children,
+  hasFooter = true,
+  backgroundWhite = false,
+}: PropsWithChildren<Props>) => {
   const result = useUser();
 
   return (
-    <AppScreen backgroundColor="#FAFAFA">
+    <AppScreen backgroundColor={backgroundWhite ? '#FFFFFF' : '#FAFAFA'}>
       <main className="overflow-hidden h-[100vh]">
         {React.cloneElement(children, { result })}
       </main>
