@@ -1,11 +1,15 @@
 /* eslint-disable react/prop-types */
 import { AppScreen } from '@stackflow/plugin-basic-ui';
+import { useActivity } from '@stackflow/react';
+import { AccountQueryResult } from 'apis/useAccountQuery';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import DMList from 'components/DMList';
 import Footer from 'components/Footer';
 import MyLayout from 'components/MyLayout';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
+import useChatRoomSocket from 'hooks/useChatRoomSocket';
 import { Link } from 'libs/link';
+import { useEffect, useRef } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
 
 const ChatLisPageWrapper = () => {
@@ -17,10 +21,38 @@ const ChatLisPageWrapper = () => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ChatListPage: React.FC<any> = () => {
-  const { data: chatRoomData } = useChatRoomQuery({
+const ChatListPage: React.FC<any> = ({
+  result,
+}: {
+  result: AccountQueryResult;
+}) => {
+  const { data: chatRoomData, refetch } = useChatRoomQuery({
     select: (res) => res.data,
   });
+  const accountId = result.data?.data.accountId;
+  const activity = useActivity();
+  const { client } = useChatRoomSocket(accountId);
+  const clientRef = useRef<unknown>(null);
+  console.log('chatRoomData', chatRoomData?.data[0].latestChattingMessage);
+
+  useEffect(() => {
+    if (activity.isActive) refetch();
+  }, [activity]);
+  useEffect(() => {
+    // 웹소켓 연결이 없는 경우에만 새로운 웹소켓을 생성하고 연결합니다.
+    if (!clientRef.current) {
+      console.log('create new websocket in ChatListPage');
+      client?.activate();
+      clientRef.current = client;
+    }
+
+    //컴포넌트가 언마운트되면 웹소켓 연결을 종료합니다.
+    return () => {
+      if (clientRef.current) {
+        client?.deactivate();
+      }
+    };
+  }, []);
 
   return (
     <AppScreen backgroundColor="#FAFAFA">
