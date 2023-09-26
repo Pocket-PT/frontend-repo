@@ -20,3 +20,5 @@ export const koreanOrEnglishRegex = /^[가-힣A-Za-z]+$/;
 
 export const PUB_URL = '/pub/chatting/rooms';
 export const SUB_URL = '/sub/channel';
+export const PUB_CHATROOM_URL = '/pub/chatting/rooms';
+export const SUB_CHATROOM_URL = '/sub/accounts';

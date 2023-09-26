@@ -6,6 +6,7 @@ export const myprofileKeys: IMyProfileKeys = {
   chatRoom: () => [...myprofileKeys.all, 'chatRoom'] as const,
   career: () => [...myprofileKeys.all, 'career'] as const,
   ptManagement: () => [...myprofileKeys.all, 'ptManagement'] as const,
+  price: () => [...myprofileKeys.all, 'price'] as const,
 };
 
 export const messageKeys: IMessageKeys = {
@@ -22,6 +23,7 @@ export interface IMyProfileKeys {
   chatRoom: () => readonly ['myprofile', 'chatRoom'];
   career: () => readonly ['myprofile', 'career'];
   ptManagement: () => readonly ['myprofile', 'ptManagement'];
+  price: () => readonly ['myprofile', 'price'];
 }
 
 export interface IMessageKeys {
