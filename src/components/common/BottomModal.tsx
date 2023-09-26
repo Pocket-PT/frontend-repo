@@ -1,30 +1,15 @@
-import { PropsWithChildren, useEffect, useRef } from 'react';
-import { cls } from 'utils/cls';
+import { PropsWithChildren } from 'react';
 import React from 'react';
-import Hammer from 'hammerjs';
+import { cls } from 'utils/cls';
+import { animated } from '@react-spring/web';
+import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types';
 
 interface Props extends PropsWithChildren {
   isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  bindPanDown: (...args: unknown[]) => ReactDOMAttributes;
 }
 
-const BottomModal = ({ children, isOpen, setIsOpen }: Props) => {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const myElement = document.getElementById('modal');
-
-    if (myElement) {
-      const mc = new Hammer(myElement);
-      mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-
-      // listen to events...
-      mc.on('panleft panright panup pandown tap press', function (ev) {
-        //myElement.textContent = ev.type + ' gesture detected.';
-        if (ev.type === 'pandown') setIsOpen(false);
-        if (ev.type === 'panup') setIsOpen(true);
-      });
-    }
-  }, []);
+const BottomModal = ({ children, isOpen, bindPanDown }: Props) => {
   return (
     <>
       <div
@@ -33,18 +18,17 @@ const BottomModal = ({ children, isOpen, setIsOpen }: Props) => {
           isOpen ? 'absolute' : 'hidden',
         )}
       />
-
       <div id="modal" className="relative w-full h-full">
-        <div
-          ref={ref}
+        <animated.div
+          {...bindPanDown()}
           className={cls(
-            'w-full bg-white rounded-tl-[32px] rounded-tr-[32px] pt-[30px] absolute bottom-0 z-50 h-fit overflow-hidden delay-100 px-5 box-border transition-all duration-500 ease-in-out',
-            isOpen ? 'animate-modal-up' : 'animate-modal-down',
+            'w-full bg-white rounded-tl-[32px] rounded-tr-[32px] absolute bottom-0 pt-8 z-50 h-fit px-5 pb-8 transform duration-300 ease-in-out box-border',
+            isOpen ? `` : `translate-y-full`,
           )}
         >
           <div className="absolute w-20 h-1 -translate-x-1/2 rounded-full left-1/2 top-2 bg-lightGray mb-11" />
           {children}
-        </div>
+        </animated.div>
       </div>
     </>
   );

@@ -1,16 +1,17 @@
-import { RefObject, useCallback, useState } from 'react';
+import { RefObject, useCallback, useEffect, useState } from 'react';
 import LoadingSpinner from './common/LoadingSpinner';
 import {
   InfiniteQueryObserverIdleResult,
   InfiniteQueryObserverSuccessResult,
 } from 'react-query';
 import { IMessage } from 'apis/useMessageInfiniteQuery';
-import Message from './Message';
 import { AxiosResponse } from 'axios';
 import { AccountData } from 'apis/useAccountQuery';
 import useMessageStore from 'stores/message';
 import EditModal from './EditModal';
 import Scrollbars from 'react-custom-scrollbars-2';
+import Message from './Message';
+import { animated } from '@react-spring/web';
 
 interface Props {
   isScrollTop: boolean;
@@ -42,6 +43,10 @@ const ChatList = ({
     canvasWidth: 0,
     canvasHeight: 0,
   });
+
+  useEffect(() => {
+    scrollbarRef?.current?.scrollToBottom();
+  }, []);
 
   const onCloseModal = useCallback(() => {
     setModalOpen(false);
@@ -83,7 +88,11 @@ const ChatList = ({
       {messageData.data?.pages.map((page) => {
         return page.chattingMessageGetResponseList.map((item, idx) => {
           return (
-            <div key={idx} id={`${item.chattingMessageId}`}>
+            <animated.div
+              key={idx}
+              id={`${item.chattingMessageId}`}
+              className="w-full h-fit"
+            >
               <Message
                 message={item.content}
                 myId={userData?.data.accountId}
@@ -96,7 +105,7 @@ const ChatList = ({
                 isScrollTop={isScrollTop}
                 ref={item.ref}
               />
-            </div>
+            </animated.div>
           );
         });
       })}

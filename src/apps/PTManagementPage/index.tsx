@@ -1,13 +1,14 @@
 import usePTManagementQuery, { IPTData } from 'apis/usePTManagementQuery';
 import MyLayout from 'components/MyLayout';
-import LoadableBottomModal from 'components/common/LoadableBottomModal';
 import useInput from 'hooks/useInput';
-import usePatchPTManagementMutation from 'hooks/usePatchPTManagementMutation';
+import usePatchPTManagementMutation from 'hooks/mutation/usePatchPTManagementMutation';
 import usePushToPage from 'hooks/usePushToPage';
 import BackIcon from 'icons/BackIcon';
 import { useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
 import { cls } from 'utils/cls';
+import BottomModal from 'components/common/BottomModal';
+import usePan from 'hooks/usePan';
 
 const PTManagementPageWrapper = () => {
   return (
@@ -21,7 +22,7 @@ const PTManagementPage = () => {
   const { pop } = usePushToPage();
   const [mode] = useState('pending');
   const { data } = usePTManagementQuery(mode);
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen, bindPanDown } = usePan();
   const [isAccept, setIsAccept] = useState(true);
   const [targetId, setTargetId] = useState(0);
 
@@ -41,14 +42,14 @@ const PTManagementPage = () => {
   return (
     <div className="relative w-full overflow-hidden">
       <div className="relative flex flex-row items-center mt-5 ml-5">
-        <div
+        <button
           className="w-6 h-6"
-          onClick={() => pop()}
-          onKeyDown={() => pop()}
-          role="presentation"
+          onClick={() => {
+            pop();
+          }}
         >
           <BackIcon />
-        </div>
+        </button>
         <div className="ml-4 text-xl font-extrabold leading-normal">
           PT신청목록
         </div>
@@ -93,21 +94,14 @@ const PTManagementPage = () => {
           </Scrollbars>
         </div>
       </div>
-      <LoadableBottomModal isOpen={isOpen} setIsOpen={setIsOpen}>
-        <div
-          id="modal"
-          className={cls(
-            'w-full  bg-white h-fit rounded-tl-[32px] rounded-tr-[32px]',
-          )}
-        >
-          <AcceptOrRejectModal
-            modalData={data?.data.find((pt) => pt.ptMatchingId === targetId)}
-            isAccept={isAccept}
-            targetId={targetId}
-            setIsOpen={setIsOpen}
-          />
-        </div>
-      </LoadableBottomModal>
+      <BottomModal isOpen={isOpen} bindPanDown={bindPanDown}>
+        <AcceptOrRejectModal
+          modalData={data?.data.find((pt) => pt.ptMatchingId === targetId)}
+          isAccept={isAccept}
+          targetId={targetId}
+          setIsOpen={setIsOpen}
+        />
+      </BottomModal>
     </div>
   );
 };
@@ -186,11 +180,14 @@ const AcceptOrRejectModal = ({
         </div>
       )}
       <div className="flex flex-row w-full gap-3">
-        <div className="flex items-center justify-center w-1/2 rounded-md h-9 bg-lightGray">
+        <button
+          className="flex items-center justify-center w-1/2 rounded-md h-9 bg-lightGray"
+          onClick={() => setIsOpen(false)}
+        >
           <div className="text-base font-normal leading-tight text-gray">
             취소
           </div>
-        </div>
+        </button>
         <div
           className={cls(
             'flex items-center justify-center w-1/2 rounded-md h-9',

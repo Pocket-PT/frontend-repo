@@ -1,9 +1,16 @@
 import { cls } from 'utils/cls';
 import VideoMessage from './VideoMessage';
-import React, { ForwardedRef, MutableRefObject, forwardRef } from 'react';
+import React, {
+  ForwardedRef,
+  MutableRefObject,
+  PropsWithChildren,
+  forwardRef,
+} from 'react';
 import dayjs from 'dayjs';
 import Scrollbars from 'react-custom-scrollbars-2';
 import { classifyUrl } from 'utils/classifyUrl';
+import usePan, { PanReturnType } from 'hooks/usePan';
+import { animated } from '@react-spring/web';
 //import EditIcon from 'icons/EditIcon';
 
 type MessageProps = {
@@ -26,26 +33,32 @@ type MessageProps = {
   isScrollTop?: boolean;
 };
 
-type MessageWrapperProps = {
+interface MessageWrapperProps extends PropsWithChildren {
   isMyMessage: boolean;
   createAt: string;
-  children: React.ReactNode;
   scrollbarRef?: React.ForwardedRef<Scrollbars>;
-};
+  scale: PanReturnType['scale'];
+  bindPress: PanReturnType['bindPress'];
+}
 
 const MessageWrapper = ({
   isMyMessage,
   children,
   createAt,
+  scale,
+  bindPress,
 }: MessageWrapperProps) => {
   return (
     <div
+      id="message"
       className={cls(
         'flex flex-row items-start space-x-2 mt-3 mx-5 max-w-full overflow-hidden relative h-auto',
         isMyMessage ? 'flex-row-reverse space-x-reverse' : 'space-x-2',
       )}
     >
-      <div
+      <animated.div
+        {...bindPress()}
+        style={{ scale }}
         className={cls(
           'w-auto h-auto p-4 relative max-w-[70vw] justify-center items-center gap-2.5 inline-flex',
           isMyMessage
@@ -67,18 +80,23 @@ const MessageWrapper = ({
             </div>
           </div>
         </div>
-      </div>
+      </animated.div>
     </div>
   );
 };
 
 const MediaMessageWrapper = ({
-  isMyMessage,
   children,
+  isMyMessage,
   createAt,
+  scale,
+  bindPress,
 }: MessageWrapperProps) => {
   return (
-    <div
+    <animated.div
+      {...bindPress()}
+      id="message"
+      style={{ scale }}
       className={cls(
         'flex flex-row items-end space-x-2 mt-3 px-5 w-[100vw] relative h-auto',
         isMyMessage ? 'flex-row-reverse space-x-reverse' : 'space-x-2',
@@ -95,7 +113,7 @@ const MediaMessageWrapper = ({
           {dayjs(createAt).add(9, 'hour').format('h:mm A')}
         </div>
       </div>
-    </div>
+    </animated.div>
   );
 };
 
@@ -119,11 +137,15 @@ const Message = forwardRef(
 
     const uri = classifyUrl(fileUrl, message);
 
+    const { bindPress, scale } = usePan();
+
     return uri === 'image' || uri === 'video' ? (
       <MediaMessageWrapper
         scrollbarRef={scrollbarRef}
         isMyMessage={isMyMessage}
         createAt={createAt}
+        scale={scale}
+        bindPress={bindPress}
       >
         {uri === 'video' && (
           <VideoMessage
@@ -151,28 +173,16 @@ const Message = forwardRef(
                 if (!isScrollTop) scrollbarRef?.current?.scrollToBottom();
               }}
             />
-            {/* <button
-              className={cls(
-                'absolute top-1/2 text-mainBlue',
-                isMyMessage ? '-left-12' : '-right-12',
-              )}
-              // onClick={() => {
-              //   handleCapture
-              //     ? () => {
-              //         handleCapture(ref);
-              //       }
-              //     : undefined;
-              // }}
-            >
-              <div className="p-3 rounded-full bg-lightGray">
-                <EditIcon />
-              </div>
-            </button> */}
           </>
         )}
       </MediaMessageWrapper>
     ) : (
-      <MessageWrapper isMyMessage={isMyMessage} createAt={createAt}>
+      <MessageWrapper
+        isMyMessage={isMyMessage}
+        createAt={createAt}
+        scale={scale}
+        bindPress={bindPress}
+      >
         <p className="break-words whitespace-normal">{message}</p>
       </MessageWrapper>
     );
