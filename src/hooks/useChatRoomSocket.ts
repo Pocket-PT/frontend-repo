@@ -1,5 +1,6 @@
 import { Client } from '@stomp/stompjs';
-import { PUB_CHATROOM_URL, SUB_URL } from 'constants/global';
+import useChatRoomQuery from 'apis/useChatRoomQuery';
+import { SUB_CHATROOM_URL } from 'constants/global';
 import { useCallback, useEffect, useRef } from 'react';
 import useMessageStore from 'stores/message';
 import useTokenStore from 'stores/token';
@@ -7,13 +8,10 @@ import WebSocket from 'ws';
 
 Object.assign(global, WebSocket);
 
-const useSocket = (
-  chatRoomId: number | undefined,
-  accountId: number | undefined,
-) => {
+const useChatRoomSocket = (accountId: number | undefined) => {
   const { token } = useTokenStore();
-  const { setMessages } = useMessageStore();
-  //const queryClient = useQueryClient();
+  const { setUpdateChatRoom } = useMessageStore();
+  const { refetch } = useChatRoomQuery();
 
   const ref = useRef<Client>();
   console.log('ref: ', ref.current);
@@ -35,7 +33,7 @@ const useSocket = (
         onConnect: (frame) => {
           console.log('Connected: ' + frame);
           console.log('onConnect실행');
-          channelSubscribe(chatRoomId);
+          chatRoomSubscribe(accountId);
         },
         onWebSocketClose: (frame) => {
           console.log('onWebSocketClose실행');
@@ -66,40 +64,14 @@ const useSocket = (
 
   console.log('useSocket실행');
 
-  const channelSubscribe = useCallback(
-    function (chatRoomId: number | undefined) {
-      if (ref.current && chatRoomId) {
-        ref.current.subscribe(`${SUB_URL}/${chatRoomId}`, (payload) => {
-          //console.log(`Received: ${payload}`);
-          console.log(JSON.parse(payload.body).data.content);
-          const data = JSON.parse(payload.body).data;
-          console.log('channel sub실행', data);
-          if (data.content === null) return;
-          setMessages({
-            message: data.content,
-            chattingAccountId: data.chattingAccountId,
-            createAt: data.createdAt,
-          });
-          chatRoomPublish(
-            `${PUB_CHATROOM_URL}/${chatRoomId}/accounts/${accountId}/messages/${data.chattingMessageId}`,
-            JSON.stringify({ content: '' }),
-          );
-        });
-        // queryClient.invalidateQueries(myprofileKeys.chatRoom());
-        // queryClient.invalidateQueries(messageKeys.message(id));
-        // queryClient.refetchQueries(myprofileKeys.chatRoom());
-        // queryClient.refetchQueries(messageKeys.message(id));
-      }
-    },
-    [ref.current],
-  );
-
-  const publish = useCallback(
-    function (destination: string, body: string) {
-      if (ref.current) {
-        ref.current.publish({
-          destination: destination,
-          body: body,
+  const chatRoomSubscribe = useCallback(
+    function (accountId: number | undefined) {
+      if (ref.current && accountId) {
+        ref.current.subscribe(`${SUB_CHATROOM_URL}/${accountId}`, (payload) => {
+          console.log('chatRoom sub실행');
+          console.log('chatRoom payload:', JSON.parse(payload.body).data);
+          setUpdateChatRoom(JSON.parse(payload.body).data);
+          refetch();
         });
       }
     },
@@ -118,7 +90,7 @@ const useSocket = (
     [ref.current],
   );
 
-  return { client: ref.current, publish, chatRoomPublish };
+  return { client: ref.current, chatRoomPublish };
 };
 
-export default useSocket;
+export default useChatRoomSocket;
