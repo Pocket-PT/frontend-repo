@@ -1,5 +1,11 @@
-import { AppScreen } from '@stackflow/plugin-basic-ui';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { AccountQueryResult } from 'apis/useAccountQuery';
+import usePriceQuery from 'apis/usePriceQuery';
+import MyLayout from 'components/MyLayout';
+import useDeletePriceMutation from 'hooks/mutation/useDeletePriceMutation';
 import useInput from 'hooks/useInput';
+import usePatchPriceMutation from 'hooks/mutation/usePatchPriceMutation';
+import usePostPriceMutation from 'hooks/mutation/usePostPriceMutation';
 import usePushToPage from 'hooks/usePushToPage';
 import BackIcon from 'icons/BackIcon';
 import CheckIcon from 'icons/CheckIcon';
@@ -7,17 +13,51 @@ import EditIcon from 'icons/EditIcon';
 import ExitIcon from 'icons/ExitIcon';
 import { useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
-import useMyProfileStore from 'stores/myProfile';
 import { cls } from 'utils/cls';
 import truncateString from 'utils/truncateString';
 
-const PricePage = () => {
-  const { priceTable, onEditPriceTable, onDeletePriceTable } =
-    useMyProfileStore();
-  const { pop } = usePushToPage();
-
+const PricePageWrapper = () => {
   return (
-    <AppScreen>
+    <MyLayout hasFooter={false}>
+      <PricePage />
+    </MyLayout>
+  );
+};
+type PricePageProp = {
+  result: AccountQueryResult;
+};
+
+interface IPriceData {
+  trainerAccountId: number;
+  monthlyPtPriceList: {
+    monthlyPtPriceId: number;
+    period: number;
+    price: number;
+  }[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PricePage: React.FC<any> = ({ result }: PricePageProp) => {
+  console.log(result);
+  const userCode = result.data?.data.identificationCode;
+  const { data: priceData } = usePriceQuery<IPriceData>(userCode, {
+    select: (res) => res.data.data,
+  });
+  const { mutate } = usePostPriceMutation();
+  console.log(priceData?.monthlyPtPriceList.at(-1)?.period);
+  const { pop } = usePushToPage();
+  const handleAdd = () => {
+    const nextPeriod = priceData?.monthlyPtPriceList?.at(-1)?.period || 0;
+    const defaultData = {
+      period: nextPeriod + 1,
+      price: 0,
+    };
+    mutate(defaultData);
+    return defaultData;
+  };
+  console.log('handleAdd');
+  return (
+    <>
       <div className="relative w-full h-full pl-5 pr-5 overflow-hidden">
         <div className="flex flex-row items-center mt-5">
           <div
@@ -33,54 +73,45 @@ const PricePage = () => {
         <div className="w-full h-full mt-8">
           <Scrollbars autoHide autoHeight autoHeightMin={'80vh'}>
             <div>
-              {priceTable.map((price) => (
+              {priceData?.monthlyPtPriceList.map((price) => (
                 <Card
-                  key={price.key}
-                  uniqueKey={price.key}
-                  month={price.month}
-                  description={price.description}
+                  key={price.monthlyPtPriceId}
+                  id={price.monthlyPtPriceId}
+                  month={price.period}
                   price={price.price}
-                  onEditPriceTable={onEditPriceTable}
-                  onDeletePriceTable={onDeletePriceTable}
                 />
               ))}
             </div>
           </Scrollbars>
           <div className="absolute flex items-center w-full bottom-3">
-            <div className="flex items-center justify-center w-[90%] bg-mainBlue h-14 rounded-xl">
+            <button
+              onClick={handleAdd}
+              className="flex items-center justify-center w-[90%] bg-mainBlue h-14 rounded-xl"
+            >
               <div className="text-base font-bold leading-tight text-center text-white">
                 가격 플랜 추가
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
-    </AppScreen>
+    </>
   );
 };
 
 type CardProps = {
-  uniqueKey: number;
-  month: string;
-  description: string;
-  price: string;
-  onEditPriceTable: (key: number, month: string, price: string) => void;
-  onDeletePriceTable: (key: number) => void;
+  id: number;
+  month: number;
+  price: number;
 };
 
-const Card = ({
-  uniqueKey,
-  month,
-  description,
-  price,
-  onEditPriceTable,
-  onDeletePriceTable,
-}: CardProps) => {
+const Card = ({ id, month, price }: CardProps) => {
   const [isActive, setIsActive] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editTitle, onChangeEditTitle, setEditTitle] = useInput(month);
-  const [editDate, onChangeEditDate, setEditDate] = useInput(description);
-  const [editRank, onChangeEditRank, setEditRank] = useInput(price);
+  const [editMonth, onChangeEditMonth, setEditMonth] = useInput(month);
+  const [editPrice, onChangeEditPrice, setEditPrice] = useInput(price);
+  const { mutate: deletePrice } = useDeletePriceMutation(id);
+  const { mutate: patchPrice } = usePatchPriceMutation(id);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -99,11 +130,12 @@ const Card = ({
     setIsEdit((prev) => !prev);
   };
   const handleCheck = (e: React.MouseEvent) => {
-    onEditPriceTable(uniqueKey, editTitle, editRank);
-    console.log('test');
-    setEditTitle(editTitle);
-    setEditDate(editDate);
-    setEditRank(editRank);
+    patchPrice({
+      period: editMonth,
+      price: editPrice,
+    });
+    setEditMonth(editMonth);
+    setEditPrice(editPrice);
     setIsEdit(false);
     setIsActive(false);
     onValidDation();
@@ -111,12 +143,8 @@ const Card = ({
   };
 
   const onValidDation = () => {
-    if (editTitle.trim() === '') {
-      return setEditTitle('대회명을 입력해주세요');
-    } else if (editDate && editDate.trim() === '') {
-      return setEditDate('취득날짜를 입력해주세요');
-    } else if (editRank && editRank.trim() === '') {
-      return setEditRank('랭킹을 입력해주세요');
+    if (editMonth === 0 || editMonth === 0) {
+      return;
     }
   };
 
@@ -128,9 +156,8 @@ const Card = ({
     if (ref.current && !ref.current.contains(e.target as Node)) {
       setIsActive(false);
       setIsEdit(false);
-      setEditTitle(month);
-      setEditDate(description);
-      setEditRank(price);
+      setEditMonth(month);
+      setEditPrice(price);
       console.log('outside');
     }
   };
@@ -144,12 +171,7 @@ const Card = ({
   }, []);
 
   return (
-    <div
-      className="relative w-full mb-3"
-      onClick={propagation}
-      onKeyDown={propagation}
-      role="presentation"
-    >
+    <button className="relative w-full mb-3" onClick={propagation}>
       <div
         ref={ref}
         className={cls(
@@ -166,33 +188,31 @@ const Card = ({
             <div className="flex flex-col pl-6">
               <input
                 className="text-base font-medium leading-tight focus-within:outline-none focus-within:border-b focus-within:border-b-gray"
-                value={editTitle}
-                onChange={onChangeEditTitle}
+                value={editMonth}
+                onChange={onChangeEditMonth}
               />
-              <input
-                className="pt-1 text-xs font-normal leading-none text-gray focus-within:outline-none focus-within:border-b focus-within:border-b-gray"
-                value={editDate}
-                onChange={onChangeEditDate}
-              />
+              <div className="pt-1 text-xs font-normal leading-none text-gray">
+                {truncateString('description', 20)}
+              </div>
             </div>
             <input
               className="absolute block w-8 text-base font-bold right-6 focus-within:outline-none focus-within:border-b focus-within:border-b-gray"
-              value={editRank}
-              onChange={onChangeEditRank}
+              value={editPrice}
+              onChange={onChangeEditPrice}
             />
           </>
         ) : (
           <>
             <div className="flex flex-col pl-6">
               <div className="text-base font-medium leading-tight">
-                {truncateString(month, 20)}
+                {truncateString(String(month), 20)}
               </div>
               <div className="pt-1 text-xs font-normal leading-none text-gray">
-                {truncateString(description, 20)}
+                {truncateString('description', 20)}
               </div>
             </div>
             <div className="absolute text-base font-bold right-6">
-              {truncateString(price, 5)}
+              {truncateString(String(price), 5)}
             </div>
           </>
         )}
@@ -210,31 +230,27 @@ const Card = ({
           role="presentation"
         >
           {isEdit ? (
-            <div
+            <button
               className="flex items-center justify-center w-full h-full transition-all duration-200 ease-in stroke-[#666666]"
               onClick={handleCheck}
-              onKeyDown={handleCheck}
-              role="presentation"
             >
               <CheckIcon />
-            </div>
+            </button>
           ) : (
             <div>
               <EditIcon />
             </div>
           )}
         </div>
-        <div
+        <button
+          onClick={() => deletePrice()}
           className="w-8 h-8 bg-red rounded-[22px] flex justify-center items-center stroke-white text-white"
-          onClick={() => onDeletePriceTable(uniqueKey)}
-          onKeyDown={() => onDeletePriceTable(uniqueKey)}
-          role="presentation"
         >
           <ExitIcon />
-        </div>
+        </button>
       </div>
-    </div>
+    </button>
   );
 };
 
-export default PricePage;
+export default PricePageWrapper;

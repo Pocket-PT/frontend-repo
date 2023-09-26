@@ -1,8 +1,8 @@
 import { CareerListData, useCareerQuery } from 'apis/useCareerQuery';
 import MyLayout from 'components/MyLayout';
-import usePatchCareerMutation from 'hooks/usePatchCareerMutation';
+import usePatchCareerMutation from 'hooks/mutation/usePatchCareerMutation';
 import useInput from 'hooks/useInput';
-import usePostCareerMutation from 'hooks/usePostCareerMutation';
+import usePostCareerMutation from 'hooks/mutation/usePostCareerMutation';
 import usePushToPage from 'hooks/usePushToPage';
 import AddIcon from 'icons/AddIcon';
 import BackIcon from 'icons/BackIcon';
@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
 import { cls } from 'utils/cls';
 import truncateString from 'utils/truncateString';
-import useDeleteCareerMutation from 'hooks/useDeleteCareerMutation';
+import useDeleteCareerMutation from 'hooks/mutation/useDeleteCareerMutation';
 import { AccountQueryResult } from 'apis/useAccountQuery';
 
 type CategoryProps = {
@@ -37,11 +37,9 @@ const Category = ({ title, data, handleAdd }: CategoryProps) => {
     <>
       <div className="relative flex flex-row items-center mt-8 mb-1 text-lg font-bold">
         <div>{title}</div>
-        <div
+        <button
           className="absolute flex flex-row right-5 text-mainBlue hover:cursor-pointer"
           onClick={() => handleAdd(categoryType, defaultData)}
-          onKeyDown={() => handleAdd(categoryType, defaultData)}
-          role="presentation"
         >
           <div className="w-4 h-4 mr-1">
             <AddIcon />
@@ -49,7 +47,7 @@ const Category = ({ title, data, handleAdd }: CategoryProps) => {
           <span className="text-sm font-semibold leading-tight text-right">
             {title} 추가
           </span>
-        </div>
+        </button>
       </div>
       {data?.map((career) => (
         <Card
@@ -65,7 +63,7 @@ const Category = ({ title, data, handleAdd }: CategoryProps) => {
 
 const PortfolioPageWrapper = () => {
   return (
-    <MyLayout hasFooter={false}>
+    <MyLayout hasFooter={false} backgroundWhite={true}>
       <PortfolioPage />
     </MyLayout>
   );
@@ -151,8 +149,9 @@ const Card = ({ id, title, date }: CardProps) => {
   const [editDate, onChangeEditDate, setEditDate] = useInput(date);
   const { mutate: deleteCareer } = useDeleteCareerMutation(id);
   const { mutate: patchCareer } = usePatchCareerMutation(id);
-  console.log('cardId', id);
   const ref = useRef<HTMLDivElement>(null);
+
+  console.log('cardId', id);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -169,6 +168,15 @@ const Card = ({ id, title, date }: CardProps) => {
   const handleKeyDown = () => {
     setIsEdit((prev) => !prev);
   };
+
+  const onValidDation = () => {
+    if (editTitle.trim() === '') {
+      return setEditTitle('대회명을 입력해주세요');
+    } else if (editDate && editDate.trim() === '') {
+      return setEditDate('취득날짜를 입력해주세요');
+    }
+  };
+
   const handleCheck = (e: React.MouseEvent) => {
     console.log('handleCheck');
     onValidDation();
@@ -178,14 +186,6 @@ const Card = ({ id, title, date }: CardProps) => {
     setIsEdit(false);
     setIsActive(false);
     e.stopPropagation();
-  };
-
-  const onValidDation = () => {
-    if (editTitle.trim() === '') {
-      return setEditTitle('대회명을 입력해주세요');
-    } else if (editDate && editDate.trim() === '') {
-      return setEditDate('취득날짜를 입력해주세요');
-    }
   };
 
   const propagation = (e: React.MouseEvent) => {
@@ -209,14 +209,9 @@ const Card = ({ id, title, date }: CardProps) => {
       document.removeEventListener('click', (e) => handleOutsideClick(e));
     };
   }, []);
-
+  console.log(editTitle, editDate);
   return (
-    <div
-      className="relative w-full mb-3"
-      onClick={propagation}
-      onKeyDown={propagation}
-      role="presentation"
-    >
+    <button className="relative w-full mb-3" onClick={propagation}>
       <div
         ref={ref}
         className={cls(
@@ -245,7 +240,7 @@ const Card = ({ id, title, date }: CardProps) => {
           </>
         ) : (
           <>
-            <div className="flex flex-col pl-6">
+            <div className="flex flex-col items-start justify-start pl-6">
               <div className="text-base font-medium leading-tight">
                 {truncateString(title, 20)}
               </div>
@@ -269,36 +264,28 @@ const Card = ({ id, title, date }: CardProps) => {
           role="presentation"
         >
           {isEdit ? (
-            <div
+            <button
               className="flex items-center justify-center w-full h-full transition-all duration-200 ease-in stroke-[#666666]"
-              onClick={handleCheck}
-              onKeyDown={handleCheck}
-              role="presentation"
+              onClick={(e) => handleCheck(e)}
             >
               <CheckIcon />
-            </div>
+            </button>
           ) : (
             <div>
               <EditIcon />
             </div>
           )}
         </div>
-        <div
+        <button
           className="w-8 h-8 bg-red rounded-[22px] flex justify-center items-center stroke-white text-white"
           onClick={() => {
             deleteCareer();
-            console.log('delete');
           }}
-          onKeyDown={() => {
-            deleteCareer();
-            console.log('delete');
-          }}
-          role="presentation"
         >
           <ExitIcon />
-        </div>
+        </button>
       </div>
-    </div>
+    </button>
   );
 };
 
