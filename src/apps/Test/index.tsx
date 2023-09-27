@@ -1,16 +1,32 @@
-import useMessageInfiniteQuery from 'apis/useMessageInfiniteQuery';
-import Layout from 'components/Layout';
+import MyLayout from 'components/MyLayout';
+import { easeInOut, motion } from 'framer-motion';
+import { useState } from 'react';
 
 const TestPage = () => {
-  const { data, fetchNextPage } = useMessageInfiniteQuery(1);
-  console.log(data);
+  const [isOpen, setIsOpen] = useState(false);
+  const variants = {
+    open: { y: '-100%' },
+    closed: { y: '0%' },
+  };
+
   return (
-    <Layout hasFooter={false}>
+    <MyLayout hasFooter={false}>
       <div>
         <h1>Test Page</h1>
-        <button onClick={() => fetchNextPage()}>NEXT PAGE</button>
+        <motion.div
+          className="w-12 h-12 border border-mainBlue"
+          animate={isOpen ? 'open' : 'closed'}
+          variants={variants}
+          transition={{
+            duration: 0.3,
+            ease: easeInOut,
+          }}
+        >
+          MOVE
+        </motion.div>
+        <button onClick={() => setIsOpen(!isOpen)}>NEXT PAGE</button>
       </div>
-    </Layout>
+    </MyLayout>
   );
 };
 
