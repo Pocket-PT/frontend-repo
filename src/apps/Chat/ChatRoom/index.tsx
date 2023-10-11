@@ -10,7 +10,7 @@ import useMessageStore from 'stores/message';
 import ArrowUpIcon from 'icons/ArrowUpIcon';
 import MyDropzone from 'components/MyDropzone';
 import ImageIcon from 'icons/ImageIcon';
-import usePostFile from 'hooks/usePostFile';
+import usePostFileMutation from 'hooks/mutation/usePostFileMutation';
 import BackIcon from 'icons/BackIcon';
 import MenuIcon from 'icons/MenuIcon';
 import useMessageInfiniteQuery from 'apis/useMessageInfiniteQuery';
@@ -24,6 +24,12 @@ import { AccountQueryResult } from 'apis/useAccountQuery';
 import { cls } from 'utils/cls';
 import usePan from 'hooks/usePan';
 import RightSideBar from 'components/RightSidebar';
+import BottomModal from 'components/common/BottomModal';
+import useChatRoomModalStore from 'stores/firstRender';
+import useDeleteChatMutation from 'hooks/mutation/useDeleteChatMutation';
+import usePostChatBookmarkMutation from 'hooks/mutation/usePostChatBookmarkMutation';
+import useDeleteChatBookmarkMutation from 'hooks/mutation/useDeleteChatBookmarkMutation';
+import ChatRoomRightSideBox from 'components/ChatRoomRightSideBox';
 
 type ChatRoomPageProps = {
   id: string;
@@ -55,18 +61,25 @@ type ChatRoomSelectedDataProps = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
-  const messageData = useMessageInfiniteQuery(+params.id);
+  const scrollDownref = useRef<HTMLDivElement>(null);
+  const chattingRoomId = +params.id;
+  const messageData = useMessageInfiniteQuery(chattingRoomId);
   const { data: chatRoomData } = useChatRoomQuery<ChatRoomSelectedDataProps>({
     select: (res) => {
       return res.data.data.filter(
-        (item) => item.chattingRoomId === +params.id,
+        (item) => item.chattingRoomId === chattingRoomId,
       )[0].chattingParticipantResponseList[0];
     },
   });
-  const accountId = chatRoomData?.accountId;
+  const accountId = result.data?.data.accountId;
   const { data: userData } = result;
-  const { messages: newMessageData, resetMessages } = useMessageStore();
-  const { mutate } = usePostFile(+params.id);
+  const {
+    messages: newMessageData,
+    resetMessages,
+    setNextMessageId,
+  } = useMessageStore();
+  console.log('newMessageData', newMessageData);
+  const { mutate } = usePostFileMutation(+params.id, accountId);
   const [fileContainerOpen, setFileContainerOpen] = useState(false);
   const [isScrollTop, setIsScrollTop] = useState(false);
   const {
@@ -76,26 +89,70 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   } = usePan();
   const { pop } = usePushToPage();
   const scrollbarRef = useRef<Scrollbars>(null);
-  const { client, publish } = useSocket(+params.id, chatRoomData?.accountId);
+  const { client, publish } = useSocket(
+    chattingRoomId,
+    chatRoomData?.accountId,
+  );
   const clientRef = useRef<unknown>(null);
   const sideBarRef = useRef<HTMLDivElement>(null);
+  const {
+    isOpen: isBottomModalOpen,
+    setIsOpen: setIsBottomModalOpen,
+    bindPanDown,
+  } = usePan();
+  const { chattingMessageId } = useChatRoomModalStore();
+  const { mutate: bookmarkMutate } = usePostChatBookmarkMutation(
+    chattingRoomId,
+    chattingMessageId,
+  );
+  const { mutate: deleteBookmarkMutate } = useDeleteChatBookmarkMutation(
+    chattingRoomId,
+    chattingMessageId,
+  );
+  const { mutate: deleteMutate } = useDeleteChatMutation(
+    chattingRoomId,
+    chattingMessageId,
+  );
 
+  const onPressFn = () => {
+    setIsBottomModalOpen(true);
+    console.log("i'm pressed");
+    const isDeletedMessage =
+      messageData.data?.pages[0].chattingMessageWithBookmarkGetResponses.find(
+        (item) => item.chattingMessageId === chattingMessageId,
+      )?.isDeleted;
+    console.log('isDeletedMessage', chattingMessageId, isDeletedMessage);
+  };
   // console.log('params: ', params.id);
   // console.log('chatRoomData: ', chatRoomData);
   // console.log('userData: ', userData);
-  // console.log('messageData: ', messageData);
+  console.log('messageData: ', messageData);
   // console.log('newMessageData: ', newMessageData);
 
   useEffect(() => {
     if (newMessageData.length === 0) return;
     console.log('scrollToBottom 실행_1');
     scrollbarRef.current?.scrollToBottom();
-  }, [newMessageData, fileContainerOpen]);
+  }, [newMessageData]);
 
   useEffect(() => {
+    scrollbarRef.current?.scrollToBottom();
+  }, [fileContainerOpen]);
+
+  useEffect(() => {
+    const lastMessageId = messageData.data?.pages
+      .at(-1)
+      ?.chattingMessageWithBookmarkGetResponses?.at(-1)?.chattingMessageId;
+    setNextMessageId(lastMessageId);
+    console.log('lastMessageId', lastMessageId);
     if (!messageData.isLoading) return;
     console.log('isLoading, scrollToBottom 실행!_2');
     scrollbarRef.current?.scrollToBottom();
+
+    // scrollDownref.current?.scrollIntoView({
+    //   behavior: 'smooth',
+    //   block: 'end',
+    // });
   }, [messageData.isLoading]);
 
   //로드 시 스크롤바 유지
@@ -106,7 +163,7 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
     )
       return;
     const id =
-      messageData.data?.pages[1].chattingMessageGetResponseList[0]
+      messageData.data?.pages[1].chattingMessageWithBookmarkGetResponses[0]
         .chattingMessageId;
 
     const element = document.getElementById(`${id}`);
@@ -131,19 +188,28 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
       messageData.refetch();
       console.log('scrollToBottom 실행!_3');
       scrollbarRef.current?.scrollToBottom();
+      scrollDownref.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
     }
 
     //컴포넌트가 언마운트되면 웹소켓 연결을 종료합니다.
     return () => {
       if (clientRef.current) {
         client?.deactivate();
+        console.log('resetMEssages_1');
         resetMessages();
       }
     };
   }, [publish]);
+  const isChatBookmarked =
+    messageData.data?.pages[0].chattingMessageWithBookmarkGetResponses.find(
+      (item) => item.chattingMessageId === chattingMessageId,
+    )?.isBookmarked;
 
   const handleRightSideBarOpen = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     console.log('handleRightSideBarOpen');
     setisRightSideBarOpen(true);
@@ -180,6 +246,30 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
     }
   };
 
+  // const onClickFavorite = () => {
+  //   console.log('즐겨찾기');
+  // };
+
+  // const onClickEdit = () => {
+  //   console.log('수정');
+  // };
+  const onClickDelete = () => {
+    console.log('삭제', chattingMessageId);
+    deleteMutate();
+    setIsBottomModalOpen(false);
+  };
+
+  const onClickBookmark = () => {
+    console.log('북마크', chattingMessageId);
+    bookmarkMutate();
+    setIsBottomModalOpen(false);
+  };
+  const onClickDeleteBookmark = () => {
+    console.log('북마크 삭제', chattingMessageId);
+    deleteBookmarkMutate();
+    setIsBottomModalOpen(false);
+  };
+
   if (messageData.isError) {
     return <div>에러가 발생했습니다. 캐시된 데이터입니다</div>;
   }
@@ -189,17 +279,17 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   }
 
   return (
-    <div className="overflow-hidden max-w-[100vw] h-full relative">
+    <div className="relative w-full overflow-hidden">
       <RightSideBar
         isRightSideBarOpen={isRightSideBarOpen}
         handleRightSideBarClose={handleRightSideBarClose}
         bindPanRight={bindPanRight}
         ref={sideBarRef}
       >
-        <RightSideBox />
+        <ChatRoomRightSideBox chatRoomId={chattingRoomId} />
       </RightSideBar>
       <div
-        className="box-border relative w-full mx-auto overflow-hidden"
+        className="box-border relative w-full h-[100vh] mx-auto overflow-hidden"
         onClick={(e) => handleSideBarOutsideClick(e)}
         onKeyDown={(e) => handleSideBarOutsideClick(e)}
         role="presentation"
@@ -223,14 +313,12 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
               {chatRoomData?.accountNickName}
             </div>
           </div>
-          <div
+          <button
             className="absolute w-6 h-6 right-5"
             onClick={(e) => handleRightSideBarOpen(e)}
-            onKeyDown={(e) => handleRightSideBarOpen(e)}
-            role="presentation"
           >
             <MenuIcon />
-          </div>
+          </button>
         </div>
         <Scrollbars
           style={{ backgroundColor: '#FAFAFA' }}
@@ -239,8 +327,8 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
           autoHeight
           autoHeightMin={
             fileContainerOpen
-              ? `calc(100vh - ${52}px - 176px - 16px - 64px)`
-              : `calc(100vh - ${52}px - 16px - 64px)`
+              ? `calc(100vh - 8.5rem - 11rem)`
+              : `calc(100vh - 8.5rem)`
           }
           ref={scrollbarRef}
         >
@@ -251,9 +339,12 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
             messageData={messageData}
             postFile={postFile}
             fileContainerOpen={fileContainerOpen}
+            onPressFn={onPressFn}
+            scrollDownref={scrollDownref}
           />
+          <div ref={scrollDownref}></div>
         </Scrollbars>
-        <div className="fixed bottom-0 w-full pb-1">
+        <div className="absolute bottom-0 w-full pb-1">
           <CreateMessage
             id={+params.id}
             accountId={accountId}
@@ -264,6 +355,71 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
           />
         </div>
       </div>
+      <BottomModal isOpen={isBottomModalOpen} bindPanDown={bindPanDown}>
+        <div className="w-full bg-white">
+          <button
+            className="flex flex-row items-center justify-between w-full h-16 px-5 py-5"
+            onClick={isChatBookmarked ? onClickDeleteBookmark : onClickBookmark}
+          >
+            <div className="text-base font-normal leading-tight">
+              {isChatBookmarked ? '즐겨찾기 해제' : '즐겨찾기'}
+            </div>
+            <div className="relative w-5 h-5">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.38843 4.28963C7.69278 2.57693 4.94954 2.5686 3.26122 4.2739C1.5729 5.9792 1.58114 8.75004 3.27679 10.4627L9.55368 16.8028C9.81404 17.0657 10.2362 17.0657 10.4965 16.8028L16.7408 10.4994C18.4252 8.78856 18.4199 6.02549 16.7239 4.31249C15.0252 2.59671 12.2807 2.58838 10.5894 4.29673L9.99299 4.90026L9.38843 4.28963Z"
+                  fill="#212121"
+                />
+              </svg>
+            </div>
+          </button>
+          <div className="flex flex-row items-center justify-between w-full h-16 px-5 py-5">
+            <div className="text-base font-normal leading-tight">수정</div>
+            <div className="relative w-5 h-5">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15.8911 3.04825C17.2885 1.65064 19.5543 1.65058 20.9519 3.0481C22.3493 4.4455 22.3493 6.71112 20.952 8.10861L20.0602 9.00057L14.9995 3.93991L15.8911 3.04825ZM13.9389 5.00064L3.94103 14.9997C3.5347 15.4061 3.2491 15.9172 3.116 16.4762L2.02041 21.0777C1.96009 21.3311 2.03552 21.5976 2.21968 21.7817C2.40385 21.9659 2.67037 22.0413 2.92373 21.981L7.52498 20.8855C8.08418 20.7523 8.59546 20.4666 9.00191 20.0601L18.9996 10.0613L13.9389 5.00064Z"
+                  fill="#212121"
+                />
+              </svg>
+            </div>
+          </div>
+          <button
+            onClick={onClickDelete}
+            className="flex flex-row items-center justify-between w-full h-16 px-5 py-5"
+          >
+            <div className="text-base font-normal leading-tight text-red">
+              삭제
+            </div>
+            <div className="relative w-5 h-5">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 5H14C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5ZM8.5 5C8.5 3.067 10.067 1.5 12 1.5C13.933 1.5 15.5 3.067 15.5 5H21.25C21.6642 5 22 5.33579 22 5.75C22 6.16421 21.6642 6.5 21.25 6.5H19.9309L18.7589 18.6112C18.5729 20.5334 16.9575 22 15.0263 22H8.97369C7.04254 22 5.42715 20.5334 5.24113 18.6112L4.06908 6.5H2.75C2.33579 6.5 2 6.16421 2 5.75C2 5.33579 2.33579 5 2.75 5H8.5ZM10.5 9.75C10.5 9.33579 10.1642 9 9.75 9C9.33579 9 9 9.33579 9 9.75V17.25C9 17.6642 9.33579 18 9.75 18C10.1642 18 10.5 17.6642 10.5 17.25V9.75ZM14.25 9C13.8358 9 13.5 9.33579 13.5 9.75V17.25C13.5 17.6642 13.8358 18 14.25 18C14.6642 18 15 17.6642 15 17.25V9.75C15 9.33579 14.6642 9 14.25 9Z"
+                  fill="#E74733"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </BottomModal>
     </div>
   );
 };
@@ -323,7 +479,7 @@ const CreateMessage = React.memo(function CreateMessage({
   }, [acitvity.transitionState]);
 
   return (
-    <div className="w-full pt-2 bg-white">
+    <div className="w-full py-2 bg-white">
       <form
         className="flex flex-row w-full h-auto"
         onSubmit={handleSubmit(onValid)}
@@ -384,92 +540,5 @@ const CreateMessage = React.memo(function CreateMessage({
     </div>
   );
 });
-
-const RightSideBox = () => {
-  return (
-    <div className="box-border relative z-30 w-full h-full px-4 pt-6">
-      <div>
-        <div className="flex flex-row justify-between w-full">
-          <div className="pt-[2px] text-base font-medium flex flex-row gap-2 items-center">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="-mt-1"
-            >
-              <path
-                d="M13.3333 3.33333C14.0666 3.33333 14.6666 3.93333 14.6666 4.66667V12.6667C14.6666 13.4 14.0666 14 13.3333 14H2.66665C1.93331 14 1.33331 13.4 1.33331 12.6667V4.66667C1.33331 3.93333 1.93331 3.33333 2.66665 3.33333H4.77998L5.99998 2H9.99998L11.22 3.33333H13.3333ZM13.3333 12.6667V4.66667H2.66665V12.6667H13.3333ZM9.33331 8L7.33331 10.48L5.99998 8.66667L3.99998 11.3333H12L9.33331 8Z"
-                fill="black"
-              />
-            </svg>
-            사진, 동영상
-          </div>
-          <button className="w-6 h-6">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M5.73271 2.20694C6.03263 1.92125 6.50737 1.93279 6.79306 2.23271L11.7944 7.48318C12.0703 7.77285 12.0703 8.22809 11.7944 8.51776L6.79306 13.7682C6.50737 14.0681 6.03263 14.0797 5.73271 13.794C5.43279 13.5083 5.42125 13.0336 5.70694 12.7336L10.2155 8.00047L5.70694 3.26729C5.42125 2.96737 5.43279 2.49264 5.73271 2.20694Z"
-                fill="#222222"
-              />
-            </svg>
-          </button>
-        </div>
-        <div className="flex flex-row gap-2 mt-2">
-          {[1, 2, 3, 4].map((v) => {
-            return (
-              <img
-                key={v}
-                src="https://via.placeholder.com/64x64"
-                alt="img"
-                className="w-[16vw] h-[16vw] rounded bg-gray"
-              />
-            );
-          })}
-        </div>
-      </div>
-      <div>
-        <div className="flex flex-row justify-between w-full mt-8">
-          <div className="pt-[2px] flex flex-row items-center gap-2 text-base font-medium">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="-mt-1"
-            >
-              <path
-                d="M7.54118 3.94746C6.26949 2.67576 4.21213 2.66958 2.94594 3.93578C1.67975 5.20197 1.68593 7.25933 2.95762 8.53102L7.66511 13.2385C7.86038 13.4338 8.17696 13.4338 8.37222 13.2385L13.0553 8.55824C14.3185 7.28793 14.3145 5.23634 13.0426 3.96442C11.7686 2.69045 9.7103 2.68427 8.44184 3.95273L7.99458 4.40085L7.54118 3.94746Z"
-                fill="#212121"
-              />
-            </svg>
-            즐겨찾기
-          </div>
-          <button className="w-6 h-6">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M5.73271 2.20694C6.03263 1.92125 6.50737 1.93279 6.79306 2.23271L11.7944 7.48318C12.0703 7.77285 12.0703 8.22809 11.7944 8.51776L6.79306 13.7682C6.50737 14.0681 6.03263 14.0797 5.73271 13.794C5.43279 13.5083 5.42125 13.0336 5.70694 12.7336L10.2155 8.00047L5.70694 3.26729C5.42125 2.96737 5.43279 2.49264 5.73271 2.20694Z"
-                fill="#222222"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default React.memo(ChatRoomPageWrapper);

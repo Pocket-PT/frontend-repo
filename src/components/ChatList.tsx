@@ -11,17 +11,18 @@ import useMessageStore from 'stores/message';
 import EditModal from './EditModal';
 import Scrollbars from 'react-custom-scrollbars-2';
 import Message from './Message';
-import { animated } from '@react-spring/web';
 
 interface Props {
   isScrollTop: boolean;
   scrollbarRef: RefObject<Scrollbars | null>;
   userData: AxiosResponse<AccountData> | undefined;
-  postFile: (file: FormData) => void;
+  postFile?: (file: FormData) => void;
   messageData:
     | InfiniteQueryObserverIdleResult<IMessage, unknown>
     | InfiniteQueryObserverSuccessResult<IMessage, unknown>;
-  fileContainerOpen: boolean;
+  fileContainerOpen?: boolean;
+  onPressFn: () => void;
+  scrollDownref: RefObject<HTMLDivElement>;
 }
 interface CanvasData {
   canvasURL: string;
@@ -35,6 +36,8 @@ const ChatList = ({
   userData,
   messageData,
   postFile,
+  onPressFn,
+  scrollDownref,
 }: Props) => {
   const { messages: newMessageData } = useMessageStore();
   const [modalOpen, setModalOpen] = useState(false);
@@ -86,9 +89,9 @@ const ChatList = ({
     <div className="w-full h-full">
       {messageData.isLoading ?? <LoadingSpinner />}
       {messageData.data?.pages.map((page) => {
-        return page.chattingMessageGetResponseList.map((item, idx) => {
+        return page.chattingMessageWithBookmarkGetResponses.map((item, idx) => {
           return (
-            <animated.div
+            <div
               key={idx}
               id={`${item.chattingMessageId}`}
               className="w-full h-fit"
@@ -97,15 +100,20 @@ const ChatList = ({
                 message={item.content}
                 myId={userData?.data.accountId}
                 chatId={item.chattingAccountId}
+                chatMessageId={item.chattingMessageId}
                 createAt={item.updatedAt}
+                isDeleted={item.isDeleted}
+                isBookmarked={item.isBookmarked}
                 fileUrl={item.fileUrl}
                 postFile={postFile}
                 handleCapture={() => handleCapture(item.ref)}
                 scrollbarRef={scrollbarRef}
                 isScrollTop={isScrollTop}
                 ref={item.ref}
+                onPressFn={onPressFn}
+                scrollDownref={scrollDownref}
               />
-            </animated.div>
+            </div>
           );
         });
       })}
@@ -113,11 +121,16 @@ const ChatList = ({
         <Message
           key={idx}
           message={item.message}
+          chatMessageId={item.chatMessageId}
           myId={userData?.data.accountId}
           chatId={item.chattingAccountId}
           createAt={item.createAt}
+          isDeleted={false}
+          isBookmarked={false}
           fileUrl={null}
           postFile={postFile}
+          onPressFn={onPressFn}
+          scrollDownref={scrollDownref}
         />
       ))}
       {modalOpen ? (

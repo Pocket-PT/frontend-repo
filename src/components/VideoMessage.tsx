@@ -12,12 +12,14 @@ const VideoMessage = forwardRef(
       isMyMessage,
       handleCapture,
       src,
+      scrollDownref,
     }: {
       scrollTop?: boolean;
       scrollbarsRef?: React.RefObject<Scrollbars>;
       isMyMessage: boolean;
       handleCapture: (() => void) | undefined;
       src?: string;
+      scrollDownref: React.RefObject<HTMLDivElement>;
     },
     ref: React.ForwardedRef<
       HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
@@ -34,13 +36,24 @@ const VideoMessage = forwardRef(
       pauseVideo();
     };
 
+    const scrollToBottomwhenLoaded = () => {
+      console.log('scrollToBottomwhenLoaded');
+      if (!scrollTop) {
+        scrollbarsRef?.current?.scrollToBottom();
+        scrollDownref.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }
+    };
+
     console.log('videoMessageRef: ', ref);
     return (
       <div className="relative w-full h-full">
         <video
-          onLoadedData={() => {
-            if (!scrollTop) scrollbarsRef?.current?.scrollToBottom();
-          }}
+          width={'100%'}
+          height={'auto'}
+          onLoadedData={scrollToBottomwhenLoaded}
           crossOrigin="anonymous"
           ref={ref}
           src={src}

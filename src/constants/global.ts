@@ -22,3 +22,5 @@ export const PUB_URL = '/pub/chatting/rooms';
 export const SUB_URL = '/sub/channel';
 export const PUB_CHATROOM_URL = '/pub/chatting/rooms';
 export const SUB_CHATROOM_URL = '/sub/accounts';
+export const SENDING_MEDIA =
+  'f69000b18974727d848e217631f2f2eddfdf642b8dc45fc2ab86a9c64ef166fce542ce102c9db6e9afc49e5ceb026bad062f6d895be00c6f19c4154c2206e50a' as const;

@@ -2,7 +2,7 @@ import { useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import { useState } from 'react';
 
-const usePan = () => {
+const usePan = (onPressFn?: () => void) => {
   const [isOpen, setIsOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [{ x, y, scale }, api] = useSpring(() => ({ x: 0, y: 0, scale: 1 }));
@@ -28,12 +28,18 @@ const usePan = () => {
 
   const bindPress = useDrag(
     ({ down, movement: [mx, my] }) => {
-      console.log('pressing');
       api.start({
-        x: down ? mx : 0,
-        y: down ? my : 0,
-        scale: down ? 0.8 : 1,
+        x: mx,
+        y: my,
+        scale: down ? 0.9 : 1,
       });
+      if (mx - 0 > 0.1 || mx - 0 < 0) return;
+      if (my - 0 > 0.1 || my - 0 < 0) return;
+      if (down && typeof onPressFn === 'function') {
+        console.log('bindPress 실행');
+        setIsOpen(true);
+        onPressFn();
+      }
     },
     { delay: 1000 },
   );
