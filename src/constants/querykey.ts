@@ -7,12 +7,14 @@ export const myprofileKeys: IMyProfileKeys = {
   career: () => [...myprofileKeys.all, 'career'] as const,
   ptManagement: () => [...myprofileKeys.all, 'ptManagement'] as const,
   price: () => [...myprofileKeys.all, 'price'] as const,
+  signup: () => [...myprofileKeys.all, 'signup'] as const,
 };
 
 export const messageKeys: IMessageKeys = {
   all: ['messages'] as const,
   message: (id) => [...messageKeys.all, id] as const,
   messageFiles: (id) => [...messageKeys.all, id, 'files'] as const,
+  bookmark: (id) => [...messageKeys.all, id, 'bookmarks'] as const,
 };
 
 export interface IMyProfileKeys {
@@ -24,10 +26,12 @@ export interface IMyProfileKeys {
   career: () => readonly ['myprofile', 'career'];
   ptManagement: () => readonly ['myprofile', 'ptManagement'];
   price: () => readonly ['myprofile', 'price'];
+  signup: () => readonly ['myprofile', 'signup'];
 }
 
 export interface IMessageKeys {
   all: readonly ['messages'];
   message: (id: number) => readonly ['messages', number];
   messageFiles: (id: number) => readonly ['messages', number, 'files'];
+  bookmark: (id: number) => readonly ['messages', number, 'bookmarks'];
 }

@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import useHashLocation from 'hooks/useHashLocation';
 import usePushToPage from 'hooks/usePushToPage';
-import { useEffect } from 'react';
 import useTokenStore from 'stores/token';
+import LoadingSpinner from 'components/common/LoadingSpinner';
 
 const AfterLogin = () => {
   const { token, setToken } = useTokenStore();
@@ -14,13 +15,13 @@ const AfterLogin = () => {
       setToken(params.accessToken ?? '');
     }
     if (token) {
-      replaceTo('Main');
+      replaceTo('CheckSignup');
     }
   }, [token]);
 
   return (
     <div>
-      <h1>AfterLogin</h1>
+      <LoadingSpinner />
     </div>
   );
 };
