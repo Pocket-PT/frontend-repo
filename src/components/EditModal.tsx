@@ -11,7 +11,7 @@ import { cls } from 'utils/cls';
 import DataURIToBlob from 'utils/dataURIToBlob';
 
 type EditModalProps = {
-  postFile: (file: FormData) => void;
+  postFile?: (file: FormData) => void;
   onCloseModal: () => void;
   canvasData: {
     canvasURL: string;
@@ -133,7 +133,7 @@ const EditModal = ({ onCloseModal, canvasData, postFile }: EditModalProps) => {
 
   const onSubmit = () => {
     const divElement = divRef.current;
-    if (divElement) {
+    if (divElement && postFile) {
       html2canvas(divElement).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         //saveAsImage(imgData, 'test.png');

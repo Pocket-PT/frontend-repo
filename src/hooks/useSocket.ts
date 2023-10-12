@@ -78,6 +78,7 @@ const useSocket = (
           setMessages({
             message: data.content,
             chattingAccountId: data.chattingAccountId,
+            chatMessageId: data.chattingMessageId,
             createAt: data.createdAt,
           });
           chatRoomPublish(

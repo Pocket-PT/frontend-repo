@@ -2,7 +2,6 @@ import { Client } from '@stomp/stompjs';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import { SUB_CHATROOM_URL } from 'constants/global';
 import { useCallback, useEffect, useRef } from 'react';
-import useMessageStore from 'stores/message';
 import useTokenStore from 'stores/token';
 import WebSocket from 'ws';
 
@@ -10,7 +9,6 @@ Object.assign(global, WebSocket);
 
 const useChatRoomSocket = (accountId: number | undefined) => {
   const { token } = useTokenStore();
-  const { setUpdateChatRoom } = useMessageStore();
   const { refetch } = useChatRoomQuery();
 
   const ref = useRef<Client>();
@@ -70,7 +68,6 @@ const useChatRoomSocket = (accountId: number | undefined) => {
         ref.current.subscribe(`${SUB_CHATROOM_URL}/${accountId}`, (payload) => {
           console.log('chatRoom sub실행');
           console.log('chatRoom payload:', JSON.parse(payload.body).data);
-          setUpdateChatRoom(JSON.parse(payload.body).data);
           refetch();
         });
       }

@@ -62,7 +62,7 @@ Input.TextField = forwardRef(
     return (
       <input
         className={cls(
-          'w-full py-4 px-4 text-base leading-12 outline outline-1 outline-lightGray border-none rounded-md bg-white transition-all duration-200 focus:outline-mainPurple',
+          'w-full py-4 px-4 text-base leading-12 outline outline-1 outline-lightGray border-none rounded-md bg-white transition-all duration-200 focus:outline-mainBlue',
           error ? 'outline-red shadow-red' : 'border-opacity-20',
         )}
         ref={ref}

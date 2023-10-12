@@ -38,7 +38,7 @@ const useMemeberQuery = <T = IData>(
     {
       ...options,
       staleTime: Infinity,
-      retry: 0,
+      retry: 3,
     },
   );
 

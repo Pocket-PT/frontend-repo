@@ -16,6 +16,8 @@ import AfterLogin from 'apps/login/AfterLogin';
 import IncomePage from 'apps/MyProfilePage/Income';
 import Test from 'apps/Test';
 import PTManagementPage from 'apps/PTManagementPage';
+import CheckSignup from 'apps/login/CheckSignup';
+import BookmarkPage from 'apps/Chat/ChatRoom/BookmarkPage';
 
 const activities = {
   Main,
@@ -23,6 +25,7 @@ const activities = {
   MyProfilePage,
   ChatListPage,
   ChatRoomPage,
+  BookmarkPage,
   SignInPage,
   PortfolioPage,
   MyProfileEditPage,
@@ -30,6 +33,7 @@ const activities = {
   IncomePage,
   BeforeLogin,
   AfterLogin,
+  CheckSignup,
   PTManagementPage,
   Test,
 };
@@ -49,6 +53,7 @@ export const { Stack, useStepFlow } = stackflow({
         MyProfilePage: '/mypage',
         ChatListPage: '/chats',
         ChatRoomPage: '/chats-rooms',
+        BookmarkPage: '/chats-rooms/bookmarks',
         SignInPage: '/login',
         PortfolioPage: '/mypage/portfolio',
         MyProfileEditPage: '/mypage/edit',
@@ -56,6 +61,7 @@ export const { Stack, useStepFlow } = stackflow({
         IncomePage: '/mypage/income',
         BeforeLogin: '/before-login',
         AfterLogin: '/after-login',
+        CheckSignup: '/check-signup',
         PTManagementPage: '/pt-management',
         Test: '/test',
       },
