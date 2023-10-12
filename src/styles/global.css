@@ -7,13 +7,16 @@
     scroll-behavior: smooth;
     background: #f1f4f9;
     @apply text-dark;
-
     .ant-slider-handle::before {
       display: none;
     }
     .ant-slider-handle::after {
       display: none;
     }
+  }
+
+  body {
+    overscroll-behavior-y: none;
   }
 
   input[type='range'] {
