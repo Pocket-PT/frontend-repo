@@ -39,27 +39,24 @@ interface MessageData {
   >;
 }
 
-const useMessageInfiniteQuery = (
-  id: number,
+const useBookmarkInfiniteQuery = (
+  chatRoomId: number,
 ): UseInfiniteQueryResult<IMessage> => {
-  console.log('useInfiniteQuery');
   const serverInstance = getServerInstance();
   const queryClient = useQueryClient();
   const { replaceTo } = usePushToPage();
   const result = useInfiniteQuery(
-    messageKeys.message(id),
+    messageKeys.bookmark(chatRoomId),
     ({ pageParam = 0 }) =>
       serverInstance.get(
-        `/api/v1/chatting/rooms/${id}/messages?page=${pageParam}&size=20`,
+        `/api/v1/chatting/rooms/${chatRoomId}/bookmarks?page=${pageParam}&size=20`,
       ),
     {
-      onSuccess: () => {
-        console.log('resetMessagesa_1 onSucess');
-      },
       onSettled: () => {
-        queryClient.cancelQueries(messageKeys.message(id));
+        queryClient.cancelQueries(messageKeys.message(chatRoomId));
       },
       select: (data: InfiniteData<AxiosResponse<AxiosResponse<IMessage>>>) => {
+        console.log('beforeSelect', data);
         return {
           pages: data.pages
             .reverse()
@@ -107,4 +104,4 @@ const useMessageInfiniteQuery = (
   return result;
 };
 
-export default useMessageInfiniteQuery;
+export default useBookmarkInfiniteQuery;
