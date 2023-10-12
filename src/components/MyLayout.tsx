@@ -1,7 +1,7 @@
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import Footer from './Footer';
 import useUser from 'hooks/useUser';
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useEffect } from 'react';
 // import DropdownButton from './common/Dropdown';
 // import PersonIcon from 'icons/PersonIcon';
 // import { MenuProps } from 'antd';
@@ -46,6 +46,28 @@ const MyLayout = ({
   backgroundWhite = false,
 }: PropsWithChildren<Props>) => {
   const result = useUser();
+
+  useEffect(() => {
+    //touchmove event listener preventDefault
+    document.addEventListener('touchmove', function (event) {
+      if (typeof window === 'undefined') {
+        return;
+      }
+      if (window.scrollY <= 0) {
+        event.preventDefault();
+      }
+    });
+    return () => {
+      document.removeEventListener('touchmove', function (event) {
+        if (typeof window === 'undefined') {
+          return;
+        }
+        if (window.scrollY <= 0) {
+          event.preventDefault();
+        }
+      });
+    };
+  }, []);
 
   return (
     <AppScreen backgroundColor={backgroundWhite ? '#FFFFFF' : '#FAFAFA'}>
