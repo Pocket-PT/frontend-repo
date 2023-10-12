@@ -23,7 +23,7 @@ const SignInPage = () => {
         <div className="my-auto hover:cursor-pointer">
           <a
             href={`https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
-              'http://localhost:8000/#/after-login',
+              'https://pocketpt.netlify.app/#/after-login',
             )}`}
           >
             <KaKaoLogin />
