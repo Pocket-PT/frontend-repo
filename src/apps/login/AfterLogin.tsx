@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import useHashLocation from 'hooks/useHashLocation';
 import usePushToPage from 'hooks/usePushToPage';
-import useTokenStore from 'stores/token';
+import useTokenStore from '../../stores/token';
 import LoadingSpinner from 'components/common/LoadingSpinner';
 
 const AfterLogin = () => {

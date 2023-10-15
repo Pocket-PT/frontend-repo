@@ -1,5 +1,6 @@
 import { AppScreen } from '@stackflow/plugin-basic-ui';
 import KaKaoLogin from 'components/KaKaoLogin';
+import { SERVER_URL } from 'constants/global';
 
 //https://pocketpt.netlify.app
 //http://localhost:8000
@@ -22,7 +23,7 @@ const SignInPage = () => {
       >
         <div className="my-auto hover:cursor-pointer">
           <a
-            href={`https://back.pocketpt.shop/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
+            href={`${SERVER_URL}/oauth2/authorization/kakao?redirectUri=${encodeURIComponent(
               'https://pocketpt.netlify.app/#/after-login',
             )}`}
           >

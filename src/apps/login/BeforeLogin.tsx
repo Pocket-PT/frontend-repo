@@ -2,7 +2,7 @@
 /* eslint-disable react/prop-types */
 import { useStepFlow } from 'libs/stackflow';
 import useHashLocation from 'hooks/useHashLocation';
-import useTokenStore from 'stores/token';
+import useTokenStore from '../../stores/token';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityComponentType } from '@stackflow/react';
 import Input from 'components/common/Input';
@@ -16,19 +16,24 @@ import CheckIcon from 'icons/CheckIcon';
 import EditIcon from 'icons/EditIcon';
 import ExitIcon from 'icons/ExitIcon';
 import truncateString from 'utils/truncateString';
-import useMyProfileStore from 'stores/myProfile';
+import useMyProfileStore from '../../stores/myProfile';
 import FirstPrivacy from 'components/FirstPrivacy';
 import SecondPrivacy from 'components/common/SecondPrivacy';
 import usePatchAccountMutation from 'hooks/mutation/usePatchAccountMutation';
 import usePushToPage from 'hooks/usePushToPage';
 import numberWithCommas from 'utils/numberWithCommas';
+import { useCheckSignupQuery } from 'apis/useCheckSignupQuery';
+import useQueryLoadingStore from 'stores/queryLoading';
+import LoadingSpinnerTwo from 'components/common/LoadingSpinnerTwo';
 
 type BeforeLoginProps = {
   title?: string;
 };
 
 const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
+  const { data } = useCheckSignupQuery();
   const { stepPush, stepReplace } = useStepFlow('BeforeLogin');
+  const { replaceTo } = usePushToPage();
   const { setToken } = useTokenStore();
   const { params: props } = useHashLocation();
   const [userRole, setUserRole] = useState('');
@@ -38,6 +43,12 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   useEffect(() => {
     setToken(props.accessToken ?? '');
   }, []);
+
+  useEffect(() => {
+    if (data?.data.isAccountSignedUp) {
+      replaceTo('Main');
+    }
+  }, [data]);
 
   if (params.title === undefined || params.title === 'CheckPrivacy') {
     return (
@@ -295,6 +306,15 @@ interface FinalStepProps {
   phoneNumber: string;
 }
 
+type TrainerData = {
+  name: string;
+  phoneNumber: string;
+  monthlyPtPriceList: {
+    period: number;
+    price: number;
+  }[];
+};
+
 const FinalStep = ({ inputName, phoneNumber }: FinalStepProps) => {
   const { priceTable, onAddPriceTable, onEditPriceTable, onDeletePriceTable } =
     useMyProfileStore();
@@ -302,7 +322,9 @@ const FinalStep = ({ inputName, phoneNumber }: FinalStepProps) => {
     onAddPriceTable(0, 0);
   };
   const { replaceTo } = usePushToPage();
-  const { mutate } = usePatchAccountMutation();
+  const { mutate } = usePatchAccountMutation<TrainerData>('trainer');
+  const { refetch } = useCheckSignupQuery();
+  const { signUpLoading } = useQueryLoadingStore();
 
   const onSubmit = () => {
     const monthlyPtPriceList = priceTable.map((monthlyPtPrice) => {
@@ -318,9 +340,11 @@ const FinalStep = ({ inputName, phoneNumber }: FinalStepProps) => {
         monthlyPtPriceList,
       },
       {
-        onSuccess: () => {
-          alert('회원가입이 완료되었습니다.');
-          replaceTo('Main');
+        onSuccess: async () => {
+          if ((await refetch()).isSuccess) {
+            alert('회원가입이 완료되었습니다.');
+            replaceTo('Main');
+          }
         },
         onError: () => {
           alert('회원가입에 실패했습니다.');
@@ -358,9 +382,15 @@ const FinalStep = ({ inputName, phoneNumber }: FinalStepProps) => {
           <div className="absolute flex items-center w-full bottom-3">
             <button
               onClick={onSubmit}
-              className="flex text-base font-bold leading-tight text-center text-white items-center justify-center w-[90%] bg-mainBlue h-14 rounded-xl"
+              className="flex text-base font-bold leading-tight text-center text-white items-center justify-center w-[90%] bg-mainBlue h-14 rounded-xl active:scale-105 transition-all duration-300 ease-in-out"
             >
-              회원 가입 완료
+              {signUpLoading ? (
+                <div className="text-white">
+                  <LoadingSpinnerTwo />
+                </div>
+              ) : (
+                '회원 가입 완료'
+              )}
             </button>
           </div>
         </div>

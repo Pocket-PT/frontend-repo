@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import useTokenStore from 'stores/token';
+import useTokenStore from '../stores/token';
 import usePushToPage from './usePushToPage';
-import { useAccountQuery } from 'apis/useAccountQuery';
+import { useCheckSignupQuery } from 'apis/useCheckSignupQuery';
 
 const useUser = () => {
-  const { data, isError, isLoading, isSuccess } = useAccountQuery();
-  const { token, setToken } = useTokenStore();
+  const { data, isLoading, isError, isSuccess } = useCheckSignupQuery();
+  const { token } = useTokenStore();
   const { replaceTo } = usePushToPage();
 
   console.log('useUser 실행!');
@@ -14,15 +14,11 @@ const useUser = () => {
       console.log('isLoading', isLoading);
       replaceTo('SignInPage', false);
     }
-  }, [isLoading]);
-
-  useEffect(() => {
-    if (isError && !isLoading) {
-      console.log('isError');
-      setToken('');
-      replaceTo('SignInPage', false);
+    if (!data?.data.isAccountSignedUp && !isLoading) {
+      console.log('2차 회원가입 안됨');
+      replaceTo('BeforeLogin', false);
     }
-  }, [isError, isLoading]);
+  }, [data?.data.isAccountSignedUp, isLoading]);
 
   return { data, isError, isLoading, isSuccess };
 };
