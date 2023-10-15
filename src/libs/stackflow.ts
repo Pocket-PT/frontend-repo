@@ -18,6 +18,7 @@ import Test from 'apps/Test';
 import PTManagementPage from 'apps/PTManagementPage';
 import CheckSignup from 'apps/login/CheckSignup';
 import BookmarkPage from 'apps/Chat/ChatRoom/BookmarkPage';
+import FilePage from 'apps/Chat/ChatRoom/FilePage';
 
 const activities = {
   Main,
@@ -26,6 +27,7 @@ const activities = {
   ChatListPage,
   ChatRoomPage,
   BookmarkPage,
+  FilePage,
   SignInPage,
   PortfolioPage,
   MyProfileEditPage,
@@ -53,6 +55,7 @@ export const { Stack, useStepFlow } = stackflow({
         MyProfilePage: '/mypage',
         ChatListPage: '/chats',
         ChatRoomPage: '/chats-rooms',
+        FilePage: '/chats-rooms/files',
         BookmarkPage: '/chats-rooms/bookmarks',
         SignInPage: '/login',
         PortfolioPage: '/mypage/portfolio',
