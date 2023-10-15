@@ -4,11 +4,13 @@ import useInput from 'hooks/useInput';
 import usePatchPTManagementMutation from 'hooks/mutation/usePatchPTManagementMutation';
 import usePushToPage from 'hooks/usePushToPage';
 import BackIcon from 'icons/BackIcon';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
 import { cls } from 'utils/cls';
 import BottomModal from 'components/common/BottomModal';
 import usePan from 'hooks/usePan';
+import LoadingSpinner from 'components/common/LoadingSpinner';
+import { FOOTER_HEIGHT } from 'constants/global';
 
 const PTManagementPageWrapper = () => {
   return (
@@ -25,6 +27,9 @@ const PTManagementPage = () => {
   const { isOpen, setIsOpen, bindPanDown } = usePan();
   const [isAccept, setIsAccept] = useState(true);
   const [targetId, setTargetId] = useState(0);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const [refHeights, setRefHeights] = useState<number[]>([]);
+  const [isRefLoading, setIsRefLoading] = useState<boolean>(true);
 
   const handleAcceptModalOpen = (id: number) => {
     console.log('handleAcceptModalOpen', id);
@@ -39,9 +44,19 @@ const PTManagementPage = () => {
     setTargetId(id);
   };
 
+  useEffect(() => {
+    if (titleRef.current) {
+      setRefHeights([titleRef.current?.clientHeight ?? 0]);
+      setIsRefLoading(false);
+    }
+  }, [titleRef.current]);
+
   return (
     <div className="relative w-full overflow-hidden">
-      <div className="relative flex flex-row items-center mt-5 ml-5">
+      <div
+        ref={titleRef}
+        className="relative flex flex-row items-center mt-5 ml-5"
+      >
         <button
           className="w-6 h-6"
           onClick={() => {
@@ -56,42 +71,46 @@ const PTManagementPage = () => {
       </div>
       <div className="w-full h-full">
         <div className="w-full px-5 mt-8">
-          <Scrollbars
-            autoHide
-            autoHeight
-            autoHeightMin={`calc(100vh - 80px - 32px`}
-          >
-            {data?.data.map((pt) => {
-              return (
-                <PTCard
-                  key={pt.ptMatchingId}
-                  id={pt.ptMatchingId}
-                  profileUrl={pt.profilePictureUrl}
-                  name={pt.name}
-                  email={pt.email}
-                  month={pt.subscriptionPeriod}
-                  phoneNumber={pt.phoneNumber}
-                  handleAcceptModalOpen={handleAcceptModalOpen}
-                  handleRejectModalOpen={handleRejectModalOpen}
-                />
-              );
-            })}
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => {
-              return (
-                <PTCard
-                  key={v}
-                  id={v}
-                  profileUrl="https://via.placeholder.com/44x44"
-                  name="김일곤"
-                  email="email@test.com"
-                  month={5}
-                  phoneNumber="01012345678"
-                  handleAcceptModalOpen={handleAcceptModalOpen}
-                  handleRejectModalOpen={handleRejectModalOpen}
-                />
-              );
-            })}
-          </Scrollbars>
+          {isRefLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <Scrollbars
+              autoHide
+              autoHeight
+              autoHeightMin={`calc(100vh - ${refHeights[0]}px - ${FOOTER_HEIGHT}px)`}
+            >
+              {data?.data.map((pt) => {
+                return (
+                  <PTCard
+                    key={pt.ptMatchingId}
+                    id={pt.ptMatchingId}
+                    profileUrl={pt.profilePictureUrl}
+                    name={pt.name}
+                    email={pt.email}
+                    month={pt.subscriptionPeriod}
+                    phoneNumber={pt.phoneNumber}
+                    handleAcceptModalOpen={handleAcceptModalOpen}
+                    handleRejectModalOpen={handleRejectModalOpen}
+                  />
+                );
+              })}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => {
+                return (
+                  <PTCard
+                    key={v}
+                    id={v}
+                    profileUrl="https://via.placeholder.com/44x44"
+                    name="김일곤"
+                    email="email@test.com"
+                    month={5}
+                    phoneNumber="01012345678"
+                    handleAcceptModalOpen={handleAcceptModalOpen}
+                    handleRejectModalOpen={handleRejectModalOpen}
+                  />
+                );
+              })}
+            </Scrollbars>
+          )}
         </div>
       </div>
       <BottomModal isOpen={isOpen} bindPanDown={bindPanDown}>
@@ -150,9 +169,7 @@ const AcceptOrRejectModal = ({
         >
           {isAccept ? '수락' : '거절'}
         </span>
-        <span className="text-neutral-800 text-2xl font-bold font-['Pretendard Variable'] leading-normal">
-          하시겠습니까?
-        </span>
+        <span className="text-2xl font-bold leading-normal">하시겠습니까?</span>
       </div>
       <div className="flex flex-col items-center justify-center mb-6">
         <img
@@ -188,7 +205,7 @@ const AcceptOrRejectModal = ({
             취소
           </div>
         </button>
-        <div
+        <button
           className={cls(
             'flex items-center justify-center w-1/2 rounded-md h-9',
             isAccept
@@ -198,13 +215,11 @@ const AcceptOrRejectModal = ({
               : 'bg-red',
           )}
           onClick={isAccept ? handleAccept : handleReject}
-          onKeyDown={isAccept ? handleAccept : handleReject}
-          role="presentation"
         >
           <div className="text-base font-normal leading-tight text-white">
             {isAccept ? '수락' : '거절'}
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );
@@ -233,7 +248,7 @@ const PTCard = ({
 }: PTCardProps) => {
   return (
     <>
-      <div className="w-full h-[20vh] px-5 py-4 bg-white rounded-xl relative mb-3">
+      <div className="relative w-full px-5 py-4 mb-3 bg-white rounded-xl">
         <div className="flex flex-row items-center">
           <img
             className="rounded-full w-11 h-11"

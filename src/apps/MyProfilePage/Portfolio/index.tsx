@@ -14,7 +14,7 @@ import Scrollbars from 'react-custom-scrollbars-2';
 import { cls } from 'utils/cls';
 import truncateString from 'utils/truncateString';
 import useDeleteCareerMutation from 'hooks/mutation/useDeleteCareerMutation';
-import { AccountQueryResult } from 'apis/useAccountQuery';
+import { useAccountQuery } from 'apis/useAccountQuery';
 
 type CategoryProps = {
   title: string;
@@ -69,14 +69,10 @@ const PortfolioPageWrapper = () => {
   );
 };
 
-type PortfolioPageProp = {
-  result: AccountQueryResult;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const PortfolioPage: React.FC<any> = ({ result }: PortfolioPageProp) => {
-  console.log('result', result);
-  const userId = result.data?.data.accountId;
+const PortfolioPage: React.FC<any> = () => {
+  const { data: result } = useAccountQuery();
+  const userId = result?.data.accountId;
   const { data: careerData } = useCareerQuery(userId);
   const { mutate } = usePostCareerMutation();
 
@@ -188,7 +184,7 @@ const Card = ({ id, title, date }: CardProps) => {
     e.stopPropagation();
   };
 
-  const propagation = (e: React.MouseEvent) => {
+  const propagation = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
   };
 
@@ -211,7 +207,12 @@ const Card = ({ id, title, date }: CardProps) => {
   }, []);
   console.log(editTitle, editDate);
   return (
-    <button className="relative w-full mb-3" onClick={propagation}>
+    <div
+      className="relative w-full mb-3"
+      onClick={propagation}
+      onKeyDown={propagation}
+      role="presentation"
+    >
       <div
         ref={ref}
         className={cls(
@@ -285,7 +286,7 @@ const Card = ({ id, title, date }: CardProps) => {
           <ExitIcon />
         </button>
       </div>
-    </button>
+    </div>
   );
 };
 

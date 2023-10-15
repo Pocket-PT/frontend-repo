@@ -1,3 +1,4 @@
+import { useAccountQuery } from 'apis/useAccountQuery';
 import MyLayout from 'components/MyLayout';
 import BottomWhitePlain from 'components/common/BottomWhitePlain';
 import usePushToPage from 'hooks/usePushToPage';
@@ -6,22 +7,25 @@ import BackIcon from 'icons/BackIcon';
 import GraphIcon from 'icons/GraphIcon';
 import PrizeIcon from 'icons/PrizeIcon';
 import { Link } from 'libs/link';
-import useMyProfileStore from 'stores/myProfile';
 
 type MyProfileCardProps = {
-  name: string;
-  nickname: string;
-  description: string;
-  birthDate: string;
-  email: string;
+  name: string | undefined;
+  introduce: string | undefined;
+  profilePictureUrl: string | undefined;
+  email: string | undefined;
 };
 
-const MyProfileCard = ({ name, description, email }: MyProfileCardProps) => {
+const MyProfileCard = ({
+  name,
+  introduce,
+  profilePictureUrl,
+  email,
+}: MyProfileCardProps) => {
   return (
     <div className="w-full h-[30vh] flex-col justify-start items-center gap-4 inline-flex">
       <img
         className="w-[15vh] rounded-full h-[15vh] border-opacity-5"
-        src="https://via.placeholder.com/160x160"
+        src={profilePictureUrl}
         alt="$"
       />
       <div className="flex flex-col items-start justify-start gap-1">
@@ -33,7 +37,7 @@ const MyProfileCard = ({ name, description, email }: MyProfileCardProps) => {
         </div>
       </div>
       <div className="w-full text-sm font-medium leading-tight text-center text-white">
-        {description}
+        {introduce}
       </div>
     </div>
   );
@@ -75,9 +79,9 @@ const MyProfilePageWrapper = () => {
   );
 };
 
-const MyProfilePage = () => {
-  const { name, nickname, description, birthDate, email } = useMyProfileStore();
-  console.log('MyProfilePage', name, nickname, description, birthDate, email);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MyProfilePage: React.FC<any> = () => {
+  const { data: myData } = useAccountQuery();
   const { pop } = usePushToPage();
 
   return (
@@ -90,11 +94,18 @@ const MyProfilePage = () => {
       >
         <BackIcon />
       </div>
-
       <div className="absolute text-sm text-white top-5 right-5">
-        <Link activityName="MyProfileEditPage">편집</Link>
+        <Link
+          activityName="MyProfileEditPage"
+          activityParams={{
+            name: myData?.data.name,
+            introduce: myData?.data.introduce,
+            profilePictureUrl: myData?.data.profilePictureUrl,
+          }}
+        >
+          편집
+        </Link>
       </div>
-
       <div className="w-full h-full bg-dark bg-opacity-20 backdrop-blur-[80px] absolute -z-10" />
       <div
         className="absolute w-full h-full bg-center bg-repeat bg-cover -z-20"
@@ -104,11 +115,10 @@ const MyProfilePage = () => {
       />
       <div className="px-5 mt-8 mb-5">
         <MyProfileCard
-          name={name}
-          nickname={nickname}
-          description={description}
-          birthDate={birthDate}
-          email={email}
+          name={myData?.data.name}
+          introduce={myData?.data.introduce}
+          profilePictureUrl={myData?.data.profilePictureUrl}
+          email={myData?.data.email}
         />
       </div>
       <BottomWhitePlain>

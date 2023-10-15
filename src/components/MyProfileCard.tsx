@@ -1,9 +1,10 @@
 type MyProfileCardProps = {
   name: string | undefined;
   profileUrl: string | undefined;
+  introduce: string | undefined;
 };
 
-const MyProfileCard = ({ name, profileUrl }: MyProfileCardProps) => {
+const MyProfileCard = ({ name, profileUrl, introduce }: MyProfileCardProps) => {
   return (
     <div className="relative flex items-center w-full h-auto px-5 hover:bg-hoverGray hover:cursor-pointer">
       <img
@@ -18,7 +19,7 @@ const MyProfileCard = ({ name, profileUrl }: MyProfileCardProps) => {
             {name}
           </div>
           <div className="text-xs font-medium leading-none text-gray">
-            건강한 라이프스타일을 위한 스트레스 관리 방법
+            {introduce}
           </div>
         </div>
       </div>

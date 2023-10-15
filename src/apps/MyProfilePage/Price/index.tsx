@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { AccountQueryResult } from 'apis/useAccountQuery';
 import usePriceQuery from 'apis/usePriceQuery';
 import MyLayout from 'components/MyLayout';
 import useDeletePriceMutation from 'hooks/mutation/useDeletePriceMutation';
@@ -15,6 +13,8 @@ import { useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
 import { cls } from 'utils/cls';
 import truncateString from 'utils/truncateString';
+import numberWithCommas from 'utils/numberWithCommas';
+import { useAccountQuery } from 'apis/useAccountQuery';
 
 const PricePageWrapper = () => {
   return (
@@ -22,9 +22,6 @@ const PricePageWrapper = () => {
       <PricePage />
     </MyLayout>
   );
-};
-type PricePageProp = {
-  result: AccountQueryResult;
 };
 
 interface IPriceData {
@@ -37,10 +34,11 @@ interface IPriceData {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const PricePage: React.FC<any> = ({ result }: PricePageProp) => {
-  console.log(result);
-  const userCode = result.data?.data.identificationCode;
+const PricePage: React.FC<any> = () => {
+  const { data: result } = useAccountQuery();
+  const userCode = result?.data.identificationCode;
   const { data: priceData } = usePriceQuery<IPriceData>(userCode, {
+    enabled: !!userCode,
     select: (res) => res.data.data,
   });
   const { mutate } = usePostPriceMutation();
@@ -55,7 +53,7 @@ const PricePage: React.FC<any> = ({ result }: PricePageProp) => {
     mutate(defaultData);
     return defaultData;
   };
-  console.log('handleAdd');
+  console.log('priceData', priceData);
   return (
     <>
       <div className="relative w-full h-full pl-5 pr-5 overflow-hidden">
@@ -77,7 +75,7 @@ const PricePage: React.FC<any> = ({ result }: PricePageProp) => {
                 <Card
                   key={price.monthlyPtPriceId}
                   id={price.monthlyPtPriceId}
-                  month={price.period}
+                  period={price.period}
                   price={price.price}
                 />
               ))}
@@ -101,14 +99,14 @@ const PricePage: React.FC<any> = ({ result }: PricePageProp) => {
 
 type CardProps = {
   id: number;
-  month: number;
+  period: number;
   price: number;
 };
 
-const Card = ({ id, month, price }: CardProps) => {
+const Card = ({ id, period, price }: CardProps) => {
   const [isActive, setIsActive] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editMonth, onChangeEditMonth, setEditMonth] = useInput(month);
+  const [editPeriod, onChangeEditPeriod, setEditPeriod] = useInput(period);
   const [editPrice, onChangeEditPrice, setEditPrice] = useInput(price);
   const { mutate: deletePrice } = useDeletePriceMutation(id);
   const { mutate: patchPrice } = usePatchPriceMutation(id);
@@ -131,10 +129,10 @@ const Card = ({ id, month, price }: CardProps) => {
   };
   const handleCheck = (e: React.MouseEvent) => {
     patchPrice({
-      period: editMonth,
+      period: editPeriod,
       price: editPrice,
     });
-    setEditMonth(editMonth);
+    setEditPeriod(editPeriod);
     setEditPrice(editPrice);
     setIsEdit(false);
     setIsActive(false);
@@ -143,12 +141,12 @@ const Card = ({ id, month, price }: CardProps) => {
   };
 
   const onValidDation = () => {
-    if (editMonth === 0 || editMonth === 0) {
+    if (editPeriod === 0 || editPeriod === 0) {
       return;
     }
   };
 
-  const propagation = (e: React.MouseEvent) => {
+  const propagation = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
   };
 
@@ -156,7 +154,7 @@ const Card = ({ id, month, price }: CardProps) => {
     if (ref.current && !ref.current.contains(e.target as Node)) {
       setIsActive(false);
       setIsEdit(false);
-      setEditMonth(month);
+      setEditPeriod(period);
       setEditPrice(price);
       console.log('outside');
     }
@@ -171,7 +169,12 @@ const Card = ({ id, month, price }: CardProps) => {
   }, []);
 
   return (
-    <button className="relative w-full mb-3" onClick={propagation}>
+    <div
+      className="relative w-full mb-3"
+      onClick={propagation}
+      onKeyDown={propagation}
+      role="presentation"
+    >
       <div
         ref={ref}
         className={cls(
@@ -188,11 +191,15 @@ const Card = ({ id, month, price }: CardProps) => {
             <div className="flex flex-col pl-6">
               <input
                 className="text-base font-medium leading-tight focus-within:outline-none focus-within:border-b focus-within:border-b-gray"
-                value={editMonth}
-                onChange={onChangeEditMonth}
+                value={editPeriod}
+                onChange={onChangeEditPeriod}
               />
               <div className="pt-1 text-xs font-normal leading-none text-gray">
-                {truncateString('description', 20)}
+                {`1개월 당 ${
+                  !Number.isNaN(Math.floor(price / period))
+                    ? numberWithCommas(Math.floor(price / period))
+                    : 0
+                }원`}
               </div>
             </div>
             <input
@@ -205,10 +212,14 @@ const Card = ({ id, month, price }: CardProps) => {
           <>
             <div className="flex flex-col pl-6">
               <div className="text-base font-medium leading-tight">
-                {truncateString(String(month), 20)}
+                {truncateString(String(period), 20)}
               </div>
               <div className="pt-1 text-xs font-normal leading-none text-gray">
-                {truncateString('description', 20)}
+                {`1개월 당 ${
+                  !Number.isNaN(Math.floor(price / period))
+                    ? numberWithCommas(Math.floor(price / period))
+                    : 0
+                }원`}
               </div>
             </div>
             <div className="absolute text-base font-bold right-6">
@@ -249,7 +260,7 @@ const Card = ({ id, month, price }: CardProps) => {
           <ExitIcon />
         </button>
       </div>
-    </button>
+    </div>
   );
 };
 
