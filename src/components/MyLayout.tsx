@@ -38,12 +38,14 @@ type Props = {
   children: React.ReactElement;
   hasFooter?: boolean;
   backgroundWhite?: boolean;
+  preventSwipeBack?: boolean;
 };
 
 const MyLayout = ({
   children,
   hasFooter = true,
   backgroundWhite = false,
+  preventSwipeBack = false,
 }: PropsWithChildren<Props>) => {
   const result = useUser();
 
@@ -70,7 +72,10 @@ const MyLayout = ({
   }, []);
 
   return (
-    <AppScreen backgroundColor={backgroundWhite ? '#FFFFFF' : '#FAFAFA'}>
+    <AppScreen
+      backgroundColor={backgroundWhite ? '#FFFFFF' : '#FAFAFA'}
+      preventSwipeBack={preventSwipeBack}
+    >
       <main className="overflow-hidden h-[100vh]">
         {React.cloneElement(children, { result })}
       </main>
