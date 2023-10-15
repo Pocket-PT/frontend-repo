@@ -1,23 +1,10 @@
 import axios from 'axios';
-import useTokenStore from 'stores/token';
-
-const mockInstance = axios.create({
-  baseURL: 'https://6aa0968e-27a3-4d55-ade1-a51d88001e05.mock.pstmn.io',
-  timeout: 3000,
-  headers: {
-    Authorization: '',
-    'Content-Type': 'application/json',
-  },
-});
-
-export const getMockInstance = () => {
-  const { token } = useTokenStore();
-  mockInstance.defaults.headers.Authorization = `Bearer ${token}`;
-  return mockInstance;
-};
+import useTokenStore from '../stores/token';
+import { SERVER_URL } from 'constants/global';
+import usePushToPage from 'hooks/usePushToPage';
 
 const serverInstance = axios.create({
-  baseURL: 'https://back.pocketpt.shop',
+  baseURL: SERVER_URL,
   timeout: Infinity,
   headers: {
     Authorization: '',
@@ -27,7 +14,18 @@ const serverInstance = axios.create({
 
 export const getServerInstance = () => {
   const { token } = useTokenStore();
+  const { replaceTo } = usePushToPage();
   serverInstance.defaults.headers.Authorization = `Bearer ${token}`;
   serverInstance.defaults.headers['Access-Control-Allow-Origin'] = '*';
+  serverInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response.status === 401) {
+        console.log('axios catch 401');
+        replaceTo('SignInPage', false);
+      }
+    },
+  );
+
   return serverInstance;
 };

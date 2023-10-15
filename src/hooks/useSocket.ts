@@ -1,9 +1,10 @@
 import { Client } from '@stomp/stompjs';
 import { PUB_CHATROOM_URL, SUB_URL } from 'constants/global';
-import { useCallback, useEffect, useRef } from 'react';
-import useMessageStore from 'stores/message';
-import useTokenStore from 'stores/token';
+import { createRef, useCallback, useEffect, useRef } from 'react';
+import useMessageStore from '../stores/message';
+import useTokenStore from '../stores/token';
 import WebSocket from 'ws';
+import { classifyUrl } from 'utils/classifyUrl';
 
 Object.assign(global, WebSocket);
 
@@ -13,7 +14,6 @@ const useSocket = (
 ) => {
   const { token } = useTokenStore();
   const { setMessages } = useMessageStore();
-  //const queryClient = useQueryClient();
 
   const ref = useRef<Client>();
   console.log('ref: ', ref.current);
@@ -73,23 +73,39 @@ const useSocket = (
           //console.log(`Received: ${payload}`);
           console.log(JSON.parse(payload.body).data.content);
           const data = JSON.parse(payload.body).data;
-          console.log('channel sub실행', data);
-          if (data.content === null) return;
-          setMessages({
-            message: data.content,
-            chattingAccountId: data.chattingAccountId,
-            chatMessageId: data.chattingMessageId,
-            createAt: data.createdAt,
-          });
+          console.log('channel sub실행', data, chatRoomId);
+          if (data.content === null) {
+            const uri = classifyUrl(data.fileUrl, data.content);
+
+            setMessages({
+              message: data.content,
+              fileUrl: data.fileUrl,
+              chattingAccountId: data.chattingAccountId,
+              chatMessageId: data.chattingMessageId,
+              createAt: data.createdAt,
+              ref:
+                uri === 'image'
+                  ? createRef<HTMLImageElement>()
+                  : uri === 'video'
+                  ? createRef<HTMLVideoElement>()
+                  : createRef<HTMLAnchorElement>(),
+            });
+          } else {
+            setMessages({
+              message: data.content,
+              fileUrl: data.fileUrl,
+              chattingAccountId: data.chattingAccountId,
+              chatMessageId: data.chattingMessageId,
+              createAt: data.createdAt,
+              ref: createRef<HTMLDivElement>(),
+            });
+          }
+          console.log('channel sub실행2', data);
           chatRoomPublish(
             `${PUB_CHATROOM_URL}/${chatRoomId}/accounts/${accountId}/messages/${data.chattingMessageId}`,
             JSON.stringify({ content: '' }),
           );
         });
-        // queryClient.invalidateQueries(myprofileKeys.chatRoom());
-        // queryClient.invalidateQueries(messageKeys.message(id));
-        // queryClient.refetchQueries(myprofileKeys.chatRoom());
-        // queryClient.refetchQueries(messageKeys.message(id));
       }
     },
     [ref.current],
