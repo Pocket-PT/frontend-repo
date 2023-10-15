@@ -1,40 +1,44 @@
 /* eslint-disable react/prop-types */
 import { ActivityComponentType } from '@stackflow/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import React from 'react';
 import BackIcon from 'icons/BackIcon';
 import ChatList from 'components/ChatList';
 import usePushToPage from 'hooks/usePushToPage';
 import LoadingSpinner from 'components/common/LoadingSpinner';
-import Scrollbars from 'react-custom-scrollbars-2';
+import Scrollbars, { positionValues } from 'react-custom-scrollbars-2';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import MyLayout from 'components/MyLayout';
-import { AccountQueryResult } from 'apis/useAccountQuery';
+import { useAccountQuery } from 'apis/useAccountQuery';
 import usePan from 'hooks/usePan';
 import BottomModal from 'components/common/BottomModal';
-import useChatRoomModalStore from 'stores/firstRender';
+import useChatRoomModalStore from '../../../stores/firstRender';
 import useDeleteChatMutation from 'hooks/mutation/useDeleteChatMutation';
 import usePostChatBookmarkMutation from 'hooks/mutation/usePostChatBookmarkMutation';
 import useDeleteChatBookmarkMutation from 'hooks/mutation/useDeleteChatBookmarkMutation';
+import useMessageStore from 'stores/message';
 import useBookmarkInfiniteQuery from 'apis/useBookmarkInfiniteQuery';
+import { useQueryClient } from 'react-query';
+import { messageKeys } from 'constants/querykey';
+import useMyActivity from 'hooks/useMyActivity';
+import { FOOTER_HEIGHT } from 'constants/global';
 
 type BookmarkPageProps = {
   id: string;
 };
 
-const BookmarkPageWrapper: ActivityComponentType<BookmarkPageProps> = ({
+const ChatRoomBookmarkWrapper: ActivityComponentType<BookmarkPageProps> = ({
   params,
 }) => {
   return (
     <MyLayout hasFooter={false}>
-      <BookmarkPage params={params} />
+      <ChatRoomBookmarkPage params={params} />
     </MyLayout>
   );
 };
 
 type Props = {
   params: { id: string };
-  result: AccountQueryResult;
 };
 
 type ChatRoomSelectedDataProps = {
@@ -47,11 +51,10 @@ type ChatRoomSelectedDataProps = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
-  console.log('bookmarkParams', params);
+const ChatRoomBookmarkPage: React.FC<any> = ({ params }: Props) => {
+  const scrollDownref = useRef<HTMLDivElement>(null);
   const chattingRoomId = +params.id;
   const messageData = useBookmarkInfiniteQuery(chattingRoomId);
-  console.log('bookmarkData: ', messageData);
   const { data: chatRoomData } = useChatRoomQuery<ChatRoomSelectedDataProps>({
     select: (res) => {
       return res.data.data.filter(
@@ -59,16 +62,23 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
       )[0].chattingParticipantResponseList[0];
     },
   });
-  const { data: userData } = result;
-  const [isScrollTop] = useState(false);
+  const { data: userData } = useAccountQuery();
+  const queryClient = useQueryClient();
+  const chattingTitleRef = useRef<HTMLDivElement>(null);
+  const [refHeights, setRefHeights] = useState<number[]>([]);
+  const [isRefLoading, setIsRefLoading] = useState<boolean>(true);
+  const [isScrollTop, setIsScrollTop] = useState(false);
   const { pop } = usePushToPage();
   const scrollbarRef = useRef<Scrollbars>(null);
+  const sideBarRef = useRef<HTMLDivElement>(null);
   const {
     isOpen: isBottomModalOpen,
     setIsOpen: setIsBottomModalOpen,
     bindPanDown,
   } = usePan();
+  const { activity } = useMyActivity();
   const { chattingMessageId } = useChatRoomModalStore();
+  const { setNextMessageId } = useMessageStore();
   const { mutate: bookmarkMutate } = usePostChatBookmarkMutation(
     chattingRoomId,
     chattingMessageId,
@@ -91,13 +101,29 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
       )?.isDeleted;
     console.log('isDeletedMessage', chattingMessageId, isDeletedMessage);
   };
-  // console.log('params: ', params.id);
-  // console.log('chatRoomData: ', chatRoomData);
-  // console.log('userData: ', userData);
   console.log('messageData: ', messageData);
-  // console.log('newMessageData: ', newMessageData);
 
   useEffect(() => {
+    console.log('페이지 진입할때만 실행');
+    // queryClient.invalidateQueries(messageKeys.all);
+    // queryClient.refetchQueries(messageKeys.all);
+    queryClient.invalidateQueries(messageKeys.bookmark(chattingRoomId));
+    queryClient.refetchQueries(messageKeys.bookmark(chattingRoomId));
+  }, [activity]);
+
+  useEffect(() => {
+    if (chattingTitleRef.current) {
+      setRefHeights([chattingTitleRef.current?.clientHeight ?? 0]);
+      setIsRefLoading(false);
+    }
+  }, [chattingTitleRef.current]);
+
+  useEffect(() => {
+    const lastMessageId = messageData.data?.pages
+      .at(-1)
+      ?.chattingMessageWithBookmarkGetResponses?.at(-1)?.chattingMessageId;
+    setNextMessageId(lastMessageId);
+    console.log('lastMessageId', lastMessageId);
     if (!messageData.isLoading) return;
     console.log('isLoading, scrollToBottom 실행!_2');
     scrollbarRef.current?.scrollToBottom();
@@ -113,7 +139,6 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
     const id =
       messageData.data?.pages[1].chattingMessageWithBookmarkGetResponses[0]
         .chattingMessageId;
-
     const element = document.getElementById(`${id}`);
     if (element) {
       console.log(
@@ -131,6 +156,30 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
     messageData.data?.pages[0].chattingMessageWithBookmarkGetResponses.find(
       (item) => item.chattingMessageId === chattingMessageId,
     )?.isBookmarked;
+
+  const postFile = useCallback((file: FormData) => {
+    console.log(file);
+  }, []);
+
+  const onScroll = useCallback(
+    (values: positionValues) => {
+      if (values.scrollTop === 0 && messageData.hasNextPage) {
+        console.log('가장 위', messageData);
+        messageData.fetchNextPage();
+        setIsScrollTop(true);
+      }
+    },
+    [scrollbarRef, messageData.hasNextPage, messageData.fetchNextPage],
+  );
+
+  const handleSideBarOutsideClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent,
+  ) => {
+    if (sideBarRef.current) {
+      e.stopPropagation();
+      console.log('handleSideBarOutsideClick');
+    }
+  };
 
   const onClickDelete = () => {
     console.log('삭제', chattingMessageId);
@@ -158,9 +207,17 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
   }
 
   return (
-    <div className="relative w-full overflow-hidden border border-red">
-      <div className="box-border relative w-full h-[100vh] mx-auto overflow-hidden">
-        <div className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray">
+    <div className="relative w-full overflow-hidden">
+      <div
+        className="box-border relative w-full h-[100vh] mx-auto overflow-hidden"
+        onClick={(e) => handleSideBarOutsideClick(e)}
+        onKeyDown={(e) => handleSideBarOutsideClick(e)}
+        role="presentation"
+      >
+        <div
+          ref={chattingTitleRef}
+          className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray"
+        >
           <button
             className="w-6 h-6"
             onClick={() => {
@@ -180,21 +237,33 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
             </div>
           </div>
         </div>
-        <Scrollbars
-          style={{ backgroundColor: '#FAFAFA' }}
-          autoHide
-          autoHeight
-          autoHeightMin={`calc(100vh - 8.5rem)`}
-          ref={scrollbarRef}
-        >
-          <ChatList
-            scrollbarRef={scrollbarRef}
-            isScrollTop={isScrollTop}
-            userData={userData}
-            messageData={messageData}
-            onPressFn={onPressFn}
-          />
-        </Scrollbars>
+        {isRefLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <Scrollbars
+            style={{ backgroundColor: '#FAFAFA' }}
+            autoHide
+            onScrollFrame={onScroll}
+            autoHeight
+            autoHeightMin={`calc(100vh - ${refHeights[0]}px - ${FOOTER_HEIGHT}px)`}
+            ref={scrollbarRef}
+          >
+            <ChatList
+              scrollbarRef={scrollbarRef}
+              isScrollTop={isScrollTop}
+              userData={userData}
+              messageData={messageData}
+              postFile={postFile}
+              fileContainerOpen={false}
+              onPressFn={onPressFn}
+              scrollDownref={scrollDownref}
+              publish={() => {}}
+              chattingRoomId={chattingRoomId}
+              stepPush={() => {}}
+            />
+            <div ref={scrollDownref}></div>
+          </Scrollbars>
+        )}
       </div>
       <BottomModal isOpen={isBottomModalOpen} bindPanDown={bindPanDown}>
         <div className="w-full bg-white">
@@ -265,4 +334,4 @@ const BookmarkPage: React.FC<any> = ({ params, result }: Props) => {
   );
 };
 
-export default React.memo(BookmarkPageWrapper);
+export default React.memo(ChatRoomBookmarkWrapper);
