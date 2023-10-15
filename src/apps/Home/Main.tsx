@@ -2,38 +2,49 @@ import { Scrollbars } from 'react-custom-scrollbars-2';
 import MyProfileCard from 'components/MyProfileCard';
 import { Link } from 'libs/link';
 import ProfileCard from 'components/ProfileCard';
-import { useEffect } from 'react';
-import useMyProfileStore from 'stores/myProfile';
+import { useEffect, useRef, useState } from 'react';
 import AddPersonIcon from 'icons/AddPersonIcon';
 import Footer from 'components/Footer';
 import useMemeberQuery from 'apis/useMemberQuery';
-import { AccountQueryResult } from 'apis/useAccountQuery';
+import { useAccountQuery } from 'apis/useAccountQuery';
 import MyLayout from 'components/MyLayout';
 import LoadingSpinner from 'components/common/LoadingSpinner';
+import { FOOTER_HEIGHT } from 'constants/global';
 
 const MainWrapper = () => {
   return (
-    <MyLayout>
+    <MyLayout preventSwipeBack={true}>
       <Main />
     </MyLayout>
   );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Main: React.FC<any> = ({ result }: { result: AccountQueryResult }) => {
-  const { data: userData, isLoading, isSuccess, isError } = result;
-  // const customerList = Array.from({ length: 100 }, (v, i) => i + 1);
-  const { onEditProfileUrl } = useMyProfileStore();
-  //const { data: userData, isSuccess, isLoading, isError } = useUser();
+const Main: React.FC<any> = () => {
+  const { data: userData, isLoading, isError } = useAccountQuery();
+  const myProfileRef = useRef<HTMLDivElement>(null);
+  const memberTitleRef = useRef<HTMLDivElement>(null);
+  const [refHeights, setRefHeights] = useState<number[]>([]);
+  const [isRefLoading, setIsRefLoading] = useState<boolean>(true);
   const { data: memberData, isLoading: memberLoading } = useMemeberQuery({
     select: (response) => response.data,
   });
 
   useEffect(() => {
-    if (isSuccess) {
-      onEditProfileUrl(userData?.data.profilePictureUrl ?? '');
+    if (myProfileRef.current && memberTitleRef.current) {
+      setRefHeights([
+        myProfileRef.current?.clientHeight ?? 0,
+        memberTitleRef.current?.clientHeight ?? 0,
+      ]);
+      setIsRefLoading(false);
     }
-  }, [isSuccess]);
+  }, [
+    myProfileRef.current,
+    memberTitleRef.current,
+    memberData,
+    isLoading,
+    isError,
+  ]);
 
   if (isLoading || isError) {
     return <LoadingSpinner />;
@@ -42,11 +53,12 @@ const Main: React.FC<any> = ({ result }: { result: AccountQueryResult }) => {
   //#E9ECF0
   return (
     <div>
-      <div className="my-5">
+      <div className="my-5" ref={myProfileRef}>
         <Link activityName="MyProfilePage">
           <MyProfileCard
             name={userData?.data.name}
             profileUrl={userData?.data.profilePictureUrl}
+            introduce={userData?.data.introduce}
           />
         </Link>
       </div>
@@ -55,7 +67,10 @@ const Main: React.FC<any> = ({ result }: { result: AccountQueryResult }) => {
         <LoadingSpinner />
       ) : (
         <div className="w-full bg-white rounded-tl-[32px] rounded-tr-[32px] h-full">
-          <div className="pl-5 pt-[30px] text-xl font-bold leading-normal flex flex-row items-center relative w-full">
+          <div
+            className="pl-5 pt-[30px] text-xl font-bold leading-normal flex flex-row items-center relative w-full"
+            ref={memberTitleRef}
+          >
             회원
             <span className="pl-1 text-xl font-normal leading-normal text-gray">
               {memberData?.data.length}
@@ -69,29 +84,45 @@ const Main: React.FC<any> = ({ result }: { result: AccountQueryResult }) => {
               </Link>
             </div>
           </div>
-          <Scrollbars
-            autoHeight
-            autoHeightMin="75vh"
-            autoHide
-            style={{ paddingBottom: 16 }}
-          >
-            {memberData?.data.map((member) => (
-              <Link
-                key={member.ptMatchingId}
-                activityName="OtherProfile"
-                activityParams={{ id: String(member.ptMatchingId) }}
-              >
-                <div className="flex flex-row mt-8 hover:cursor-pointer">
-                  <ProfileCard
-                    name={member.name}
-                    email={member.email}
-                    profilePictureUrl={member.profilePictureUrl}
-                  />
-                  {/* {customer} */}
-                </div>
-              </Link>
-            ))}
-          </Scrollbars>
+          {isRefLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <Scrollbars
+              autoHeight
+              autoHeightMin={`calc(100vh - ${refHeights[0]}px - ${refHeights[1]}px - ${FOOTER_HEIGHT}px)`}
+              autoHide
+              style={{ paddingBottom: 16 }}
+            >
+              {memberData?.data.map((member) => (
+                <Link
+                  key={member.ptMatchingId}
+                  activityName="OtherProfile"
+                  activityParams={{
+                    ptMatchingId: String(member.ptMatchingId),
+                    status: member.status,
+                    subscriptionPeriod: String(member.subscriptionPeriod),
+                    paymentAmount: String(member.paymentAmount),
+                    startDate: String(member.startDate),
+                    expiredDate: member.expiredDate,
+                    rejectReason: String(member.rejectReason),
+                    accountId: String(member.accountId),
+                    name: member.name,
+                    phoneNumber: member.phoneNumber,
+                    email: member.email,
+                    profilePictureUrl: member.profilePictureUrl,
+                  }}
+                >
+                  <div className="flex flex-row mt-8 hover:cursor-pointer">
+                    <ProfileCard
+                      name={member.name}
+                      email={member.email}
+                      profilePictureUrl={member.profilePictureUrl}
+                    />
+                  </div>
+                </Link>
+              ))}
+            </Scrollbars>
+          )}
         </div>
       )}
       <Footer />

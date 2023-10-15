@@ -10,26 +10,21 @@ import { messageKeys } from 'constants/querykey';
 import useMessageInfiniteQuery, {
   IMessage,
 } from 'apis/useMessageInfiniteQuery';
-import useMessageStore from 'stores/message';
-import { SENDING_MEDIA } from 'constants/global';
+import useMessageStore from '../../stores/message';
+import useLoadingObj from 'hooks/useLoadingObj';
 
 //import useMessagesQuery from 'apis/useMessagesQuery';
 
 export default function usePostFileMutation(
   chattingRoomId: number,
-  chatiingAccountId: number | undefined,
+  chattingAccountId: number | undefined,
 ): UseMutationResult<FormData, AxiosError, FormData> {
   const serverInstance = getServerInstance();
   serverInstance.defaults.headers['Content-Type'] = 'multipart/form-data';
   const queryClient = useQueryClient();
-  const { refetch } = useMessageInfiniteQuery(chattingRoomId);
   const { setMessages } = useMessageStore();
-  const loadingMessage = {
-    message: SENDING_MEDIA,
-    chattingAccountId: chatiingAccountId ?? 0,
-    chatMessageId: 0,
-    createAt: '',
-  };
+  const { refetch } = useMessageInfiniteQuery(chattingRoomId);
+  const { loadingMessage } = useLoadingObj(chattingAccountId);
   return useMutation(
     (data) => {
       return serverInstance.post(
@@ -55,9 +50,7 @@ export default function usePostFileMutation(
         >(messageKeys.message(chattingRoomId));
         console.log('filemutationChatOldData: ', chatOldData);
         console.log('filemutationoldData:', oldData);
-
         setMessages(loadingMessage);
-
         console.log('fileTest: ', chatOldData);
       },
       onSettled: () => {

@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
-import { AppScreen } from '@stackflow/plugin-basic-ui';
 import { useActivity } from '@stackflow/react';
-import { AccountQueryResult } from 'apis/useAccountQuery';
+import { useAccountQuery } from 'apis/useAccountQuery';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import DMList from 'components/DMList';
 import Footer from 'components/Footer';
 import MyLayout from 'components/MyLayout';
+import LoadingSpinner from 'components/common/LoadingSpinner';
 import { FOOTER_HEIGHT, HEADER_HEIGHT } from 'constants/global';
 import useChatRoomSocket from 'hooks/useChatRoomSocket';
 import { Link } from 'libs/link';
@@ -21,19 +21,19 @@ const ChatLisPageWrapper = () => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ChatListPage: React.FC<any> = ({
-  result,
-}: {
-  result: AccountQueryResult;
-}) => {
-  const { data: chatRoomData, refetch } = useChatRoomQuery({
+const ChatListPage: React.FC<any> = () => {
+  const {
+    data: chatRoomData,
+    refetch,
+    isLoading,
+  } = useChatRoomQuery({
     select: (res) => res.data,
   });
+  const result = useAccountQuery();
   const accountId = result.data?.data.accountId;
   const activity = useActivity();
   const { client } = useChatRoomSocket(accountId);
   const clientRef = useRef<unknown>(null);
-  console.log('chatRoomData', chatRoomData?.data[0].latestChattingMessage);
 
   useEffect(() => {
     if (activity.isActive) refetch();
@@ -55,7 +55,7 @@ const ChatListPage: React.FC<any> = ({
   }, []);
 
   return (
-    <AppScreen backgroundColor="#FAFAFA">
+    <div>
       <div className="relative mt-5 h-7">
         <div className="absolute text-xl font-extrabold leading-normal left-5">
           채팅
@@ -64,38 +64,46 @@ const ChatListPage: React.FC<any> = ({
           편집
         </div>
       </div>
-      <Scrollbars
-        autoHide
-        autoHeight
-        autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`}
-      >
-        <div className="w-full px-5 mt-7">
-          {chatRoomData?.data.map((item) => (
-            <Link
-              key={item.chattingRoomId}
-              activityName="ChatRoomPage"
-              activityParams={{ id: String(item.chattingRoomId) }}
-            >
-              <DMList
-                name={item.roomName}
-                profilePictureUrl={
-                  item.chattingParticipantResponseList[0]
-                    .accountProfilePictureUrl
-                }
-                lastFileUrl={item.latestFileUrl}
-                latestChattingMessage={item.latestChattingMessage}
-                latestChattingMessageCreatedAt={
-                  item.latestChattingMessageCreatedAt
-                }
-                createAt={item.createdAt}
-                notViewCount={item.notViewCount}
-              />
-            </Link>
-          ))}
-        </div>
-      </Scrollbars>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <Scrollbars
+          autoHide
+          autoHeight
+          autoHeightMin={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px - 8px)`}
+        >
+          <div className="w-full px-5 mt-7">
+            {chatRoomData?.data.map((item) => (
+              <Link
+                key={item.chattingRoomId}
+                activityName="ChatRoomPage"
+                activityParams={{
+                  id: String(item.chattingRoomId),
+                  title: 'chatRoomPage',
+                }}
+              >
+                <DMList
+                  name={item.roomName}
+                  profilePictureUrl={
+                    item.chattingParticipantResponseList[0]
+                      .accountProfilePictureUrl
+                  }
+                  lastFileUrl={item.latestFileUrl}
+                  latestChattingMessage={item.latestChattingMessage}
+                  latestChattingMessageCreatedAt={
+                    item.latestChattingMessageCreatedAt
+                  }
+                  createAt={item.createdAt}
+                  notViewCount={item.notViewCount}
+                />
+              </Link>
+            ))}
+          </div>
+        </Scrollbars>
+      )}
+
       <Footer />
-    </AppScreen>
+    </div>
   );
 };
 

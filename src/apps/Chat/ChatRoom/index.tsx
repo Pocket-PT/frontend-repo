@@ -6,7 +6,7 @@ import { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useSocket from 'hooks/useSocket';
 import React from 'react';
-import useMessageStore from 'stores/message';
+import useMessageStore, { INewMessage } from '../../../stores/message';
 import ArrowUpIcon from 'icons/ArrowUpIcon';
 import MyDropzone from 'components/MyDropzone';
 import ImageIcon from 'icons/ImageIcon';
@@ -20,18 +20,25 @@ import LoadingSpinner from 'components/common/LoadingSpinner';
 import Scrollbars, { positionValues } from 'react-custom-scrollbars-2';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import MyLayout from 'components/MyLayout';
-import { AccountQueryResult } from 'apis/useAccountQuery';
+import { useAccountQuery } from 'apis/useAccountQuery';
 import { cls } from 'utils/cls';
 import usePan from 'hooks/usePan';
 import RightSideBar from 'components/RightSidebar';
 import BottomModal from 'components/common/BottomModal';
-import useChatRoomModalStore from 'stores/firstRender';
+import useChatRoomModalStore from '../../../stores/firstRender';
 import useDeleteChatMutation from 'hooks/mutation/useDeleteChatMutation';
 import usePostChatBookmarkMutation from 'hooks/mutation/usePostChatBookmarkMutation';
 import useDeleteChatBookmarkMutation from 'hooks/mutation/useDeleteChatBookmarkMutation';
 import ChatRoomRightSideBox from 'components/ChatRoomRightSideBox';
+import useMyActivity from 'hooks/useMyActivity';
+import { useQueryClient } from 'react-query';
+import { messageKeys } from 'constants/querykey';
+import { useStepFlow } from 'libs/stackflow';
+import truncateString from 'utils/truncateString';
+import useChatRoomFileQuery from 'apis/useChatRoomFileQuery';
 
-type ChatRoomPageProps = {
+export type ChatRoomPageProps = {
+  title?: string;
   id: string;
 };
 
@@ -46,8 +53,7 @@ const ChatRoomPageWrapper: ActivityComponentType<ChatRoomPageProps> = ({
 };
 
 type Props = {
-  params: { id: string };
-  result: AccountQueryResult;
+  params: ChatRoomPageProps;
 };
 
 type ChatRoomSelectedDataProps = {
@@ -60,10 +66,14 @@ type ChatRoomSelectedDataProps = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
+const ChatRoomPage: React.FC<any> = ({ params }: Props) => {
   const scrollDownref = useRef<HTMLDivElement>(null);
   const chattingRoomId = +params.id;
+  const queryClient = useQueryClient();
   const messageData = useMessageInfiniteQuery(chattingRoomId);
+  const { data: fileData } = useChatRoomFileQuery(chattingRoomId);
+  console.log('fileData', fileData);
+  const { stepPush, stepReplace } = useStepFlow('ChatRoomPage');
   const { data: chatRoomData } = useChatRoomQuery<ChatRoomSelectedDataProps>({
     select: (res) => {
       return res.data.data.filter(
@@ -71,17 +81,22 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
       )[0].chattingParticipantResponseList[0];
     },
   });
-  const accountId = result.data?.data.accountId;
-  const { data: userData } = result;
+  const { data: userData } = useAccountQuery();
+  const accountId = userData?.data.accountId;
+  const chattingTitleRef = useRef<HTMLDivElement>(null);
+  const createMessageRef = useRef<HTMLDivElement>(null);
+  const [refHeights, setRefHeights] = useState<number[]>([]);
+  const [isRefLoading, setIsRefLoading] = useState<boolean>(true);
   const {
     messages: newMessageData,
     resetMessages,
     setNextMessageId,
+    modalfileUrl,
   } = useMessageStore();
-  console.log('newMessageData', newMessageData);
   const { mutate } = usePostFileMutation(+params.id, accountId);
   const [fileContainerOpen, setFileContainerOpen] = useState(false);
   const [isScrollTop, setIsScrollTop] = useState(false);
+  const [isNewMessageArrived, setIsNewMessageArrived] = useState(false);
   const {
     isOpen: isRightSideBarOpen,
     setIsOpen: setisRightSideBarOpen,
@@ -100,6 +115,7 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
     setIsOpen: setIsBottomModalOpen,
     bindPanDown,
   } = usePan();
+  const { activity } = useMyActivity();
   const { chattingMessageId } = useChatRoomModalStore();
   const { mutate: bookmarkMutate } = usePostChatBookmarkMutation(
     chattingRoomId,
@@ -128,12 +144,65 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   // console.log('userData: ', userData);
   console.log('messageData: ', messageData);
   // console.log('newMessageData: ', newMessageData);
+  useEffect(() => {
+    console.log('페이지 진입할때만 실행');
+    // queryClient.invalidateQueries(messageKeys.all);
+    // queryClient.refetchQueries(messageKeys.all);
+    queryClient.invalidateQueries(messageKeys.message(chattingRoomId));
+    queryClient.refetchQueries(messageKeys.message(chattingRoomId));
+    resetMessages();
+    if (activity.transitionState === 'enter-done') {
+      setTimeout(() => {
+        handleRightSideBarClose();
+      }, 300);
+    }
+  }, [activity]);
 
   useEffect(() => {
+    if (chattingTitleRef.current && createMessageRef.current) {
+      setRefHeights([
+        chattingTitleRef.current?.clientHeight ?? 0,
+        createMessageRef.current?.clientHeight ?? 0,
+      ]);
+      setIsRefLoading(false);
+    }
+  }, [chattingTitleRef.current, createMessageRef.current]);
+
+  //새로운 메세지 도착 시 스크롤바 컨트롤
+  useEffect(() => {
     if (newMessageData.length === 0) return;
-    console.log('scrollToBottom 실행_1');
-    scrollbarRef.current?.scrollToBottom();
+    const lastChattingMessageAccountId =
+      newMessageData.at(-1)?.chattingAccountId;
+    if (lastChattingMessageAccountId === accountId) {
+      console.log(
+        'scrollToBottom 실행_내가 채팅 쳤을때만',
+        lastChattingMessageAccountId,
+        accountId,
+      );
+      scrollbarRef.current?.scrollToBottom();
+    } else {
+      const heightDifference = scrollbarRef.current
+        ? scrollbarRef?.current?.getScrollHeight() -
+          scrollbarRef?.current?.getScrollTop()
+        : undefined;
+      if (heightDifference && heightDifference >= 100) {
+        console.log('scrollToBottom 실행_스크롤 위치 확인');
+        setIsNewMessageArrived(true);
+      }
+      console.log(
+        'scrollToBottom 실행_스크롤 위치 확인',
+        scrollbarRef?.current?.getClientHeight(),
+      );
+    }
   }, [newMessageData]);
+
+  const onClickNewMessageModal = () => {
+    setIsNewMessageArrived(false);
+    scrollDownref.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    });
+  };
 
   useEffect(() => {
     scrollbarRef.current?.scrollToBottom();
@@ -148,11 +217,6 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
     if (!messageData.isLoading) return;
     console.log('isLoading, scrollToBottom 실행!_2');
     scrollbarRef.current?.scrollToBottom();
-
-    // scrollDownref.current?.scrollIntoView({
-    //   behavior: 'smooth',
-    //   block: 'end',
-    // });
   }, [messageData.isLoading]);
 
   //로드 시 스크롤바 유지
@@ -165,14 +229,8 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
     const id =
       messageData.data?.pages[1].chattingMessageWithBookmarkGetResponses[0]
         .chattingMessageId;
-
     const element = document.getElementById(`${id}`);
     if (element) {
-      console.log(
-        '로드 시 스크롤바 유지: ',
-        element,
-        messageData.data.pageParams,
-      );
       scrollbarRef.current?.scrollTop(
         element?.getBoundingClientRect().y - element?.scrollHeight - 16,
       );
@@ -185,6 +243,8 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
       console.log('create new websocket');
       client?.activate();
       clientRef.current = client;
+      console.log('resetMEssages_1');
+      resetMessages();
       messageData.refetch();
       console.log('scrollToBottom 실행!_3');
       scrollbarRef.current?.scrollToBottom();
@@ -224,9 +284,12 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   const postFile = useCallback((file: FormData) => {
     mutate(file);
   }, []);
-
   const onScroll = useCallback(
     (values: positionValues) => {
+      console.log('scrollValues', values);
+      if (0.98 <= values.top && values.top <= 1) {
+        setIsNewMessageArrived(false);
+      }
       if (values.scrollTop === 0 && messageData.hasNextPage) {
         console.log('가장 위', messageData);
         messageData.fetchNextPage();
@@ -246,13 +309,6 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
     }
   };
 
-  // const onClickFavorite = () => {
-  //   console.log('즐겨찾기');
-  // };
-
-  // const onClickEdit = () => {
-  //   console.log('수정');
-  // };
   const onClickDelete = () => {
     console.log('삭제', chattingMessageId);
     deleteMutate();
@@ -277,16 +333,45 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   if (messageData.isLoading) {
     return <LoadingSpinner />;
   }
-
+  console.log('params', params.title);
   return (
     <div className="relative w-full overflow-hidden">
+      {params.title === 'imageModal' && (
+        <div className="box-border absolute z-10 w-full h-full overflow-hidden bg-dark">
+          <div className="absolute z-20 flex flex-row items-center w-full gap-3 py-4 pl-4 bg-dark">
+            <button
+              onClick={() =>
+                stepReplace({
+                  id: String(chattingRoomId),
+                  title: 'chatRoomPage',
+                })
+              }
+              className="w-6 h-6 text-white"
+            >
+              <BackIcon />
+            </button>
+          </div>
+          <div className="absolute top-0 z-10 flex items-center justify-center w-full h-full">
+            <img
+              src={modalfileUrl}
+              className="object-cover w-full h-auto"
+              alt={modalfileUrl}
+            />
+          </div>
+        </div>
+      )}
       <RightSideBar
         isRightSideBarOpen={isRightSideBarOpen}
         handleRightSideBarClose={handleRightSideBarClose}
         bindPanRight={bindPanRight}
         ref={sideBarRef}
       >
-        <ChatRoomRightSideBox chatRoomId={chattingRoomId} />
+        <ChatRoomRightSideBox
+          chatRoomId={chattingRoomId}
+          fileData={fileData}
+          accountName={chatRoomData?.accountNickName}
+          accountProfileUrl={chatRoomData?.accountProfilePictureUrl}
+        />
       </RightSideBar>
       <div
         className="box-border relative w-full h-[100vh] mx-auto overflow-hidden"
@@ -294,7 +379,10 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
         onKeyDown={(e) => handleSideBarOutsideClick(e)}
         role="presentation"
       >
-        <div className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray">
+        <div
+          ref={chattingTitleRef}
+          className="flex flex-row items-center w-full h-16 px-5 bg-hoverGray"
+        >
           <button
             className="w-6 h-6"
             onClick={() => {
@@ -320,33 +408,49 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
             <MenuIcon />
           </button>
         </div>
-        <Scrollbars
-          style={{ backgroundColor: '#FAFAFA' }}
-          autoHide
-          onScrollFrame={onScroll}
-          autoHeight
-          autoHeightMin={
-            fileContainerOpen
-              ? `calc(100vh - 8.5rem - 11rem)`
-              : `calc(100vh - 8.5rem)`
-          }
-          ref={scrollbarRef}
-        >
-          <ChatList
-            scrollbarRef={scrollbarRef}
-            isScrollTop={isScrollTop}
-            userData={userData}
-            messageData={messageData}
-            postFile={postFile}
-            fileContainerOpen={fileContainerOpen}
-            onPressFn={onPressFn}
-            scrollDownref={scrollDownref}
-          />
-          <div ref={scrollDownref}></div>
-        </Scrollbars>
-        <div className="absolute bottom-0 w-full pb-1">
+        {isRefLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div className="relative">
+            <Scrollbars
+              style={{ backgroundColor: '#FAFAFA' }}
+              autoHide
+              onScrollFrame={onScroll}
+              autoHeight
+              autoHeightMin={
+                fileContainerOpen
+                  ? `calc(100vh - ${refHeights[0]}px - ${refHeights[1]}px - 11rem)`
+                  : `calc(100vh - ${refHeights[0]}px - ${refHeights[1]}px)`
+              }
+              ref={scrollbarRef}
+            >
+              <ChatList
+                chattingRoomId={chattingRoomId}
+                scrollbarRef={scrollbarRef}
+                isScrollTop={isScrollTop}
+                userData={userData}
+                messageData={messageData}
+                postFile={postFile}
+                publish={publish}
+                fileContainerOpen={fileContainerOpen}
+                onPressFn={onPressFn}
+                scrollDownref={scrollDownref}
+                stepPush={stepPush}
+              />
+              <div ref={scrollDownref}></div>
+            </Scrollbars>
+            <NewMessageArrivedModal
+              isNewMessageArrived={isNewMessageArrived}
+              onClickNewMessageModal={onClickNewMessageModal}
+              chatRoomData={chatRoomData}
+              newMessageData={newMessageData}
+            />
+          </div>
+        )}
+
+        <div ref={createMessageRef} className="absolute bottom-0 w-full pb-1">
           <CreateMessage
-            id={+params.id}
+            chattingRoomId={chattingRoomId}
             accountId={accountId}
             postFile={postFile}
             publish={publish}
@@ -424,8 +528,64 @@ const ChatRoomPage: React.FC<any> = ({ params, result }: Props) => {
   );
 };
 
+type NewMessageArrivedModalProps = {
+  onClickNewMessageModal: () => void;
+  isNewMessageArrived: boolean;
+  chatRoomData: ChatRoomSelectedDataProps | undefined;
+  newMessageData: INewMessage[];
+};
+
+const NewMessageArrivedModal = ({
+  onClickNewMessageModal,
+  isNewMessageArrived,
+  chatRoomData,
+  newMessageData,
+}: NewMessageArrivedModalProps) => {
+  return (
+    <button
+      onClick={onClickNewMessageModal}
+      className={cls(
+        'flex flex-row gap-1 items-center px-4 w-[90vw] mx-auto shadow py-1 text-sm text-center rounded-full bg-lightGray text-dark transform transition-all duration-300 ease-in-out',
+        isNewMessageArrived
+          ? `absolute bottom-4 z-10 left-1/2 -translate-x-1/2 translate-y-0`
+          : `absolute -bottom-4 left-1/2 -translate-x-1/2 translate-y-full`,
+      )}
+    >
+      <div className="flex flex-row items-center gap-1">
+        <img
+          src={chatRoomData?.accountProfilePictureUrl}
+          width={24}
+          height={24}
+          style={{ objectFit: 'cover' }}
+          alt="채팅보낸사람 프로필"
+        />
+        <div>{chatRoomData?.accountNickName}</div>
+      </div>
+      <div>
+        {newMessageData.at(-1)?.fileUrl
+          ? '미디어 파일'
+          : truncateString(newMessageData.at(-1)?.message, 10)}
+      </div>
+      <div className="absolute right-4 text-gray">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2.21967 4.46967C2.51256 4.17678 2.98744 4.17678 3.28033 4.46967L6 7.18934L8.71967 4.46967C9.01256 4.17678 9.48744 4.17678 9.78033 4.46967C10.0732 4.76256 10.0732 5.23744 9.78033 5.53033L6.53033 8.78033C6.23744 9.07322 5.76256 9.07322 5.46967 8.78033L2.21967 5.53033C1.92678 5.23744 1.92678 4.76256 2.21967 4.46967Z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+    </button>
+  );
+};
+
 type CreateMessageProps = {
-  id: number;
+  chattingRoomId: number;
   accountId: number | undefined;
   postFile: (file: FormData) => void;
   publish: (url: string, message: string) => void;
@@ -434,7 +594,7 @@ type CreateMessageProps = {
 };
 
 const CreateMessage = React.memo(function CreateMessage({
-  id,
+  chattingRoomId,
   publish,
   postFile,
   fileContainerOpen,
@@ -446,15 +606,10 @@ const CreateMessage = React.memo(function CreateMessage({
   const { handleSubmit } = useForm();
   const onValid = useCallback(() => {
     if (message.trim() === '') return;
-    publish(`${PUB_URL}/${id}`, JSON.stringify({ content: message }));
-    // console.log(
-    //   'chatRoomPublish',
-    //   `${PUB_CHATROOM_URL}/${id}/accounts/${accountId}/messages/${lastChattingMessageId}`,
-    // );
-    // chatRoomPublish(
-    //   `${PUB_CHATROOM_URL}/${id}/accounts/${accountId}/messages/${lastChattingMessageId}`,
-    //   JSON.stringify({ content: '' }),
-    // );
+    publish(
+      `${PUB_URL}/${chattingRoomId}`,
+      JSON.stringify({ content: message }),
+    );
     setMessage('');
   }, [message]);
 

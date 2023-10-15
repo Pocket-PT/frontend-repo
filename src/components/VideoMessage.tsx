@@ -2,29 +2,33 @@
 import EditIcon from 'icons/EditIcon';
 import React, { forwardRef } from 'react';
 import Scrollbars from 'react-custom-scrollbars-2';
+import useMessageStore from 'stores/message';
 import { cls } from 'utils/cls';
 
 const VideoMessage = forwardRef(
   (
     {
-      scrollTop,
-      scrollbarsRef,
+      isScrollTop,
+      scrollbarRef,
       isMyMessage,
       handleCapture,
       src,
       scrollDownref,
+      chatMessageId,
     }: {
-      scrollTop?: boolean;
-      scrollbarsRef?: React.RefObject<Scrollbars>;
+      isScrollTop: boolean | undefined;
+      scrollbarRef: React.RefObject<Scrollbars> | undefined;
       isMyMessage: boolean;
       handleCapture: (() => void) | undefined;
       src?: string;
       scrollDownref: React.RefObject<HTMLDivElement>;
+      chatMessageId: number;
     },
     ref: React.ForwardedRef<
       HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
     >,
   ) => {
+    const { messages, nextMessageId, removeLoadingMessage } = useMessageStore();
     const pauseVideo = () => {
       if (typeof ref === 'object' && ref?.current instanceof HTMLVideoElement) {
         ref?.current?.pause();
@@ -37,13 +41,23 @@ const VideoMessage = forwardRef(
     };
 
     const scrollToBottomwhenLoaded = () => {
-      console.log('scrollToBottomwhenLoaded');
-      if (!scrollTop) {
-        scrollbarsRef?.current?.scrollToBottom();
+      if (!isScrollTop && messages.length > 0 && isMyMessage) {
+        scrollbarRef?.current?.scrollToBottom();
         scrollDownref.current?.scrollIntoView({
           behavior: 'smooth',
           block: 'end',
         });
+      }
+      if (!isScrollTop && messages?.length === 0) {
+        console.log('img로드될때 실행되는 scrollToBottom');
+        scrollbarRef?.current?.scrollToBottom();
+        scrollDownref.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }
+      if (chatMessageId === nextMessageId) {
+        removeLoadingMessage();
       }
     };
 

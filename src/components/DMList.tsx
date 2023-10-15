@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import truncateString from 'utils/truncateString';
 
 type DMListProps = {
   name: string;
@@ -28,13 +29,16 @@ const DMList = ({
       />
       <div className="flex flex-col w-1/2 ml-4">
         <div className="text-base font-medium leading-tight">{name}</div>
-        <div className="text-xs font-normal leading-none text-gray">
+        <p
+          className="text-xs font-normal leading-none text-gray"
+          style={{ wordBreak: 'break-all', maxBlockSize: '2em' }}
+        >
           {lastFileUrl !== null && latestChattingMessage === null
             ? '미디어 파일'
             : lastFileUrl === null && latestChattingMessage !== null
-            ? latestChattingMessage
+            ? truncateString(latestChattingMessage, 30)
             : '채팅 내용이 없습니다'}
-        </div>
+        </p>
       </div>
       <div className="absolute flex flex-col items-center w-12 space-y-1 right-5">
         <div className="text-xs font-normal leading-none text-gray">

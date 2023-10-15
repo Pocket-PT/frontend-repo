@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs';
 import useChatRoomQuery from 'apis/useChatRoomQuery';
 import { SUB_CHATROOM_URL } from 'constants/global';
 import { useCallback, useEffect, useRef } from 'react';
-import useTokenStore from 'stores/token';
+import useTokenStore from '../stores/token';
 import WebSocket from 'ws';
 
 Object.assign(global, WebSocket);

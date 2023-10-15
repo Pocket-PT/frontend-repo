@@ -7,10 +7,11 @@ import {
 import { IMessage } from 'apis/useMessageInfiniteQuery';
 import { AxiosResponse } from 'axios';
 import { AccountData } from 'apis/useAccountQuery';
-import useMessageStore from 'stores/message';
+import useMessageStore from '../stores/message';
 import EditModal from './EditModal';
 import Scrollbars from 'react-custom-scrollbars-2';
 import Message from './Message';
+import { ChatRoomPageProps } from 'apps/Chat/ChatRoom';
 
 interface Props {
   isScrollTop: boolean;
@@ -22,7 +23,10 @@ interface Props {
     | InfiniteQueryObserverSuccessResult<IMessage, unknown>;
   fileContainerOpen?: boolean;
   onPressFn: () => void;
+  publish: (destination: string, body: string) => void;
+  chattingRoomId: number;
   scrollDownref: RefObject<HTMLDivElement>;
+  stepPush: (params: ChatRoomPageProps, options?: object | undefined) => void;
 }
 interface CanvasData {
   canvasURL: string;
@@ -35,9 +39,12 @@ const ChatList = ({
   scrollbarRef,
   userData,
   messageData,
+  publish,
   postFile,
   onPressFn,
   scrollDownref,
+  chattingRoomId,
+  stepPush,
 }: Props) => {
   const { messages: newMessageData } = useMessageStore();
   const [modalOpen, setModalOpen] = useState(false);
@@ -100,18 +107,21 @@ const ChatList = ({
                 message={item.content}
                 myId={userData?.data.accountId}
                 chatId={item.chattingAccountId}
+                chattingRoomId={chattingRoomId}
                 chatMessageId={item.chattingMessageId}
                 createAt={item.updatedAt}
                 isDeleted={item.isDeleted}
-                isBookmarked={item.isBookmarked}
+                isBookmarked={item.isBookmarked ?? true}
                 fileUrl={item.fileUrl}
                 postFile={postFile}
+                publish={publish}
                 handleCapture={() => handleCapture(item.ref)}
                 scrollbarRef={scrollbarRef}
                 isScrollTop={isScrollTop}
                 ref={item.ref}
                 onPressFn={onPressFn}
                 scrollDownref={scrollDownref}
+                stepPush={stepPush}
               />
             </div>
           );
@@ -121,16 +131,21 @@ const ChatList = ({
         <Message
           key={idx}
           message={item.message}
-          chatMessageId={item.chatMessageId}
           myId={userData?.data.accountId}
           chatId={item.chattingAccountId}
+          chattingRoomId={chattingRoomId}
+          chatMessageId={item.chatMessageId}
           createAt={item.createAt}
           isDeleted={false}
           isBookmarked={false}
-          fileUrl={null}
+          fileUrl={item.fileUrl}
+          publish={publish}
+          handleCapture={() => handleCapture(item.ref)}
           postFile={postFile}
+          ref={item.ref}
           onPressFn={onPressFn}
           scrollDownref={scrollDownref}
+          stepPush={stepPush}
         />
       ))}
       {modalOpen ? (

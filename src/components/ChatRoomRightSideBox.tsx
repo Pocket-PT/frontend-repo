@@ -1,58 +1,92 @@
+import { IChatRoomFileMessage } from 'apis/useChatRoomFileQuery';
+import { StaticImage } from 'gatsby-plugin-image';
 import { Link } from 'libs/link';
+import { InfiniteData } from 'react-query';
+import { classifyUrl } from 'utils/classifyUrl';
 
 interface Props {
   chatRoomId: number;
+  accountProfileUrl: string | undefined;
+  accountName: string | undefined;
+  fileData: InfiniteData<IChatRoomFileMessage> | undefined;
 }
 
-const ChatRoomRightSideBox = ({ chatRoomId }: Props) => {
+const ChatRoomRightSideBox = ({
+  chatRoomId,
+  fileData,
+  accountName,
+  accountProfileUrl,
+}: Props) => {
   return (
     <div className="box-border relative z-30 w-full h-full px-4 pt-6">
-      <div>
-        <div className="flex flex-row justify-between w-full">
-          <div className="pt-[2px] text-base font-medium flex flex-row gap-2 items-center">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="-mt-1"
-            >
-              <path
-                d="M13.3333 3.33333C14.0666 3.33333 14.6666 3.93333 14.6666 4.66667V12.6667C14.6666 13.4 14.0666 14 13.3333 14H2.66665C1.93331 14 1.33331 13.4 1.33331 12.6667V4.66667C1.33331 3.93333 1.93331 3.33333 2.66665 3.33333H4.77998L5.99998 2H9.99998L11.22 3.33333H13.3333ZM13.3333 12.6667V4.66667H2.66665V12.6667H13.3333ZM9.33331 8L7.33331 10.48L5.99998 8.66667L3.99998 11.3333H12L9.33331 8Z"
-                fill="black"
-              />
-            </svg>
-            사진, 동영상
+      <Link
+        activityName="FilePage"
+        activityParams={{
+          chattingRoomId: String(chatRoomId),
+          accountNickName: accountName,
+          accountProfilePictureUrl: accountProfileUrl,
+        }}
+      >
+        <div>
+          <div className="flex flex-row justify-between w-full">
+            <div className="pt-[2px] text-base font-medium flex flex-row gap-2 items-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="-mt-1"
+              >
+                <path
+                  d="M13.3333 3.33333C14.0666 3.33333 14.6666 3.93333 14.6666 4.66667V12.6667C14.6666 13.4 14.0666 14 13.3333 14H2.66665C1.93331 14 1.33331 13.4 1.33331 12.6667V4.66667C1.33331 3.93333 1.93331 3.33333 2.66665 3.33333H4.77998L5.99998 2H9.99998L11.22 3.33333H13.3333ZM13.3333 12.6667V4.66667H2.66665V12.6667H13.3333ZM9.33331 8L7.33331 10.48L5.99998 8.66667L3.99998 11.3333H12L9.33331 8Z"
+                  fill="black"
+                />
+              </svg>
+              사진, 동영상
+            </div>
+            <button className="w-6 h-6">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.73271 2.20694C6.03263 1.92125 6.50737 1.93279 6.79306 2.23271L11.7944 7.48318C12.0703 7.77285 12.0703 8.22809 11.7944 8.51776L6.79306 13.7682C6.50737 14.0681 6.03263 14.0797 5.73271 13.794C5.43279 13.5083 5.42125 13.0336 5.70694 12.7336L10.2155 8.00047L5.70694 3.26729C5.42125 2.96737 5.43279 2.49264 5.73271 2.20694Z"
+                  fill="#222222"
+                />
+              </svg>
+            </button>
           </div>
-          <button className="w-6 h-6">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M5.73271 2.20694C6.03263 1.92125 6.50737 1.93279 6.79306 2.23271L11.7944 7.48318C12.0703 7.77285 12.0703 8.22809 11.7944 8.51776L6.79306 13.7682C6.50737 14.0681 6.03263 14.0797 5.73271 13.794C5.43279 13.5083 5.42125 13.0336 5.70694 12.7336L10.2155 8.00047L5.70694 3.26729C5.42125 2.96737 5.43279 2.49264 5.73271 2.20694Z"
-                fill="#222222"
-              />
-            </svg>
-          </button>
+          <div className="flex flex-row gap-2 mt-2">
+            {fileData?.pages[0].chattingMessageGetResponseList
+              .slice(0, 4)
+              .map((file) => {
+                return classifyUrl(file.fileUrl, null) === 'image' ? (
+                  <img
+                    key={file.chattingMessageId}
+                    src={file.fileUrl ?? 'https://via.placeholder.com/64x64'}
+                    alt="img"
+                    className="w-[16vw] h-[16vw] rounded bg-gray"
+                  />
+                ) : (
+                  <StaticImage
+                    key={file.chattingMessageId}
+                    src="../../static/video-placeholder.png"
+                    style={{
+                      width: '16vw',
+                      height: '16vw',
+                      objectFit: 'fill',
+                    }}
+                    alt='<a href="https://kr.freepik.com/free-vector/workout-concept-illustration_7069793.htm#page=2&query=gym&position=4&from_view=search&track=sph">작가 storyset</a> 출처 Freepik'
+                  />
+                );
+              })}
+          </div>
         </div>
-        <div className="flex flex-row gap-2 mt-2">
-          {[1, 2, 3, 4].map((v) => {
-            return (
-              <img
-                key={v}
-                src="https://via.placeholder.com/64x64"
-                alt="img"
-                className="w-[16vw] h-[16vw] rounded bg-gray"
-              />
-            );
-          })}
-        </div>
-      </div>
+      </Link>
       <div>
         <div className="flex flex-row justify-between w-full mt-8">
           <div className="pt-[2px] flex flex-row items-center gap-2 text-base font-medium">

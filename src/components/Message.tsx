@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/prop-types */
 import { cls } from 'utils/cls';
 import VideoMessage from './VideoMessage';
 import React, {
@@ -12,19 +14,22 @@ import Scrollbars from 'react-custom-scrollbars-2';
 import { classifyUrl } from 'utils/classifyUrl';
 import { animated } from '@react-spring/web';
 import usePan, { PanReturnType } from 'hooks/usePan';
-import useChatRoomModalStore from 'stores/firstRender';
-import useMessageStore from 'stores/message';
+import useChatRoomModalStore from '../stores/firstRender';
 import { SENDING_MEDIA } from 'constants/global';
+import useMessageStore from 'stores/message';
+import { ChatRoomPageProps } from 'apps/Chat/ChatRoom';
 
 type MessageProps = {
   message: string | null;
   fileUrl: string | null;
   myId: number | undefined;
   chatId: number;
+  chattingRoomId: number;
   chatMessageId: number;
   isDeleted: boolean;
   isBookmarked: boolean;
   createAt: string;
+  publish: (destination: string, body: string) => void;
   videoRef?: React.RefObject<HTMLVideoElement> | null;
   messageRef?: React.RefObject<
     HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
@@ -39,6 +44,7 @@ type MessageProps = {
   isScrollTop?: boolean;
   onPressFn: () => void;
   scrollDownref: RefObject<HTMLDivElement>;
+  stepPush: (params: ChatRoomPageProps, options?: object | undefined) => void;
 };
 
 interface MessageWrapperProps extends PropsWithChildren {
@@ -68,50 +74,61 @@ const MessageWrapper = ({
         isMyMessage ? 'flex-row-reverse space-x-reverse' : 'space-x-2',
       )}
     >
-      <animated.div
-        {...bindPress()}
-        style={{ scale }}
-        className={cls(
-          'w-auto h-auto p-4 relative max-w-[70vw] justify-center items-center gap-2.5 inline-flex',
-          isMyMessage && content === SENDING_MEDIA
-            ? 'text-white bg-gray bg-opacity-40 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br'
-            : isMyMessage && content !== SENDING_MEDIA
-            ? ' text-white bg-mainBlue rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br'
-            : ' bg-[#d7d7d9] rounded-tl rounded-tr-2xl rounded-bl-2xl rounded-br-2xl ',
-        )}
-      >
-        {children}
-        <div
+      <div className="relative flex flex-col">
+        <animated.div
+          {...bindPress()}
+          style={{ scale, touchAction: 'none' }}
           className={cls(
-            isMyMessage
-              ? 'absolute bottom-0 -left-12'
-              : 'absolute bottom-0 -right-12',
+            'w-auto h-auto p-4 relative max-w-[70vw] justify-center items-center gap-2.5 inline-flex',
+            isMyMessage && content === SENDING_MEDIA
+              ? 'text-white bg-gray bg-opacity-40 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br'
+              : isMyMessage && content !== SENDING_MEDIA
+              ? ' text-white bg-mainBlue rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br'
+              : ' bg-[#d7d7d9] rounded-tl rounded-tr-2xl rounded-bl-2xl rounded-br-2xl ',
           )}
         >
-          <div className="h-full text-xs font-normal leading-none text-gray">
-            <div className="flex flex-col items-end h-full">
-              {isBookmarked ? (
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mb-1"
-                >
-                  <path
-                    d="M5.65599 2.73693C4.70219 1.75824 3.15912 1.75349 2.20944 2.72795C1.25976 3.7024 1.26439 5.28574 2.2182 6.26443L5.74895 9.8873C5.8954 10.0376 6.13284 10.0376 6.27929 9.8873L9.7917 6.28538C10.7392 5.30775 10.7362 3.72885 9.7822 2.74999C8.82669 1.76955 7.28289 1.76479 6.33151 2.74099L5.99605 3.08587L5.65599 2.73693Z"
-                    fill="#3E66FB"
-                  />
-                </svg>
-              ) : null}
-              {content === SENDING_MEDIA
-                ? null
-                : dayjs(createAt).add(9, 'hour').format('h:mm A')}
+          {children}
+          <div
+            className={cls(
+              isMyMessage
+                ? 'absolute bottom-0 -left-12'
+                : 'absolute bottom-0 -right-12',
+            )}
+          >
+            <div className="h-full text-xs font-normal leading-none text-gray">
+              <div className="flex flex-col items-end h-full">
+                {content === SENDING_MEDIA
+                  ? null
+                  : dayjs(createAt).add(9, 'hour').format('h:mm A')}
+              </div>
             </div>
           </div>
-        </div>
-      </animated.div>
+        </animated.div>
+        {isBookmarked ? (
+          <div className="relative w-full h-7">
+            <div
+              className={cls(
+                'absolute top-[2px] transform duration-300',
+                isMyMessage ? 'right-1' : 'left-1',
+              )}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="10" cy="10" r="10" fill="#f9f118" />
+                <path
+                  d="M10 12.635L12.075 13.89C12.455 14.12 12.92 13.78 12.82 13.35L12.27 10.99L14.105 9.40001C14.44 9.11001 14.26 8.56001 13.82 8.52501L11.405 8.32001L10.46 6.09C10.29 5.685 9.71001 5.685 9.54001 6.09L8.59501 8.31501L6.18001 8.52C5.74001 8.555 5.56001 9.105 5.89501 9.395L7.73001 10.985L7.18001 13.345C7.08001 13.775 7.54501 14.115 7.92501 13.885L10 12.635Z"
+                  fill="#ffffff"
+                />
+              </svg>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
@@ -134,7 +151,7 @@ const MediaMessageWrapper = ({
     >
       <animated.div
         {...bindPress()}
-        style={{ scale }}
+        style={{ scale, touchAction: 'none' }}
         className="relative w-auto h-full max-w-[70%]"
       >
         {children}
@@ -161,6 +178,7 @@ const Message = forwardRef(
       message,
       myId,
       chatId,
+      chattingRoomId,
       chatMessageId,
       createAt,
       isDeleted,
@@ -170,6 +188,7 @@ const Message = forwardRef(
       onPressFn,
       scrollbarRef, //isScrollTop,
       scrollDownref,
+      stepPush,
     }: MessageProps,
     ref: ForwardedRef<
       HTMLVideoElement | HTMLImageElement | HTMLAnchorElement | HTMLDivElement
@@ -177,8 +196,14 @@ const Message = forwardRef(
   ) => {
     const isMyMessage = myId === chatId;
     const uri = classifyUrl(fileUrl, message);
+    const {
+      messages,
+      nextMessageId,
+      removeLoadingMessage,
+      setModalFileUrl,
+      setModalOpen,
+    } = useMessageStore();
     const { setChattingMessageId } = useChatRoomModalStore();
-    const { resetMessages, nextMessageId } = useMessageStore();
     const onMessagePress = () => {
       console.log('message pressed');
       console.log('chatMessageId', chatMessageId);
@@ -186,7 +211,36 @@ const Message = forwardRef(
       if (isDeleted) return;
       onPressFn();
     };
+    const imgOnLoad = () => {
+      console.log('scroll관련 messages', messages);
+      if (!isScrollTop && messages.length > 0 && isMyMessage) {
+        scrollbarRef?.current?.scrollToBottom();
+        scrollDownref.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }
+      if (!isScrollTop && messages?.length === 0) {
+        console.log('img로드될때 실행되는 scrollToBottom');
+        scrollbarRef?.current?.scrollToBottom();
+        scrollDownref.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end',
+        });
+      }
+      if (chatMessageId === nextMessageId) {
+        removeLoadingMessage();
+      }
+    };
     const { scale, bindPress } = usePan(onMessagePress);
+
+    const reloadWhenError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      console.log('image reloadWhenError');
+      setTimeout(() => {
+        e.currentTarget.src = fileUrl ?? '';
+      }, 1000);
+    };
+
     return uri === 'image' || uri === 'video' ? (
       <MediaMessageWrapper
         scrollbarRef={scrollbarRef}
@@ -198,10 +252,12 @@ const Message = forwardRef(
       >
         {uri === 'video' && (
           <VideoMessage
-            scrollTop={isScrollTop}
+            isScrollTop={isScrollTop}
+            scrollbarRef={scrollbarRef}
             scrollDownref={scrollDownref}
             isMyMessage={isMyMessage}
             src={fileUrl ?? ''}
+            chatMessageId={chatMessageId}
             handleCapture={
               handleCapture
                 ? () => {
@@ -213,22 +269,25 @@ const Message = forwardRef(
           />
         )}
         {uri === 'image' && (
-          <>
+          <button
+            onClick={() => {
+              setModalOpen(true);
+              setModalFileUrl(fileUrl ?? '');
+              stepPush({ id: String(chattingRoomId), title: 'imageModal' });
+              console.log('imageClick', fileUrl);
+            }}
+          >
             <img
               width={'100%'}
               height={'auto'}
               src={fileUrl ?? ''}
               alt="img"
               className="rounded-xl"
-              onLoad={() => {
-                if (chatMessageId === nextMessageId) {
-                  console.log('resetMessages', chatMessageId, nextMessageId);
-                  resetMessages();
-                }
-                if (!isScrollTop) scrollbarRef?.current?.scrollToBottom();
-              }}
+              onLoad={imgOnLoad}
+              crossOrigin="anonymous"
+              onError={(e) => reloadWhenError(e)}
             />
-          </>
+          </button>
         )}
       </MediaMessageWrapper>
     ) : (
@@ -263,7 +322,12 @@ const Message = forwardRef(
             </div>
           </div>
         ) : (
-          <p className="break-words whitespace-normal">{message}</p>
+          <p
+            className="break-words whitespace-normal"
+            style={{ wordBreak: 'break-all' }}
+          >
+            {message}
+          </p>
         )}
       </MessageWrapper>
     );
