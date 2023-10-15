@@ -56,7 +56,6 @@ const useBookmarkInfiniteQuery = (
         queryClient.cancelQueries(messageKeys.message(chatRoomId));
       },
       select: (data: InfiniteData<AxiosResponse<AxiosResponse<IMessage>>>) => {
-        console.log('beforeSelect', data);
         return {
           pages: data.pages
             .reverse()
@@ -88,9 +87,8 @@ const useBookmarkInfiniteQuery = (
         };
       },
       getNextPageParam: (lastPage) => {
-        const { data } = lastPage;
-        if (data.data.hasNextPage) {
-          return data.data.pageNum + 1;
+        if (lastPage?.data?.data?.hasNextPage) {
+          return lastPage.data.data.pageNum + 1;
         }
         return undefined;
       },

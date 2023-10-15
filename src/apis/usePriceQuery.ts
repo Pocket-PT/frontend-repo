@@ -28,7 +28,6 @@ const usePriceQuery = <T>(
       retry: 0,
     },
   );
-  console.log('useChatRoomQuery실행');
 
   return result;
 };

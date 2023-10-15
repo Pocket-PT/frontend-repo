@@ -13,8 +13,13 @@ export const myprofileKeys: IMyProfileKeys = {
 export const messageKeys: IMessageKeys = {
   all: ['messages'] as const,
   message: (id) => [...messageKeys.all, id] as const,
-  messageFiles: (id) => [...messageKeys.all, id, 'files'] as const,
+  messageFiles: (id) => [...messageKeys.all, id ?? 0, 'files'] as const,
   bookmark: (id) => [...messageKeys.all, id, 'bookmarks'] as const,
+};
+
+export const otherProfileKeys: IOtherProfileKeys = {
+  all: ['otherProfile'] as const,
+  otherProfile: (id) => [...otherProfileKeys.all, id] as const,
 };
 
 export interface IMyProfileKeys {
@@ -32,6 +37,13 @@ export interface IMyProfileKeys {
 export interface IMessageKeys {
   all: readonly ['messages'];
   message: (id: number) => readonly ['messages', number];
-  messageFiles: (id: number) => readonly ['messages', number, 'files'];
+  messageFiles: (
+    id: number | undefined,
+  ) => readonly ['messages', number, 'files'];
   bookmark: (id: number) => readonly ['messages', number, 'bookmarks'];
+}
+
+export interface IOtherProfileKeys {
+  all: readonly ['otherProfile'];
+  otherProfile: (id: number) => readonly ['otherProfile', number];
 }

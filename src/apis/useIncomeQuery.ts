@@ -29,7 +29,7 @@ export interface IncomeData {
 }
 
 const useIncomeQuery = (
-  filters: { value: string; date: string },
+  filters: { value: string | number; date: string },
   options?: Omit<
     UseQueryOptions<
       AxiosResponse<IncomeData>,

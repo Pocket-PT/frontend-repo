@@ -27,6 +27,7 @@ export const useCareerQuery = (id: number | undefined): CareerQueryResult => {
     myprofileKeys.career(),
     () => serverInstance.get(`/api/v1/account/trainer/career/${id}`),
     {
+      enabled: !!id,
       select: (response: AxiosResponse) => response.data,
       staleTime: 300000,
       retry: 0,

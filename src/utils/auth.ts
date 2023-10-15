@@ -1,4 +1,4 @@
-import useTokenStore from 'stores/token';
+import useTokenStore from '../stores/token';
 
 export const isBrowser = () => typeof window !== 'undefined';
 

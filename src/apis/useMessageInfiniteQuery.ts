@@ -10,6 +10,7 @@ import { createRef, useEffect } from 'react';
 import usePushToPage from 'hooks/usePushToPage';
 import { AxiosResponse } from 'axios';
 import { classifyUrl } from 'utils/classifyUrl';
+import useMessageStore from 'stores/message';
 
 export interface IMessage {
   chattingMessageWithBookmarkGetResponses: MessageData[];
@@ -46,6 +47,7 @@ const useMessageInfiniteQuery = (
   const serverInstance = getServerInstance();
   const queryClient = useQueryClient();
   const { replaceTo } = usePushToPage();
+  const { resetMessages } = useMessageStore();
   const result = useInfiniteQuery(
     messageKeys.message(id),
     ({ pageParam = 0 }) =>
@@ -53,11 +55,11 @@ const useMessageInfiniteQuery = (
         `/api/v1/chatting/rooms/${id}/messages?page=${pageParam}&size=20`,
       ),
     {
-      onSuccess: () => {
-        console.log('resetMessagesa_1 onSucess');
-      },
+      staleTime: 1000 * 60 * 60 * 24,
       onSettled: () => {
         queryClient.cancelQueries(messageKeys.message(id));
+        console.log('onSettled messageInfinityQuery');
+        resetMessages();
       },
       select: (data: InfiniteData<AxiosResponse<AxiosResponse<IMessage>>>) => {
         return {
@@ -90,10 +92,13 @@ const useMessageInfiniteQuery = (
           pageParams: data.pages.map((page) => page.data.data.pageNum),
         };
       },
+      onError: (error) => {
+        console.log('messageError', error);
+        replaceTo('SignInPage', false);
+      },
       getNextPageParam: (lastPage) => {
-        const { data } = lastPage;
-        if (data.data.hasNextPage) {
-          return data.data.pageNum + 1;
+        if (lastPage?.data?.data?.hasNextPage) {
+          return lastPage.data.data.pageNum + 1;
         }
         return undefined;
       },

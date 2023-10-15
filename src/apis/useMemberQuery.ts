@@ -8,7 +8,9 @@ export interface MemberData {
   status: string;
   subscriptionPeriod: number;
   paymentAmount: number;
+  startDate: string;
   expiredDate: string;
+  rejectReason: string;
   accountId: number;
   name: string;
   phoneNumber: string;
