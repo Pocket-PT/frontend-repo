@@ -33,8 +33,8 @@ const usePan = (onPressFn?: () => void) => {
         y: my,
         scale: down ? 0.9 : 1,
       });
-      // if (mx - 0 > 0.1 || mx - 0 < 0) return;
-      // if (my - 0 > 0.1 || my - 0 < 0) return;
+      if (mx - 0 > 1 || mx - 0 < -1) return;
+      if (my - 0 > 1 || my - 0 < -1) return;
       if (down && typeof onPressFn === 'function') {
         console.log('bindPress 실행');
         setIsOpen(true);
