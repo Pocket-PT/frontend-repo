@@ -10,6 +10,7 @@ import { useAccountQuery } from 'apis/useAccountQuery';
 import MyLayout from 'components/MyLayout';
 import LoadingSpinner from 'components/common/LoadingSpinner';
 import { FOOTER_HEIGHT } from 'constants/global';
+import useMyActivity from 'hooks/useMyActivity';
 
 const MainWrapper = () => {
   return (
@@ -22,13 +23,31 @@ const MainWrapper = () => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Main: React.FC<any> = () => {
   const { data: userData, isLoading, isError } = useAccountQuery();
+  const { activity } = useMyActivity();
   const myProfileRef = useRef<HTMLDivElement>(null);
   const memberTitleRef = useRef<HTMLDivElement>(null);
   const [refHeights, setRefHeights] = useState<number[]>([]);
   const [isRefLoading, setIsRefLoading] = useState<boolean>(true);
+  //const [firstHistory, setFirstHistory] = useState<number>(0);
   const { data: memberData, isLoading: memberLoading } = useMemeberQuery({
     select: (response) => response.data,
   });
+
+  useEffect(() => {
+    console.log('Main setFirstHistory');
+    //setFirstHistory(history.length);
+  }, []);
+
+  const resetStack = () => {
+    console.log('resetStack');
+  };
+
+  useEffect(() => {
+    if (activity.transitionState === 'enter-done') {
+      console.log('Main resetStack');
+      resetStack();
+    }
+  }, [activity]);
 
   useEffect(() => {
     if (myProfileRef.current && memberTitleRef.current) {
