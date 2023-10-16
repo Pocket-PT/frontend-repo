@@ -77,7 +77,7 @@ const MessageWrapper = ({
       <div className="relative flex flex-col">
         <animated.div
           {...bindPress()}
-          style={{ scale }}
+          style={{ scale, touchAction: 'none' }}
           className={cls(
             'w-auto h-auto p-4 relative max-w-[70vw] justify-center items-center gap-2.5 inline-flex',
             isMyMessage && content === SENDING_MEDIA
@@ -151,7 +151,7 @@ const MediaMessageWrapper = ({
     >
       <animated.div
         {...bindPress()}
-        style={{ scale }}
+        style={{ scale, touchAction: 'none' }}
         className="relative w-auto h-full max-w-[70%]"
       >
         {children}
