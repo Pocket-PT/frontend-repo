@@ -23,7 +23,9 @@ export const getServerInstance = () => {
       if (error.response.status === 401) {
         console.log('axios catch 401');
         replaceTo('SignInPage', false);
+        return;
       }
+      return Promise.reject(error);
     },
   );
 
