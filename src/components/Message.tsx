@@ -79,7 +79,7 @@ const MessageWrapper = ({
           {...bindPress()}
           style={{ scale, touchAction: 'none' }}
           className={cls(
-            'w-auto h-auto p-4 relative max-w-[70vw] justify-center items-center gap-2.5 inline-flex',
+            'w-auto h-auto p-4 relative max-w-[70vw] justify-center items-center gap-2.5 inline-flex active:bg-opacity-40',
             isMyMessage && content === SENDING_MEDIA
               ? 'text-white bg-gray bg-opacity-40 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br'
               : isMyMessage && content !== SENDING_MEDIA
@@ -152,7 +152,7 @@ const MediaMessageWrapper = ({
       <animated.div
         {...bindPress()}
         style={{ scale, touchAction: 'none' }}
-        className="relative w-auto h-full max-w-[70%]"
+        className="relative w-auto h-full max-w-[70%] scale-100"
       >
         {children}
       </animated.div>
@@ -232,13 +232,15 @@ const Message = forwardRef(
         removeLoadingMessage();
       }
     };
-    const { scale, bindPress } = usePan(onMessagePress);
+    const { scale, bindLongPress } = usePan(onMessagePress);
 
-    const reloadWhenError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const reloadWhenError = (
+      e: React.SyntheticEvent<HTMLImageElement, Event>,
+    ) => {
       console.log('image reloadWhenError');
-      setTimeout(() => {
-        e.currentTarget.src = fileUrl ?? '';
-      }, 1000);
+      // setTimeout(() => {
+      //   e.currentTarget.src = fileUrl ?? '';
+      // }, 100);
     };
 
     return uri === 'image' || uri === 'video' ? (
@@ -248,7 +250,7 @@ const Message = forwardRef(
         isBookmarked={isBookmarked}
         createAt={createAt}
         scale={scale}
-        bindPress={bindPress}
+        bindPress={bindLongPress}
       >
         {uri === 'video' && (
           <VideoMessage
@@ -282,7 +284,7 @@ const Message = forwardRef(
               height={'auto'}
               src={fileUrl ?? ''}
               alt="img"
-              className="rounded-xl"
+              className="ease-in-out transform rounded-xl scale-100 active:scale-[98%]"
               onLoad={imgOnLoad}
               crossOrigin="anonymous"
               onError={(e) => reloadWhenError(e)}
@@ -296,7 +298,7 @@ const Message = forwardRef(
         createAt={createAt}
         isBookmarked={isBookmarked}
         scale={scale}
-        bindPress={bindPress}
+        bindPress={bindLongPress}
         content={message}
       >
         {message === SENDING_MEDIA ? (

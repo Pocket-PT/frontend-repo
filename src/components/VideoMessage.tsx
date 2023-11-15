@@ -72,7 +72,7 @@ const VideoMessage = forwardRef(
           ref={ref}
           src={src}
           controls
-          className="rounded-lg"
+          className="rounded-lg sclae-100 active:scale-[98%]"
         />
         <button
           className={cls(

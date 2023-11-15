@@ -76,7 +76,6 @@ const useSocket = (
           console.log('channel sub실행', data, chatRoomId);
           if (data.content === null) {
             const uri = classifyUrl(data.fileUrl, data.content);
-
             setMessages({
               message: data.content,
               fileUrl: data.fileUrl,

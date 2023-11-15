@@ -72,7 +72,6 @@ const ChatRoomPage: React.FC<any> = ({ params }: Props) => {
   const queryClient = useQueryClient();
   const messageData = useMessageInfiniteQuery(chattingRoomId);
   const { data: fileData } = useChatRoomFileQuery(chattingRoomId);
-  console.log('fileData', fileData);
   const { stepPush, stepReplace } = useStepFlow('ChatRoomPage');
   const { data: chatRoomData } = useChatRoomQuery<ChatRoomSelectedDataProps>({
     select: (res) => {
