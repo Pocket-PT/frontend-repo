@@ -36,7 +36,7 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   const { replaceTo } = usePushToPage();
   const { setToken } = useTokenStore();
   const { params: props } = useHashLocation();
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<'trainer' | 'trainee'>('trainee');
   const [inputName, onChangeInputName] = useInput('');
   const [phoneNumber, onChangePhoneNumber] = useInput('');
 
@@ -104,7 +104,11 @@ const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   if (params.title === 'FinalStep') {
     return (
       <AppScreen>
-        <FinalStep inputName={inputName} phoneNumber={phoneNumber} />
+        <FinalStep
+          inputName={inputName}
+          phoneNumber={phoneNumber}
+          userRole={userRole}
+        />
       </AppScreen>
     );
   }
@@ -304,6 +308,7 @@ const PrivacyPage = ({ stepPush }: PrivacyPageProps) => {
 interface FinalStepProps {
   inputName: string;
   phoneNumber: string;
+  userRole: 'trainer' | 'trainee';
 }
 
 type TrainerData = {
@@ -315,14 +320,14 @@ type TrainerData = {
   }[];
 };
 
-const FinalStep = ({ inputName, phoneNumber }: FinalStepProps) => {
+const FinalStep = ({ inputName, phoneNumber, userRole }: FinalStepProps) => {
   const { priceTable, onAddPriceTable, onEditPriceTable, onDeletePriceTable } =
     useMyProfileStore();
   const handleAdd = () => {
     onAddPriceTable(0, 0);
   };
   const { replaceTo } = usePushToPage();
-  const { mutate } = usePatchAccountMutation<TrainerData>('trainer');
+  const { mutate } = usePatchAccountMutation<TrainerData>(userRole);
   const { refetch } = useCheckSignupQuery();
   const { signUpLoading } = useQueryLoadingStore();
 
@@ -423,7 +428,6 @@ const Card = ({
   const [editPeriod, onChangeEditPeriod, setEditPeriod] = useInput(period);
   const [editPrice, onChangeEditPrice, setEditPrice] = useInput(price);
   const ref = useRef<HTMLDivElement>(null);
-  console.log('period', period, 'price', price, 'editPrice', editPrice);
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isEdit) return;
@@ -579,7 +583,7 @@ const Card = ({
 interface SelectUserRoleProps {
   stepPush: (params: BeforeLoginProps, options?: object | undefined) => void;
   userRole: string;
-  setUserRole: React.Dispatch<React.SetStateAction<string>>;
+  setUserRole: React.Dispatch<React.SetStateAction<'trainer' | 'trainee'>>;
 }
 
 const SelectUserRole = ({
@@ -599,7 +603,7 @@ const SelectUserRole = ({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.KeyboardEvent,
   ) => {
     const target = e.target as HTMLButtonElement;
-    setUserRole(target.innerText);
+    setUserRole(target.innerText === '트레이너' ? 'trainer' : 'trainee');
     setIsDisabled(false);
   };
 

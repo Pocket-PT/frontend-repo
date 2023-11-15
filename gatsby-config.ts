@@ -96,7 +96,6 @@ const config: GatsbyConfig = {
       resolve: `gatsby-plugin-s3`,
       options: {
         bucketName: 'pocketpt-frontend',
-        protocol: 'https',
       },
     },
   ],
