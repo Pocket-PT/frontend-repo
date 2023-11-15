@@ -19,6 +19,8 @@ import PTManagementPage from 'apps/PTManagementPage';
 import CheckSignup from 'apps/login/CheckSignup';
 import BookmarkPage from 'apps/Chat/ChatRoom/BookmarkPage';
 import FilePage from 'apps/Chat/ChatRoom/FilePage';
+import TrainerPage from 'apps/Trainer';
+import TrainerApplyPage from 'apps/Trainer/Apply/Index';
 
 const activities = {
   Main,
@@ -37,6 +39,8 @@ const activities = {
   AfterLogin,
   CheckSignup,
   PTManagementPage,
+  TrainerPage,
+  TrainerApplyPage,
   Test,
 };
 
@@ -66,6 +70,8 @@ export const { Stack, useStepFlow } = stackflow({
         AfterLogin: '/after-login',
         CheckSignup: '/check-signup',
         PTManagementPage: '/pt-management',
+        TrainerPage: '/trainer',
+        TrainerApplyPage: '/trainer/apply',
         Test: '/test',
       },
       fallbackActivity: () => 'Main',

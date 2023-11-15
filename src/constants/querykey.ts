@@ -22,6 +22,15 @@ export const otherProfileKeys: IOtherProfileKeys = {
   otherProfile: (id) => [...otherProfileKeys.all, id] as const,
 };
 
+export const trainerCodeKeys: ITrainerCodeKeys = {
+  all: ['trainerCode'] as const,
+  trainerCode: (code) => [...trainerCodeKeys.all, code] as const,
+  paymentAmount: (code) =>
+    [...trainerCodeKeys.all, code, 'paymentAmount'] as const,
+  matchingRequest: (code) =>
+    [...trainerCodeKeys.all, code, 'matchingRequest'] as const,
+};
+
 export interface IMyProfileKeys {
   all: readonly ['myprofile'];
   account: () => readonly ['myprofile', 'account'];
@@ -46,4 +55,15 @@ export interface IMessageKeys {
 export interface IOtherProfileKeys {
   all: readonly ['otherProfile'];
   otherProfile: (id: number) => readonly ['otherProfile', number];
+}
+
+export interface ITrainerCodeKeys {
+  all: readonly ['trainerCode'];
+  trainerCode: (code: string) => readonly ['trainerCode', string];
+  paymentAmount: (
+    code: string,
+  ) => readonly ['trainerCode', string, 'paymentAmount'];
+  matchingRequest: (
+    code: string,
+  ) => readonly ['trainerCode', string, 'matchingRequest'];
 }
