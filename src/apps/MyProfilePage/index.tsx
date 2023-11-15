@@ -57,6 +57,33 @@ const InfoCard = ({ title }: { title: string }) => {
           <GraphIcon />
         </div>
       );
+    if (title === '매출 조회')
+      return (
+        <div className="">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect width="16" height="16" fill="url(#pattern0)" />
+            <defs>
+              <pattern
+                id="pattern0"
+                patternContentUnits="objectBoundingBox"
+                width="1"
+                height="1"
+              >
+                <use
+                  xlinkHref="#image0_1942_5741"
+                  transform="scale(0.0111111)"
+                />
+              </pattern>
+              <image
+                id="image0_1942_5741"
+                width="90"
+                height="90"
+                xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAYAAAA4qEECAAAACXBIWXMAAAsTAAALEwEAmpwYAAABYUlEQVR4nO2cO04DMQAFpyLcAY5Iwi35VMBREPRGlixEF2zkPC87I7nPjiYv2hQGERERERERERERETnDNXAPPAOfQPFQmosn4AQc/lrRLfCmWM7F9dpcDZesZLpkD5Vd58KZoMvBcUR03WRF0+XgcUT0h6LpDa0668aaGXKgaC4Tj6JZVLSIiIiIiMiy+F8HvoKXhUOwaBRNukKLJi/O6WBHGz2bssEz5SFnUzZ4pjzkbMoGzy4esixwFI2iSVdo0eTFOR3kpbrRKJp0cRZNXpLTQV6gG81axxcWFE26QosmL87pIC/VjUbRpIuzaPKSnA7yAt1o1jq+sKBo0hVaNHlxTgd5qW40iiZdnEWTl+R08I832otR6Jb8PiLaq364zFU/pwW+hmVj525E9KFdMZb+8GUj5wW4YpB6aZ6y+ZXkm1HJP8s+tv3xB5JvudXFQ5uL4ZJFRERERERERERE2AdfrAsUQb/Eab0AAAAASUVORK5CYII="
+              />
+            </defs>
+          </svg>
+        </div>
+      );
   };
   return (
     <div className="relative flex flex-row items-center w-full h-[60px] bg-hoverGray rounded-xl">
@@ -123,23 +150,43 @@ const MyProfilePage: React.FC<any> = () => {
       </div>
       <BottomWhitePlain>
         <div className="text-xl font-bold leading-normal">내 정보 관리</div>
-        <div className="space-y-2">
-          <div>
-            <Link activityName="PortfolioPage">
-              <InfoCard title="포트폴리오" />
-            </Link>
+        {myData?.data.role === 'trainer' ? (
+          <div className="space-y-2">
+            <div>
+              <Link activityName="PortfolioPage">
+                <InfoCard title="포트폴리오" />
+              </Link>
+            </div>
+            <div>
+              <Link activityName="PricePage">
+                <InfoCard title="가격 플랜" />
+              </Link>
+            </div>
+            <div>
+              <Link activityName="IncomePage">
+                <InfoCard title="매출 조회" />
+              </Link>
+            </div>
           </div>
-          <div>
-            <Link activityName="PricePage">
-              <InfoCard title="가격 플랜" />
-            </Link>
+        ) : (
+          <div className="space-y-2">
+            <div>
+              <Link activityName="PortfolioPage">
+                <InfoCard title="목표 설정" />
+              </Link>
+            </div>
+            <div>
+              <Link activityName="PricePage">
+                <InfoCard title="체성분 작성" />
+              </Link>
+            </div>
+            <div>
+              <Link activityName="IncomePage">
+                <InfoCard title="비포&애프터 작성" />
+              </Link>
+            </div>
           </div>
-          <div>
-            <Link activityName="IncomePage">
-              <InfoCard title="매출 조회" />
-            </Link>
-          </div>
-        </div>
+        )}
       </BottomWhitePlain>
     </>
   );
