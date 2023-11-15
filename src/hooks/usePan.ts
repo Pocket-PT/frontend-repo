@@ -1,6 +1,7 @@
 import { useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import { useState } from 'react';
+import { useLongPress } from 'use-long-press';
 
 const usePan = (onPressFn?: () => void) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,8 +11,27 @@ const usePan = (onPressFn?: () => void) => {
   // Set the drag hook and define component movement based on gesture data
   const bindPanDown = useDrag(
     ({ down, movement: [mx, my] }) => {
-      console.log('dragging', my - 0);
+      console.log('dragging down', my - 0);
       if (my - 0 > 6) setIsOpen(false);
+      api.start({ x: mx, y: my, immediate: down });
+    },
+    { axis: 'y' },
+  );
+
+  const bindUpAndDown = useDrag(
+    ({ down, movement: [mx, my] }) => {
+      console.log('dragging down', my - 0);
+      if (my - 0 > 6) setIsOpen(false);
+      if (my - 0 < -6) setIsOpen(true);
+      api.start({ x: mx, y: my, immediate: down });
+    },
+    { axis: 'y' },
+  );
+
+  const bindPanUp = useDrag(
+    ({ down, movement: [mx, my] }) => {
+      console.log('dragging up', my - 0);
+      if (my - 0 < -6) setIsOpen(true);
       api.start({ x: mx, y: my, immediate: down });
     },
     { axis: 'y' },
@@ -26,6 +46,17 @@ const usePan = (onPressFn?: () => void) => {
     { axis: 'x' },
   );
 
+  const bindLongPress = useLongPress(
+    () => {
+      console.log('longPress');
+      setIsOpen(true);
+      if (typeof onPressFn === 'function') {
+        onPressFn();
+      }
+    },
+    { threshold: 500 },
+  );
+
   const bindPress = useDrag(
     ({ down, movement: [mx, my] }) => {
       api.start({
@@ -33,10 +64,11 @@ const usePan = (onPressFn?: () => void) => {
         y: my,
         scale: down ? 0.9 : 1,
       });
-      if (mx - 0 > 1 || mx - 0 < -1) return;
-      if (my - 0 > 1 || my - 0 < -1) return;
+      console.log('bindPress 실행', mx - 0, my - 0);
+      if (mx - 0 > 4 || mx - 0 < -4) return;
+      if (my - 0 > 10 || my - 0 < -10) return;
       if (down && typeof onPressFn === 'function') {
-        console.log('bindPress 실행');
+        console.log('bindPress 예외처리 실패');
         setIsOpen(true);
         onPressFn();
       }
@@ -44,7 +76,17 @@ const usePan = (onPressFn?: () => void) => {
     { delay: 1000 },
   );
 
-  return { isOpen, setIsOpen, bindPanDown, bindPanRight, bindPress, scale };
+  return {
+    isOpen,
+    setIsOpen,
+    bindPanUp,
+    bindPanDown,
+    bindUpAndDown,
+    bindPanRight,
+    bindPress,
+    bindLongPress,
+    scale,
+  };
 };
 
 export type PanReturnType = ReturnType<typeof usePan>;
