@@ -28,6 +28,7 @@ type MemberReturnType<T extends () => unknown> = ReturnType<T>;
 type MyProfileKeyReturnType = MemberReturnType<IMyProfileKeys['member']>;
 
 const useMemeberQuery = <T = IData>(
+  mode: string,
   options?: Omit<
     UseQueryOptions<AxiosResponse<IData>, unknown, T, MyProfileKeyReturnType>,
     'queryKey' | 'queryFn'
@@ -36,7 +37,7 @@ const useMemeberQuery = <T = IData>(
   const serverInstance = getServerInstance();
   const result = useQuery(
     myprofileKeys.member(),
-    () => serverInstance.get(`/api/v1/matching?mode=active`),
+    () => serverInstance.get(`/api/v1/matching?mode=${mode}`),
     {
       ...options,
       staleTime: Infinity,

@@ -32,10 +32,18 @@ const Main: React.FC<any> = () => {
   const memberTitleRef = useRef<HTMLDivElement>(null);
   const [refHeights, setRefHeights] = useState<number[]>([]);
   const [isRefLoading, setIsRefLoading] = useState<boolean>(true);
-  const { data: memberData, isLoading: memberLoading } = useMemeberQuery({
-    select: (response) => response.data,
-  });
-  console.log('memberData', memberData);
+  const { data: memberData, isLoading: memberLoading } = useMemeberQuery(
+    'active',
+    {
+      select: (response) => response.data,
+    },
+  );
+  const { data: pendingData, isLoading: pendingLoading } = useMemeberQuery(
+    'pending',
+    {
+      select: (response) => response.data,
+    },
+  );
 
   const trainerData = [
     {
@@ -138,6 +146,24 @@ const Main: React.FC<any> = () => {
               autoHeightMin={`calc(100vh - ${refHeights[0]}px - ${refHeights[1]}px - ${FOOTER_HEIGHT}px - 1.25rem - 30px)`}
               autoHide
             >
+              {pendingLoading ? (
+                <LoadingSpinner />
+              ) : (
+                pendingData?.data.map((member) => {
+                  return (
+                    <div
+                      className="flex flex-row mt-8 bg-white hover:cursor-pointer"
+                      key={member.ptMatchingId}
+                    >
+                      <ProfileCard
+                        name={member.name}
+                        email={member.email}
+                        profilePictureUrl={member.profilePictureUrl}
+                      />
+                    </div>
+                  );
+                })
+              )}
               {memberData?.data.map((member) => {
                 return (
                   <Link
