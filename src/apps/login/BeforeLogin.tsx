@@ -30,13 +30,16 @@ type BeforeLoginProps = {
   title?: string;
 };
 
+const TRAINER = 'trainer' as const;
+const TRAINEE = 'trainee' as const;
+
 const BeforeLogin: ActivityComponentType<BeforeLoginProps> = ({ params }) => {
   const { data } = useCheckSignupQuery();
   const { stepPush, stepReplace } = useStepFlow('BeforeLogin');
   const { replaceTo } = usePushToPage();
   const { setToken } = useTokenStore();
   const { params: props } = useHashLocation();
-  const [userRole, setUserRole] = useState<'trainer' | 'trainee'>('trainee');
+  const [userRole, setUserRole] = useState<'trainer' | 'trainee'>(TRAINEE);
   const [inputName, onChangeInputName] = useInput('');
   const [phoneNumber, onChangePhoneNumber] = useInput('');
 
@@ -314,7 +317,7 @@ interface FinalStepProps {
 type TrainerData = {
   name: string;
   phoneNumber: string;
-  monthlyPtPriceList: {
+  monthlyPtPriceList?: {
     period: number;
     price: number;
   }[];
@@ -468,7 +471,6 @@ const Card = ({
 
   const handleOutsideClick = (e: MouseEvent) => {
     if (ref.current && !ref.current.contains(e.target as Node)) {
-      console.log('outside', period, price);
       setIsActive(false);
       setIsEdit(false);
       setEditPeriod(period);
@@ -603,7 +605,7 @@ const SelectUserRole = ({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.KeyboardEvent,
   ) => {
     const target = e.target as HTMLButtonElement;
-    setUserRole(target.innerText === '트레이너' ? 'trainer' : 'trainee');
+    setUserRole(target.innerText === TRAINER ? TRAINER : TRAINEE);
     setIsDisabled(false);
   };
 
@@ -619,7 +621,7 @@ const SelectUserRole = ({
             onClick={(e) => onClick(e)}
             className={cls(
               'flex items-center justify-center w-1/2 h-full border-r border-lightGray rounded-tl-xl rounded-bl-xl transition-all duration-300 ease-in-out',
-              userRole === '트레이너'
+              userRole === TRAINER
                 ? 'bg-mainBlue text-white'
                 : 'bg-white text-darkGray',
             )}
@@ -629,7 +631,7 @@ const SelectUserRole = ({
           <button
             className={cls(
               'flex items-center justify-center w-1/2 h-full rounded-tr-xl rounded-br-xl  transition-all duration-300 ease-in-out',
-              userRole === '일반회원'
+              userRole === TRAINEE
                 ? 'bg-mainBlue text-white'
                 : 'bg-white text-darkGray',
             )}
@@ -659,7 +661,7 @@ const SelectUserRole = ({
 
 interface NameAndPhoneNumberBoxProps {
   stepPush: (params: BeforeLoginProps, options?: object | undefined) => void;
-  userRole: string;
+  userRole: 'trainer' | 'trainee';
   inputName: string;
   onChangeInputName: (e: unknown) => void;
   phoneNumber: string;
@@ -675,6 +677,9 @@ const NameAndPhoneNumberBox = ({
   onChangePhoneNumber,
 }: NameAndPhoneNumberBoxProps) => {
   const [isSubmit, setIsSubmit] = useState(true);
+  const { replaceTo } = usePushToPage();
+  const { mutate } = usePatchAccountMutation<TrainerData>(userRole);
+  const { refetch } = useCheckSignupQuery();
 
   const onSubmit = () => {
     if (!onValidation()) {
@@ -684,6 +689,26 @@ const NameAndPhoneNumberBox = ({
     stepPush({
       title: 'FinalStep',
     });
+  };
+
+  const onTraineeSubmit = () => {
+    mutate(
+      {
+        name: inputName,
+        phoneNumber,
+      },
+      {
+        onSuccess: async () => {
+          if ((await refetch()).isSuccess) {
+            alert('회원가입이 완료되었습니다.');
+            replaceTo('Main');
+          }
+        },
+        onError: () => {
+          alert('회원가입에 실패했습니다.');
+        },
+      },
+    );
   };
 
   const onValidation = () => {
@@ -732,7 +757,7 @@ const NameAndPhoneNumberBox = ({
               placeholder="휴대폰 번호"
             />
           </Input>
-          {userRole === '트레이너' ? (
+          {userRole === TRAINER ? (
             <button
               onClick={onSubmit}
               disabled={isSubmit}
@@ -747,7 +772,7 @@ const NameAndPhoneNumberBox = ({
             </button>
           ) : (
             <button
-              onClick={onSubmit}
+              onClick={onTraineeSubmit}
               disabled={isSubmit}
               className={cls(
                 'flex text-base font-bold leading-tight text-center items-center justify-center w-full h-14 rounded-xl transform duration-300 ease-in-out',
