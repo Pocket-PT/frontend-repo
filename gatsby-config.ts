@@ -92,6 +92,13 @@ const config: GatsbyConfig = {
     'gatsby-plugin-image',
     'gatsby-plugin-sharp',
     'gatsby-transformer-sharp',
+    {
+      resolve: `gatsby-plugin-s3`,
+      options: {
+        bucketName: 'pocketpt-frontend',
+        protocol: 'https',
+      },
+    },
   ],
 };
 
